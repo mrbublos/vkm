@@ -1,8 +1,10 @@
-import android.app.Activity
+package vkm.vkm
+
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
