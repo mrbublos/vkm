@@ -3,7 +3,11 @@ package vkm.vkm
 import android.util.Log
 
 import com.github.kittinunf.fuel.httpGet
-class MusicService {
+
+/**
+ * todo decompile off app and get client_id and key
+ */
+open class MusicService {
 
     var token: String
 
@@ -23,7 +27,7 @@ class MusicService {
         }
     }
 
-    fun getUserPlaylist(name: String): List<Composition>? {
+    open fun getUserPlaylist(name: String): List<Composition>? {
         val url = "$apiUrl/method/users.search"
         val params = listOf<Pair<String, Any>>(Pair("q", name))
         url.httpGet(params).responseString { _, resp, result ->
@@ -48,6 +52,23 @@ class MusicService {
 
         return ""
     }
+
+    fun getMock(): MusicServiceMock {
+        return MusicServiceMock()
+    }
 }
 
-data class Composition(var name: String, var url: String, var artist: String)
+class MusicServiceMock : MusicService() {
+    override fun getUserPlaylist(name: String): List<Composition>? {
+        return listOf(Composition("name", "url", "artist"),
+                Composition("name1", "url", "artist1"),
+                Composition("name2", "url", "artist2"),
+                Composition("name3", "url", "artist3"),
+                Composition("name4", "url", "artist4"),
+                Composition("name5", "url", "artist5"),
+                Composition("name6", "url", "artist6"),
+                Composition("name7", "url", "artist7"),
+                Composition("name8", "url", "artist8"),
+                Composition("name9", "url", "artist9"))
+    }
+}

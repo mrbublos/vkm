@@ -3,8 +3,6 @@ package vkm.vkm
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 
-data class User(var userId: String, var password: String)
-
 class LoginActivity : AppCompatActivity() {
 
     var _self: User? = null
