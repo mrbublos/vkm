@@ -7,6 +7,7 @@ data class User(var userId: String, var password: String)
 
 class LoginActivity : AppCompatActivity() {
 
+    var _self: User? = null
     var _user: User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
