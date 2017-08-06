@@ -27,18 +27,28 @@ open class MusicService {
         }
     }
 
-    open fun getUserPlaylist(name: String): List<Composition>? {
+
+    // TODO make return type non-nullable
+    open fun getUserPlaylist(name: String): List<Composition> {
         val url = "$apiUrl/method/users.search"
         val params = listOf<Pair<String, Any>>(Pair("q", name))
         url.httpGet(params).responseString { _, resp, result ->
             println("test")
         }
 
-        return null
+        return listOf()
     }
 
-    fun getGroupPlaylist(groupId: String): List<Composition>? {
-        return null
+    open fun getDownloaded(): List<Composition> {
+        return listOf()
+    }
+
+    open fun getInProgress(): List<Composition> {
+        return listOf()
+    }
+
+    fun getGroupPlaylist(groupId: String): List<Composition> {
+        return listOf()
     }
 
     fun authorize(): String {
@@ -59,16 +69,28 @@ open class MusicService {
 }
 
 class MusicServiceMock : MusicService() {
-    override fun getUserPlaylist(name: String): List<Composition>? {
-        return listOf(Composition("name", "url", "artist"),
-                Composition("name1", "url", "artist1"),
-                Composition("name2", "url", "artist2"),
-                Composition("name3", "url", "artist3"),
-                Composition("name4", "url", "artist4"),
-                Composition("name5", "url", "artist5"),
-                Composition("name6", "url", "artist6"),
-                Composition("name7", "url", "artist7"),
-                Composition("name8", "url", "artist8"),
-                Composition("name9", "url", "artist9"))
+    override fun getUserPlaylist(name: String): List<Composition> {
+        return getMockList("playlist ")
+    }
+
+    override fun getDownloaded(): List<Composition> {
+        return getMockList("downloaded ")
+    }
+
+    override fun getInProgress(): List<Composition> {
+        return getMockList("inProgress ")
+    }
+
+    fun getMockList(id: String = ""): List<Composition> {
+        return listOf(Composition(id + "name", "url", "artist", 0, "", "1:00"),
+                Composition(id + "name1", "url", "artist1", 0, "", "1:00"),
+                Composition(id + "name2", "url", "artist2", 0, "", "1:00"),
+                Composition(id + "name3", "url", "artist3", 0, "", "1:00"),
+                Composition(id + "name4", "url", "artist4", 0, "", "1:00"),
+                Composition(id + "name5", "url", "artist5", 0, "", "1:00"),
+                Composition(id + "name6", "url", "artist6", 0, "", "1:00"),
+                Composition(id + "name7", "url", "artist7", 0, "", "1:00"),
+                Composition(id + "name8", "url", "artist8", 0, "", "1:00"),
+                Composition(id + "name9", "url", "artist9", 0, "", "1:00"))
     }
 }
