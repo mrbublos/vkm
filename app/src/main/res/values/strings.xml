@@ -5,6 +5,10 @@
     <string name="tab_downloaded">Downloaded</string>
     <string name="tab_in_progress">In progress</string>
     <string name="tab_queue">Waiting for download</string>
+    <string name="tab_user">User</string>
+    <string name="tab_group">Group</string>
+    <string name="tab_composition">Composition</string>
     <string name="search_button">Go</string>
     <string name="search_placeholder">Search</string>
+    <string name="search_hint">search..</string>
 </resources>

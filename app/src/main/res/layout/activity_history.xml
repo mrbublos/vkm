@@ -10,10 +10,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <TextView
-                android:text="@string/search_placeholder"
+        <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:text="@string/search_hint"
+                android:ems="10"
                 android:id="@+id/search"
                 android:layout_weight="8.68"/>
 

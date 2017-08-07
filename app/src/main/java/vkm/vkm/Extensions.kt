@@ -9,9 +9,9 @@ fun <T : View> Activity.bind(@IdRes idRes: Int): Lazy<T> {
     return unsafeLazy { findViewById(idRes) as T }
 }
 
-fun <T : View> View.bind(@IdRes idRes: Int): Lazy<T> {
+fun <T : View> View.bind(@IdRes idRes: Int): T {
     @Suppress("UNCHECKED_CAST")
-    return unsafeLazy { findViewById(idRes) as T }
+    return findViewById(idRes) as T
 }
 
 private fun <T> unsafeLazy(initializer: () -> T) = lazy(LazyThreadSafetyMode.NONE, initializer)

@@ -24,6 +24,14 @@
                 android:name=".LoginActivity"
                 android:label="@string/title_activity_main">
         </activity>
+        <activity
+                android:name=".SearchActivity"
+                android:label="@string/title_activity_main">
+        </activity>
+        <activity
+                android:name=".HistoryActivity"
+                android:label="@string/title_activity_main">
+        </activity>
 
     </application>
 
