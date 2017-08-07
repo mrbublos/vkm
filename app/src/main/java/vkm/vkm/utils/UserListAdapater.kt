@@ -16,7 +16,8 @@ import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.net.URL
 
-class UserListAdapter(context: Context, resource: Int, data: List<User>) : ArrayAdapter<User>(context, resource, data) {
+class UserListAdapter(context: Context, resource: Int, data: List<User>, val elementTouchListener: () -> Unit?) : ArrayAdapter<User>(context, resource, data) {
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         var view = convertView
 
@@ -27,7 +28,11 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>) : Array
         item?.let {
             view?.bind<TextView>(R.id.name)?.text = item.fullname
             view?.bind<TextView>(R.id.artist)?.text = item.userId
-            AsyncDownloader().execute(item.photoUrl, view?.bind<ImageView>(R.id.photo))
+            AsyncPhotoDownloader().execute(item.photoUrl, view?.bind<ImageView>(R.id.photo))
+            view?.setOnTouchListener { v, event ->
+                elementTouchListener.invoke()
+                return@setOnTouchListener v.onTouchEvent(event)
+            }
             // TODO download photo and display
         }
 
@@ -36,7 +41,7 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>) : Array
 
 }
 
-class AsyncDownloader: AsyncTask<Any, Unit, Unit>() {
+class AsyncPhotoDownloader : AsyncTask<Any, Unit, Unit>() {
 
 
     override fun doInBackground(vararg input: Any?) {

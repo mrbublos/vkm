@@ -19,6 +19,11 @@ open class MusicService {
     val apiUrl = "https://api.vk.com"
     val appId = "3682744"
 
+
+    fun initialize() {
+
+    }
+
     fun getUserDetails(userId: String) {
         val url = "$apiUrl/method/users.get"
         val params = listOf<Pair<String, Any>>(Pair("user_id", userId))

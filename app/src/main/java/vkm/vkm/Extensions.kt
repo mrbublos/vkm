@@ -2,9 +2,11 @@ package vkm.vkm
 
 import android.app.Activity
 import android.support.annotation.IdRes
+import android.util.Log
 import android.view.View
 
 fun <T : View> Activity.bind(@IdRes idRes: Int): Lazy<T> {
+    Log.e("tag2", "Binding $idRes")
     @Suppress("UNCHECKED_CAST")
     return unsafeLazy { findViewById(idRes) as T }
 }

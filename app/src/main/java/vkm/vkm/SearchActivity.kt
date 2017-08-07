@@ -2,12 +2,11 @@ package vkm.vkm
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Button
-import android.widget.ListView
-import android.widget.TabHost
-import android.widget.TextView
+import android.widget.*
+import vkm.vkm.utils.AsyncPhotoDownloader
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.SwipeManager
 import vkm.vkm.utils.UserListAdapter
@@ -15,26 +14,34 @@ import vkm.vkm.utils.UserListAdapter
 class SearchActivity : AppCompatActivity() {
 
     // list tabs
-    private val userList by bind<ListView>(R.id.tab1)
-    private val groupList by bind<ListView>(R.id.tab2)
-    private val compositionList by bind<ListView>(R.id.tab3)
+    val userList by bind<ListView>(R.id.tab1)
+    val groupList by bind<ListView>(R.id.tab2)
+    val compositionList by bind<ListView>(R.id.tab3)
 
     // active elements
-    private val tabHost by bind<TabHost>(R.id.tabhost)
-    private val button by bind<Button>(R.id.button)
-    private val textContainer by bind<TextView>(R.id.search)
+    val tabHost by bind<TabHost>(R.id.tabhost)
+    val button by bind<Button>(R.id.button)
+    val textContainer by bind<TextView>(R.id.search)
+
+    // selected user
+    val selectedUserContainer by bind<RelativeLayout>(R.id.selected_user_container)
+    val selectedUserName by bind<TextView>(R.id.selected_user_container)
+    val selectedUserId by bind<TextView>(R.id.selected_user_container)
+    val selectedUserPhoto by bind<ImageView>(R.id.selected_user_container)
+    val selectedUserButton by bind<ImageView>(R.id.selected_user_container)
 
     // services
-    private val musicService = MusicService().getMock()
+    val musicService = MusicService().getMock()
 
     // private vars
-    private var filterText: String = ""
-    private var state = "search"
-    private var selectedUserId: String = ""
-    private var selectedGroupId: String = ""
+    var filterText: String = ""
+    var state = "search"
+    var selectedUser: User = User()
+    var selectedGroup: User = User()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.e("tag", "Setting content view")
         setContentView(R.layout.activity_history)
 
         initializeTabs()
@@ -69,8 +76,8 @@ class SearchActivity : AppCompatActivity() {
             state = "user"
 
             when (tabHost.currentTabTag) {
-                "user" -> userList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getUsers())
-                "group" -> groupList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getGroups())
+                "user" -> userList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getUsers(), selectUserOrGroup)
+                "group" -> groupList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getGroups(), selectUserOrGroup)
                 "composition" -> compositionList.adapter = CompositionListAdapter(this, R.layout.user_list_element, musicService.getCompositions())
             }
             return@setOnTouchListener super.onTouchEvent(event)
@@ -78,22 +85,38 @@ class SearchActivity : AppCompatActivity() {
     }
 
     fun handleTabSwitch(tabId: String) {
-        val touchListener =  { view: View ->
-            state = "composition"
-            handleTabSwitch(tabHost.currentTabTag)
-        }
-
         if (state == "user") {
             when (tabId) {
-                "user" -> userList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getUsers(filterText))
-                "group" -> groupList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getGroups(filterText))
+                "user" -> userList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getUsers(filterText), selectUserOrGroup)
+                "group" -> groupList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getGroups(filterText), selectUserOrGroup)
                 "composition" -> groupList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getCompositions(filterText))
             }
         } else {
             when (tabId) {
-                "user" -> userList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getUserPlaylist(selectedUserId, filterText))
-                "group" -> groupList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getGroupPlaylist(selectedGroupId, filterText))
+                "user" -> userList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getUserPlaylist(selectedUser.userId, filterText))
+                "group" -> groupList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getGroupPlaylist(selectedUser.userId, filterText))
                 "composition" -> groupList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getCompositions(filterText))
+            }
+        }
+    }
+
+    val selectUserOrGroup = {
+        var _unit: User? = null
+        when (tabHost.currentTabTag) {
+            "user" -> _unit = selectedUser
+            "group" -> _unit = selectedGroup
+        }
+
+        _unit?.let {
+            selectedUserContainer.visibility = View.VISIBLE
+            selectedUserName.text = selectedUser.fullname
+            selectedUserId.text = selectedUser.userId
+            AsyncPhotoDownloader().execute(selectedUser.photoUrl, selectedUserPhoto)
+            selectedUserButton.setOnTouchListener { _, event ->
+                state = "composition"
+                selectedUserContainer.visibility = View.GONE
+                handleTabSwitch(tabHost.currentTabTag)
+                return@setOnTouchListener super.onTouchEvent(event)
             }
         }
     }

@@ -10,13 +10,13 @@ import vkm.vkm.utils.SwipeManager
 
 class HistoryActivity : AppCompatActivity() {
 
-    private val tabHost by bind<TabHost>(R.id.tabhost)
+    val tabHost by bind<TabHost>(R.id.tabhost)
 
     // list tabs
-    private val downloadedList by bind<ListView>(R.id.tab1)
-    private val inProgressList by bind<ListView>(R.id.tab2)
-    private val queueList by bind<ListView>(R.id.tab3)
-    private val musicService = MusicService()
+    val downloadedList by bind<ListView>(R.id.tab1)
+    val inProgressList by bind<ListView>(R.id.tab2)
+    val queueList by bind<ListView>(R.id.tab3)
+    val musicService = MusicService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
