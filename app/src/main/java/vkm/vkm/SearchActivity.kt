@@ -1,6 +1,7 @@
 package vkm.vkm
 
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
@@ -23,7 +24,7 @@ class SearchActivity : AppCompatActivity() {
     val textContainer by bind<TextView>(R.id.search)
 
     // selected user
-    val selectedUserContainer by bind<RelativeLayout>(R.id.selected_user_container)
+    val selectedUserContainer by bind<ConstraintLayout>(R.id.selected_user_container)
     val selectedUserName by bind<TextView>(R.id.selected_user_name)
     val selectedUserId by bind<TextView>(R.id.selected_user_id)
     val selectedUserPhoto by bind<ImageView>(R.id.selected_user_photo)
