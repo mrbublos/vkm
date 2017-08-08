@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
+import vkm.vkm.utils.AsyncPhotoDownloader
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.SwipeManager
 import vkm.vkm.utils.UserListAdapter
@@ -107,17 +108,23 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    val selectUserOrGroup = { newSelectedUser: User? ->
+    val selectUserOrGroup = { newSelectedElement: User? ->
         when (tabHost.currentTabTag) {
-            "user" -> selectedUser = newSelectedUser
-            "group" -> selectedGroup = newSelectedUser
+            "user" -> selectedUser = newSelectedElement
+            "group" -> selectedGroup = newSelectedElement
         }
 
-        newSelectedUser?.let {
+        newSelectedElement?.let {
             selectedUserContainer.visibility = View.VISIBLE
             selectedUserName.text = selectedUser?.fullname
             selectedUserId.text = selectedUser?.userId
-            selectedUserPhoto.setImageBitmap(selectedUser?.photo)
+
+            if (newSelectedElement.photo == null) {
+                AsyncPhotoDownloader().execute(newSelectedElement, selectedUserPhoto)
+            } else {
+                selectedUserPhoto.setImageBitmap(newSelectedElement.photo)
+            }
+
             selectedUserButton.setOnTouchListener { _, event ->
                 state = "composition"
                 selectedUserContainer.visibility = View.GONE

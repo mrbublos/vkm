@@ -36,23 +36,25 @@
             android:layout_height="50dp">
         <ImageView
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 android:id="@+id/selected_user_photo"
-                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintStart_toStartOf="parent"
+                tools:layout_editor_absoluteX="0dp"/>
 
         <ImageView
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 app:srcCompat="@android:drawable/ic_delete"
                 android:id="@+id/deselect_user_button"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:layout_editor_absoluteX="352dp"/>
 
         <TextView
                 android:layout_width="0dp"
@@ -62,7 +64,8 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_weight="1"
                 android:minWidth="100dp"
-                android:id="@+id/selected_user_name"/>
+                android:id="@+id/selected_user_name"
+                tools:layout_editor_absoluteX="0dp"/>
 
         <TextView
                 android:layout_width="0dp"
@@ -73,7 +76,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/selected_user_name"
                 app:layout_constraintVertical_weight="1"
-                android:id="@+id/selected_user_id"/>
+                android:id="@+id/selected_user_id"
+                tools:layout_editor_absoluteX="0dp"/>
 
     </android.support.constraint.ConstraintLayout>
 

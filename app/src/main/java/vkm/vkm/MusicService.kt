@@ -137,17 +137,18 @@ class MusicServiceMock : MusicService() {
     }
 
     fun getMockUserList(id: String = ""): List<User> {
+        val prefix = Math.random()
         return listOf(
-                User(userId = "id" + 1, fullname = "Fullname 1", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 2, fullname = "Fullname 2", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 3, fullname = "Fullname 3", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 4, fullname = "Fullname 4", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 5, fullname = "Fullname 1", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 6, fullname = "Fullname 1", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 7, fullname = "Fullname 1", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 8, fullname = "Fullname 1", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 9, fullname = "Fullname 1", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
-                User(userId = "id" + 10,fullname = "Fullname 1", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg")
+                User(userId = "" + prefix + id + 1, fullname = "Fullname 1", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 2, fullname = "Fullname 2", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 3, fullname = "Fullname 3", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 4, fullname = "Fullname 4", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 5, fullname = "Fullname 5", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 6, fullname = "Fullname 6", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 7, fullname = "Fullname 7", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 8, fullname = "Fullname 8", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 9, fullname = "Fullname 9", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg"),
+                User(userId = "" + prefix + id + 10,fullname = "Fullname 0", photoUrl = "http://assets.teenvogue.com/photos/58c703466b185d38dd28d29d/master/pass/Portrait%20Cara%20Delevingne.cpImg.868.jpg")
                 )
     }
 }

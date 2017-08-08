@@ -1,6 +1,7 @@
 package vkm.vkm.utils
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.util.Log
@@ -30,9 +31,9 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>, var ele
         val item = getItem(position)
 
         item?.let {
-            view?.bind<TextView>(R.id.name)?.text = item.fullname
-            view?.bind<TextView>(R.id.artist)?.text = item.userId
-            AsyncPhotoDownloader().execute(item, view?.bind<ImageView>(R.id.photo))
+            view?.bind<TextView>(R.id.user_name)?.text = item.fullname
+            view?.bind<TextView>(R.id.user_id)?.text = item.userId
+            AsyncPhotoDownloader().execute(item, view?.bind<ImageView>(R.id.user_photo))
             view?.setOnTouchListener { v, event ->
                 elementTouchListener.invoke(item)
                 return@setOnTouchListener v.onTouchEvent(event)
@@ -45,30 +46,25 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>, var ele
 }
 
 
-class AsyncPhotoDownloader : AsyncTask<Any, Unit, Triple<ImageView, ByteArray, User>>() {
+class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
 
     companion object {
-        val cache: ConcurrentHashMap<String, ByteArray> = ConcurrentHashMap()
+        val cache: ConcurrentHashMap<String, Bitmap> = ConcurrentHashMap()
         val limit = 1000
     }
 
-    override fun onPostExecute(result: Triple<ImageView, ByteArray, User>) {
-        val (view, out, user) = result
-
-        val options = BitmapFactory.Options()
-        options.outHeight = 10
-//        options.outWidth = 100
-
-        user.photo = BitmapFactory.decodeByteArray(out, 0, out.size, options)
+    override fun onPostExecute(result: Pair<ImageView, User>) {
+        val (view, user) = result
         view.setImageBitmap(user.photo)
         Log.v(this.toString(), "Bitmap set")
     }
 
 
-    override fun doInBackground(vararg input: Any?): Triple<ImageView, ByteArray, User> {
+    override fun doInBackground(vararg input: Any?): Pair<ImageView, User> {
         val user = input[0] as User
         if (cache.containsKey(user.photoUrl)) {
-            return Triple(input[1] as ImageView, cache[user.photoUrl] as ByteArray, user)
+            user.photo = cache[user.photoUrl]
+            return Pair(input[1] as ImageView, user)
         }
 
         val _url = URL(user.photoUrl)
@@ -77,16 +73,19 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Triple<ImageView, ByteArray, U
         connection.connect()
 
         val out = ByteArrayOutputStream()
+
         try {
             BufferedInputStream(_url.openStream()).copyTo(out)
-            cache.put(user.photoUrl, out.toByteArray())
+            user.photo = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
+            cache.put(user.photoUrl, user.photo as Bitmap)
             if (cache.size > limit) {
                 cache.remove(cache.keys.any() as String)
             }
         } catch(e: Exception) {
             Log.e(this.toString(), "Error downloading image", e)
         }
+
         Log.v(this.toString(), "Download finished $_url")
-        return Triple(input[1] as ImageView, out.toByteArray(), user)
+        return Pair(input[1] as ImageView, user)
     }
 }
