@@ -12,7 +12,7 @@ open class MusicService {
     var token: String
 
     init {
-        Log.i("", "MusicService Started")
+        Log.i(MainActivity.TAG, "MusicService Started")
         token = authorize()
     }
 
@@ -34,9 +34,9 @@ open class MusicService {
 
 
     // TODO make return type non-nullable
-    open fun getUserPlaylist(name: String, filter: String = ""): List<Composition> {
+    open fun getUserPlaylist(name: String?, filter: String = ""): List<Composition> {
         val url = "$apiUrl/method/users.search"
-        val params = listOf<Pair<String, Any>>(Pair("q", name))
+        val params = listOf(Pair("q", name))
         url.httpGet(params).responseString { _, resp, result ->
             println("test")
         }
@@ -44,7 +44,7 @@ open class MusicService {
         return listOf()
     }
 
-    open fun getGroupPlaylist(groupId: String, filter: String = ""): List<Composition> {
+    open fun getGroupPlaylist(groupId: String?, filter: String = ""): List<Composition> {
         return listOf()
     }
 
@@ -90,11 +90,11 @@ open class MusicService {
 }
 
 class MusicServiceMock : MusicService() {
-    override fun getUserPlaylist(name: String, filter: String): List<Composition> {
+    override fun getUserPlaylist(name: String?, filter: String): List<Composition> {
         return getMockCompositionList("user playlist ").filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
-    override fun getGroupPlaylist(groupId: String, filter: String): List<Composition> {
+    override fun getGroupPlaylist(groupId: String?, filter: String): List<Composition> {
         return getMockCompositionList("group playlist ").filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
