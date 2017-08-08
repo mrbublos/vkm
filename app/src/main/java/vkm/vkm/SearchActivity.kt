@@ -93,17 +93,18 @@ class SearchActivity : AppCompatActivity() {
     }
 
     fun handleTabSwitch(tabId: String) {
+        // TODO keep data lists on tab switches, if nothing has changed
         if (state == "user") {
             when (tabId) {
                 "user" -> userList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getUsers(filterText), selectUserOrGroup)
                 "group" -> groupList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getGroups(filterText), selectUserOrGroup)
-                "composition" -> groupList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getCompositions(filterText))
+                "composition" -> compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getCompositions(filterText))
             }
         } else {
             when (tabId) {
                 "user" -> userList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getUserPlaylist(selectedUser?.userId, filterText))
                 "group" -> groupList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getGroupPlaylist(selectedUser?.userId, filterText))
-                "composition" -> groupList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getCompositions(filterText))
+                "composition" -> compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getCompositions(filterText))
             }
         }
     }
@@ -126,7 +127,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             selectedUserButton.setOnTouchListener { _, event ->
-                state = "composition"
+                state = "user"
                 selectedUserContainer.visibility = View.GONE
                 handleTabSwitch(tabHost.currentTabTag)
                 return@setOnTouchListener super.onTouchEvent(event)
