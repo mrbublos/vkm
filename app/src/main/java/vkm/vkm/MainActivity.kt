@@ -13,6 +13,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        SecurityService.context = applicationContext
+
         if (SecurityService.isLoggedIn()) {
             startActivity(Intent(applicationContext, SearchActivity::class.java))
         } else {

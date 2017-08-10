@@ -1,17 +1,71 @@
 package vkm.vkm
 
+import android.content.Context
+import com.github.kittinunf.fuel.httpGet
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.*
+
 object SecurityService {
 
-    var _user: User? = null
+    var user: User? = null
 
+    val appId = "2274003"
+    val appSecret = "HbZxrka2uZ6jB1inYsH"
+    var vkAccessToken: String? = null
+    var context: Context? = null
 
     fun isLoggedIn(): Boolean {
-        // TODO read internal storage if creds exist
-        return true
+        val accessToken = loadAccessToken()
+        vkAccessToken = accessToken
+        return accessToken != null
     }
 
-    fun logIn(user: User) {
+    fun logIn(newUser: User): String {
         // TODO store user in internal storage
-        _user = user
+        user = newUser
+        return performVkLogin()
+    }
+
+    fun performVkLogin(): String {
+        val _user = user
+        _user?.let {
+            val url = "https://oauth.vk.com/token"
+            val params = listOf<Pair<String, Any>>(Pair("grant_type", "password"),
+                    Pair("client_id", appId),
+                    Pair("client_secret", appSecret),
+                    Pair("username", _user.userId),
+                    Pair("password", _user.password))
+            var resultString = ""
+            url.httpGet(params).responseString { _, resp, result ->
+                println("test")
+
+                if (resultString == "ok") {
+                    dumpAccessToken()
+                }
+            }
+        }
+
+        return "Error logging in"
+    }
+
+    fun dumpAccessToken() {
+        val name = "mydata.properties"
+        val settingsFile = File(context?.filesDir, name)
+        val settings = Properties()
+        settings.load(FileInputStream(settingsFile))
+        settings.put("vkAccessToken", vkAccessToken)
+        settings.store(FileOutputStream(settingsFile), null)
+    }
+
+    fun loadAccessToken(): String? {
+        val name = "mydata.properties"
+        val settingsFile = File(context?.filesDir, name)
+        if (!settingsFile.exists()) { return null }
+
+        val settings = Properties()
+        settings.load(FileInputStream(settingsFile))
+        return settings.getProperty("vkAccessToken")
     }
 }

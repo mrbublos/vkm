@@ -9,15 +9,15 @@ import com.github.kittinunf.fuel.httpGet
  */
 open class MusicService {
 
-    var token: String
+    var token: String?
 
     init {
         Log.i(MainActivity.TAG, "MusicService Started")
-        token = authorize()
+        token = SecurityService.vkAccessToken
     }
 
     val apiUrl = "https://api.vk.com"
-    val appId = "3682744"
+
 
 
     fun initialize() {
@@ -70,18 +70,6 @@ open class MusicService {
 
     open fun getCompositions(filter: String = ""): List<Composition> {
         return listOf(Composition()).filter { it.name.contains(filter) || it.artist.contains(filter) }
-    }
-
-    fun authorize(): String {
-        val url = "https://oauth.vk.com/token"
-        val params = listOf<Pair<String, Any>>(Pair("grant_type", "password"),
-                Pair("scope", "nohttps"), Pair("client_id", appId), Pair("client_secret", ""), Pair("username", ""), Pair("password", ""))
-
-        url.httpGet(params).responseString { _, resp, result ->
-            println("test")
-        }
-
-        return ""
     }
 
     fun getMock(): MusicServiceMock {
