@@ -5,6 +5,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -28,14 +29,16 @@ class LoginActivity : AppCompatActivity() {
     fun initializeButtons() {
 
         button.setOnTouchListener { view, event ->
-            lockUnlockScreen(true)
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                lockUnlockScreen(true)
 
-            if (validateValues()) {
-                lockUnlockScreen(false)
-                return@setOnTouchListener view.onTouchEvent(event)
+                if (!areValuesValid()) {
+                    lockUnlockScreen(false)
+                    return@setOnTouchListener view.onTouchEvent(event)
+                }
+
+                LoginPerformer(this).execute(loginName.text.toString(), password.text.toString())
             }
-
-            LoginPerformer(this).execute(loginName.text.toString(), password.text.toString())
 
             return@setOnTouchListener view.onTouchEvent(event)
         }
@@ -55,7 +58,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    fun validateValues(): Boolean {
+    fun areValuesValid(): Boolean {
         if (loginName.text.isEmpty() || password.text.isEmpty()) {
             error.text = getString(R.string.empty_password_login)
             return false

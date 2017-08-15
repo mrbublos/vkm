@@ -32,16 +32,16 @@ object SecurityService {
         val _user = user
         _user?.let {
             val url = "https://oauth.vk.com/token"
-            val params = listOf<Pair<String, Any>>(Pair("grant_type", "password"),
+            val params = listOf(Pair("grant_type", "password"),
                     Pair("client_id", appId),
                     Pair("client_secret", appSecret),
                     Pair("username", _user.userId),
                     Pair("password", _user.password))
-            var resultString = ""
+            var resultString = "ok"
             url.httpGet(params).responseString { _, resp, result ->
-                println("test")
-
-                if (resultString == "ok") {
+                if (resp.httpStatusCode != 200) {
+                    return@responseString
+                } else {
                     dumpAccessToken()
                 }
             }
