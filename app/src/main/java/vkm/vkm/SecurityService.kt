@@ -1,6 +1,9 @@
 package vkm.vkm
 
 import android.content.Context
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Parser
+import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
 import java.io.File
 import java.io.FileInputStream
@@ -12,7 +15,7 @@ object SecurityService {
     var user: User? = null
 
     val appId = "2274003"
-    val appSecret = "HbZxrka2uZ6jB1inYsH"
+    val appSecret = "hHbZxrka2uZ6jB1inYsH"
     var vkAccessToken: String? = null
     var context: Context? = null
 
@@ -30,6 +33,8 @@ object SecurityService {
 
     fun performVkLogin(): String {
         val _user = user
+        var resultString = "Error logging in"
+
         _user?.let {
             val url = "https://oauth.vk.com/token"
             val params = listOf(Pair("grant_type", "password"),
@@ -37,24 +42,26 @@ object SecurityService {
                     Pair("client_secret", appSecret),
                     Pair("username", _user.userId),
                     Pair("password", _user.password))
-            var resultString = "ok"
-            url.httpGet(params).responseString { _, resp, result ->
-                if (resp.httpStatusCode != 200) {
-                    return@responseString
-                } else {
-                    dumpAccessToken()
-                }
+
+            val result = url.httpGet(params).responseString()
+            val resp = result.component2()
+            val res = result.component3()
+
+            if (resp.httpStatusCode == 200) {
+                vkAccessToken = (Parser().parse(StringBuilder(res.component1())) as JsonObject).string("access_token")
+                dumpAccessToken()
+                resultString = "ok"
             }
         }
 
-        return "Error logging in"
+        return resultString
     }
 
     fun dumpAccessToken() {
         val name = "mydata.properties"
         val settingsFile = File(context?.filesDir, name)
         val settings = Properties()
-        settings.load(FileInputStream(settingsFile))
+        if (settingsFile.exists()) { settings.load(FileInputStream(settingsFile)) }
         settings.put("vkAccessToken", vkAccessToken)
         settings.store(FileOutputStream(settingsFile), null)
     }
