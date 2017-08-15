@@ -1,8 +1,6 @@
 package vkm.vkm
 
 import android.content.Context
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
 import java.io.File
@@ -48,7 +46,7 @@ object SecurityService {
             val res = result.component3()
 
             if (resp.httpStatusCode == 200) {
-                vkAccessToken = (Parser().parse(StringBuilder(res.component1())) as JsonObject).string("access_token")
+                vkAccessToken = res.component1()?.toJson()?.string("access_token")
                 dumpAccessToken()
                 resultString = "ok"
             }
