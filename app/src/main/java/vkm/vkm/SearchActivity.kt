@@ -23,6 +23,7 @@ class SearchActivity : AppCompatActivity() {
     val tabHost by bind<TabHost>(R.id.tabhost)
     val button by bind<Button>(R.id.button)
     val textContainer by bind<TextView>(R.id.search)
+    val loadingSpinner by bind<ProgressBar>(R.id.loading_spinner)
 
     // selected user
     val selectedUserContainer by bind<ConstraintLayout>(R.id.selected_user_container)
@@ -32,7 +33,7 @@ class SearchActivity : AppCompatActivity() {
     val selectedUserButton by bind<ImageView>(R.id.deselect_user_button)
 
     // services
-    val musicService = MusicService().getMock()
+    val musicService = MusicService()
 
     // private vars
     var filterText: String = ""
@@ -54,9 +55,11 @@ class SearchActivity : AppCompatActivity() {
         // hiding selected user container
         state = "user"
         selectedUserContainer.visibility = View.GONE
+        loadingSpinner.visibility = View.GONE
     }
 
     fun initializeTabs() {
+        // TODO consider switching to tabLayout
         tabHost.setup()
 
         var tabSpec = tabHost.newTabSpec("user")
@@ -75,45 +78,63 @@ class SearchActivity : AppCompatActivity() {
         tabHost.addTab(tabSpec)
 
         tabHost.setCurrentTabByTag("composition")
-        tabHost.setOnTabChangedListener(TabHost.OnTabChangeListener(this::handleTabSwitch))
     }
 
     fun initializeButton() {
         button.setOnTouchListener { _, event ->
             filterText = textContainer.text.toString()
-            state = "user"
+            loadingSpinner.visibility = View.VISIBLE
 
             when (tabHost.currentTabTag) {
-                "user" -> userList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getUsers(), selectUserOrGroup)
-                "group" -> groupList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getGroups(), selectUserOrGroup)
-                "composition" -> compositionList.adapter = CompositionListAdapter(this, R.layout.user_list_element, musicService.getCompositions())
+                "user" -> if (selectedUser != null) {
+                    musicService.getUserPlaylist(this, selectedUser?.userId)
+                } else {
+                    musicService.getUsers(this, filterText)
+                }
+                "group" -> if (selectedGroup != null) {
+                    musicService.getGroupPlaylist(this, filterText)
+                } else {
+                    musicService.getGroups(this, filterText)
+                }
+                "composition" -> musicService.getCompositions(this, filterText)
             }
+
             return@setOnTouchListener super.onTouchEvent(event)
         }
     }
 
-    fun handleTabSwitch(tabId: String) {
-        // TODO keep data lists on tab switches, if nothing has changed
-        if (state == "user") {
-            when (tabId) {
-                "user" -> userList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getUsers(filterText), selectUserOrGroup)
-                "group" -> groupList.adapter = UserListAdapter(this, R.layout.user_list_element, musicService.getGroups(filterText), selectUserOrGroup)
-                "composition" -> compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getCompositions(filterText))
-            }
-        } else {
-            when (tabId) {
-                "user" -> userList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getUserPlaylist(selectedUser?.userId, filterText))
-                "group" -> groupList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getGroupPlaylist(selectedUser?.userId, filterText))
-                "composition" -> compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getCompositions(filterText))
-            }
-        }
+    // callback functions
+    fun setUserList(data: List<User>) {
+        loadingSpinner.visibility = View.GONE
+        userList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, selectUserOrGroup)
+    }
+
+    fun setGroupList(data: List<User>) {
+        loadingSpinner.visibility = View.GONE
+        groupList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, selectUserOrGroup)
+    }
+
+    fun setCompositionsList(data: List<Composition>) {
+        loadingSpinner.visibility = View.GONE
+        compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, data)
     }
 
     val selectUserOrGroup = { newSelectedElement: User? ->
         when (tabHost.currentTabTag) {
-            "user" -> selectedUser = newSelectedElement
-            "group" -> selectedGroup = newSelectedElement
+            "user" -> {
+                selectedUser = newSelectedElement
+                musicService.getUserPlaylist(this, selectedUser?.userId)
+            }
+            "group" -> {
+                selectedGroup = newSelectedElement
+                musicService.getGroupPlaylist(this, selectedGroup?.userId)
+            }
         }
+
+        // hiding User and Group tabs
+        tabHost.getChildAt(0).visibility = View.GONE
+        tabHost.getChildAt(1).visibility = View.GONE
+        tabHost.currentTab = 2
 
         newSelectedElement?.let {
             selectedUserContainer.visibility = View.VISIBLE
@@ -127,9 +148,12 @@ class SearchActivity : AppCompatActivity() {
             }
 
             selectedUserButton.setOnTouchListener { _, event ->
-                state = "user"
                 selectedUserContainer.visibility = View.GONE
-                handleTabSwitch(tabHost.currentTabTag)
+
+                // hiding User and Group tabs
+                tabHost.getChildAt(0).visibility = View.VISIBLE
+                tabHost.getChildAt(1).visibility = View.VISIBLE
+
                 return@setOnTouchListener super.onTouchEvent(event)
             }
         }

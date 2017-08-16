@@ -1,7 +1,10 @@
 package vkm.vkm
 
+import android.os.AsyncTask
 import android.util.Log
-
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
 
 /**
@@ -16,35 +19,11 @@ open class MusicService {
         token = SecurityService.vkAccessToken
     }
 
-    val apiUrl = "https://api.vk.com"
-
-
-
-    fun initialize() {
-
-    }
-
-    fun getUserDetails(userId: String) {
-        val url = "$apiUrl/method/users.get"
-        val params = listOf<Pair<String, Any>>(Pair("user_id", userId))
-        url.httpGet(params).responseString { _, resp, result ->
-            println("test")
-        }
-    }
-
-
-    // TODO make return type non-nullable
-    open fun getUserPlaylist(name: String?, filter: String = ""): List<Composition> {
-        val url = "$apiUrl/method/users.search"
-        val params = listOf(Pair("q", name))
-        url.httpGet(params).responseString { _, resp, result ->
-            println("test")
-        }
-
+    open fun getUserPlaylist(activity: SearchActivity, name: String?, filter: String = ""): List<Composition> {
         return listOf()
     }
 
-    open fun getGroupPlaylist(groupId: String?, filter: String = ""): List<Composition> {
+    open fun getGroupPlaylist(activity: SearchActivity, groupId: String?, filter: String = ""): List<Composition> {
         return listOf()
     }
 
@@ -60,29 +39,56 @@ open class MusicService {
         return listOf(Composition()).filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
-    open fun getGroups(filter: String = ""): List<User> {
+    open fun getGroups(activity: SearchActivity, filter: String = ""): List<User> {
         return listOf(User()).filter { it.fullname.contains(filter) }
     }
 
-    open fun getUsers(filter: String = ""): List<User> {
-        return listOf(User()).filter { it.fullname.contains(filter) }
+    open fun getUsers(activity: SearchActivity, filter: String = "") {
+        callApi("users.search", mutableListOf(Pair("q", filter), Pair("fields", "photo_50, has_photo"))) { result ->
+            val users = ((result?.get("response") as JsonObject).get("items") as JsonArray<JsonObject>).map {
+                User(userId = it.string("id") as String,
+                        fullname = it.string("first_name") + " " + it.string("last_name"),
+                        photoUrl = it.string("photo") as String)
+            }
+            activity.setUserList(users)
+        }
     }
 
-    open fun getCompositions(filter: String = ""): List<Composition> {
+    open fun getCompositions(activity: SearchActivity, filter: String = ""): List<Composition> {
         return listOf(Composition()).filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
     fun getMock(): MusicServiceMock {
         return MusicServiceMock()
     }
+
+    fun callApi(path: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
+        VkApiCallTask(callback).execute(Pair(path, params))
+    }
 }
 
+class VkApiCallTask(val callback: (data: JsonObject?) -> Unit): AsyncTask<Pair<String, MutableList<Pair<String, String>>>, Int, JsonObject?>() {
+    val apiUrl = "https://api.vk.com"
+
+    override fun doInBackground(vararg input: Pair<String, MutableList<Pair<String, String>>>): JsonObject? {
+        val parameters = input[0].component2()
+        parameters.add(Pair("access_token", SecurityService.vkAccessToken!!))
+        val (_, _, result) = "$apiUrl/method/${input[0].component1()}".httpGet(parameters).responseString()
+        return result.component1()?.toJson()
+    }
+
+    override fun onPostExecute(result: JsonObject?) {
+        callback.invoke(result)
+    }
+}
+
+
 class MusicServiceMock : MusicService() {
-    override fun getUserPlaylist(name: String?, filter: String): List<Composition> {
+    override fun getUserPlaylist(activity: SearchActivity, name: String?, filter: String): List<Composition> {
         return getMockCompositionList("user playlist ").filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
-    override fun getGroupPlaylist(groupId: String?, filter: String): List<Composition> {
+    override fun getGroupPlaylist(activity: SearchActivity, groupId: String?, filter: String): List<Composition> {
         return getMockCompositionList("group playlist ").filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
@@ -98,15 +104,11 @@ class MusicServiceMock : MusicService() {
         return getMockCompositionList("inProgress ").filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
-    override fun getUsers(filter: String): List<User> {
-        return getMockUserList("users ").filter { it.fullname.contains(filter) }
-    }
-
-    override fun getGroups(filter: String): List<User> {
+    override fun getGroups(activity: SearchActivity, filter: String): List<User> {
         return getMockUserList("groups ").filter { it.fullname.contains(filter) }
     }
 
-    override fun getCompositions(filter: String): List<Composition> {
+    override fun getCompositions(activity: SearchActivity, filter: String): List<Composition> {
         return getMockCompositionList("compositions ").filter { it.name.contains(filter) || it.artist.contains(filter) }
 
 }

@@ -114,7 +114,11 @@
                         android:id="@+id/tab1"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
-
+                <ProgressBar
+                        android:id="@+id/loading_spinner"
+                        android:progressDrawable="@drawable/circle_progress_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
             </FrameLayout>
         </LinearLayout>
     </TabHost>
