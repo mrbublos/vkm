@@ -17,9 +17,9 @@ object SecurityService {
     var vkAccessToken: String? = null
     var context: Context? = null
 
-    fun isLoggedIn(): Boolean {
+    fun isLoggedIn(defaultToken: String?): Boolean {
         val accessToken = loadAccessToken()
-        vkAccessToken = accessToken
+        vkAccessToken = accessToken ?: defaultToken
         return accessToken != null
     }
 
