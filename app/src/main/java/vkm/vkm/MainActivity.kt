@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
 
         SecurityService.context = applicationContext
 
-        if (SecurityService.isLoggedIn(intent.extras.get("vkm_token") as String?)) {
+        if (SecurityService.isLoggedIn(intent.extras?.get("vkm_token") as String?)) {
             startActivity(Intent(applicationContext, SearchActivity::class.java))
         } else {
             startActivity(Intent(applicationContext, LoginActivity::class.java))
