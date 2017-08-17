@@ -37,7 +37,6 @@ class SearchActivity : AppCompatActivity() {
 
     // private vars
     var filterText: String = ""
-    var state = "search"
     var selectedUser: User? = null
     var selectedGroup: User? = null
 
@@ -53,7 +52,6 @@ class SearchActivity : AppCompatActivity() {
 
     fun initializeElements() {
         // hiding selected user container
-        state = "user"
         selectedUserContainer.visibility = View.GONE
         loadingSpinner.visibility = View.GONE
     }
@@ -81,9 +79,12 @@ class SearchActivity : AppCompatActivity() {
     }
 
     fun initializeButton() {
+        lockUnlockScreen(false)
         button.setOnTouchListener { _, event ->
             filterText = textContainer.text.toString()
             loadingSpinner.visibility = View.VISIBLE
+
+            lockUnlockScreen(true)
 
             when (tabHost.currentTabTag) {
                 "user" -> if (selectedUser != null) {
@@ -105,16 +106,19 @@ class SearchActivity : AppCompatActivity() {
 
     // callback functions
     fun setUserList(data: List<User>) {
+        lockUnlockScreen(false)
         loadingSpinner.visibility = View.GONE
         userList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, selectUserOrGroup)
     }
 
     fun setGroupList(data: List<User>) {
+        lockUnlockScreen(false)
         loadingSpinner.visibility = View.GONE
         groupList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, selectUserOrGroup)
     }
 
     fun setCompositionsList(data: List<Composition>) {
+        lockUnlockScreen(false)
         loadingSpinner.visibility = View.GONE
         compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, data)
     }
@@ -162,5 +166,12 @@ class SearchActivity : AppCompatActivity() {
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         SwipeManager.manageSwipe(event, this, HistoryActivity::class.java)
         return super.onTouchEvent(event)
+    }
+
+    fun lockUnlockScreen(lock: Boolean) {
+        textContainer.isFocusable = !lock
+        textContainer.isClickable = !lock
+        button.isFocusable = !lock
+        button.isClickable = !lock
     }
 }

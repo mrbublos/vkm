@@ -4,6 +4,7 @@ import android.os.AsyncTask
 import android.util.Log
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
+import com.beust.klaxon.int
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
 
@@ -39,16 +40,37 @@ open class MusicService {
         return listOf(Composition()).filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
-    open fun getGroups(activity: SearchActivity, filter: String = ""): List<User> {
-        return listOf(User()).filter { it.fullname.contains(filter) }
+    open fun getGroups(activity: SearchActivity, filter: String = "") {
+        // TODO paging, error handling
+        callApi("groups.search", mutableListOf(Pair("q", filter), Pair("fields", "photo_50"))) { result ->
+            val items = result?.get("response") as JsonArray<Any?>
+            val groups = items.filter {
+                it is JsonObject
+            }.map {
+                val group = it as JsonObject
+                val newGroup = User(userId = "" + group.int("gid")!!,
+                        fullname = group.string("name")!!,
+                        photoUrl = group.string("photo_50")!!)
+                newGroup
+            }
+            activity.setGroupList(groups)
+        }
     }
 
     open fun getUsers(activity: SearchActivity, filter: String = "") {
+        // TODO add paging, error handling
         callApi("users.search", mutableListOf(Pair("q", filter), Pair("fields", "photo_50, has_photo"))) { result ->
-            val users = ((result?.get("response") as JsonObject).get("items") as JsonArray<JsonObject>).map {
-                User(userId = it.string("id") as String,
-                        fullname = it.string("first_name") + " " + it.string("last_name"),
-                        photoUrl = it.string("photo") as String)
+            val items = result?.get("response") as JsonArray<Any?>
+            val users = items.filter {
+                it is JsonObject
+            }.map {
+                val user = it as JsonObject
+                val newUser = User(userId = "" + user.int("uid")!!,
+                        fullname = user.string("first_name") + " " + user.string("last_name"))
+                if (user.int("has_photo") == 1) {
+                    newUser.photoUrl = user.string("photo_50")!!
+                }
+                newUser
             }
             activity.setUserList(users)
         }
@@ -104,8 +126,8 @@ class MusicServiceMock : MusicService() {
         return getMockCompositionList("inProgress ").filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
-    override fun getGroups(activity: SearchActivity, filter: String): List<User> {
-        return getMockUserList("groups ").filter { it.fullname.contains(filter) }
+    override fun getGroups(activity: SearchActivity, filter: String) {
+//        return getMockUserList("groups ").filter { it.fullname.contains(filter) }
     }
 
     override fun getCompositions(activity: SearchActivity, filter: String): List<Composition> {
