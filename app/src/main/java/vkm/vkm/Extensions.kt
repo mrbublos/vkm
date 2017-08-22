@@ -30,4 +30,11 @@ fun String?.toJson(): JsonObject {
     return Parser().parse(StringBuilder(this)) as JsonObject
 }
 
+fun ByteArray?.toHexString(): String {
+    if (this == null || this.isEmpty()) { return "" }
+    val ret = StringBuilder()
+    this.forEach { ret.append(String.format("%02x", it)) }
+    return ret.toString()
+}
+
 private fun <T> unsafeLazy(initializer: () -> T) = lazy(LazyThreadSafetyMode.NONE, initializer)

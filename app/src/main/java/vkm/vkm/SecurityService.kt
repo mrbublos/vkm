@@ -18,9 +18,9 @@ object SecurityService {
     var context: Context? = null
 
     fun isLoggedIn(defaultToken: String?): Boolean {
-        val accessToken = loadAccessToken()
-        vkAccessToken = accessToken ?: defaultToken
-        return accessToken != null
+        loadAccessToken()
+        vkAccessToken = vkAccessToken ?: defaultToken
+        return vkAccessToken != null
     }
 
     fun logIn(newUser: User): String {
@@ -61,16 +61,17 @@ object SecurityService {
         val settings = Properties()
         if (settingsFile.exists()) { settings.load(FileInputStream(settingsFile)) }
         settings.put("vkAccessToken", vkAccessToken)
+        settings.put("mySecret", vkAccessToken)
         settings.store(FileOutputStream(settingsFile), null)
     }
 
-    fun loadAccessToken(): String? {
+    private fun loadAccessToken() {
         val name = "mydata.properties"
         val settingsFile = File(context?.filesDir, name)
-        if (!settingsFile.exists()) { return null }
+        if (!settingsFile.exists()) { return }
 
         val settings = Properties()
         settings.load(FileInputStream(settingsFile))
-        return settings.getProperty("vkAccessToken")
+        vkAccessToken = settings.getProperty("vkAccessToken")
     }
 }

@@ -7,20 +7,39 @@ import com.beust.klaxon.JsonObject
 import com.beust.klaxon.int
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 
 /**
  * todo decompile off app and get client_id and key
  */
 open class MusicService {
 
-    var token: String?
-
     init {
         Log.i(MainActivity.TAG, "MusicService Started")
-        token = SecurityService.vkAccessToken
     }
 
-    open fun getUserPlaylist(activity: SearchActivity, name: String?, filter: String = ""): List<Composition> {
+    open fun getUserPlaylist(activity: SearchActivity, name: String, filter: String = ""): List<Composition> {
+        val params = mutableListOf(
+                "v" to "5.62",
+                "lang" to "en",
+                "https" to "1",
+                "owner_id" to name)
+        callApi(true,"audio.get", params) { result ->
+            val items = result?.get("response") as JsonArray<Any?>
+            val compositions = items.filter {
+                it is JsonObject
+            }.map {
+                val composition = it as JsonObject
+                val compositionObject = Composition( id = "" + composition.int("aid")!!,
+                        name = composition.string("title")!!,
+                        ownerId = composition.string("owner_id")!!,
+                        artist = composition.string("artist")!!,
+                        url = composition.string("url")!!)
+                compositionObject
+            }
+            activity.setCompositionsList(compositions)
+        }
         return listOf()
     }
 
@@ -42,7 +61,7 @@ open class MusicService {
 
     open fun getGroups(activity: SearchActivity, filter: String = "") {
         // TODO paging, error handling
-        callApi("groups.search", mutableListOf(Pair("q", filter), Pair("fields", "photo_50"))) { result ->
+        callApi("groups.search", mutableListOf("q" to filter, "fields" to "photo_50")) { result ->
             val items = result?.get("response") as JsonArray<Any?>
             val groups = items.filter {
                 it is JsonObject
@@ -59,7 +78,8 @@ open class MusicService {
 
     open fun getUsers(activity: SearchActivity, filter: String = "") {
         // TODO add paging, error handling
-        callApi("users.search", mutableListOf(Pair("q", filter), Pair("fields", "photo_50, has_photo"))) { result ->
+        callApi("users.search", mutableListOf("q" to filter, "fields" to "photo_50, has_photo")) { result ->
+            if (result == null) { return@callApi }
             val items = result?.get("response") as JsonArray<Any?>
             val users = items.filter {
                 it is JsonObject
@@ -84,29 +104,52 @@ open class MusicService {
         return MusicServiceMock()
     }
 
-    fun callApi(path: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
+
+    private fun callApi(path: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
         VkApiCallTask(callback).execute(Pair(path, params))
+    }
+
+    private fun callApi(addSignature: Boolean = false, path: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
+        VkApiCallTask(callback, addSignature).execute(Pair(path, params))
     }
 }
 
-class VkApiCallTask(val callback: (data: JsonObject?) -> Unit): AsyncTask<Pair<String, MutableList<Pair<String, String>>>, Int, JsonObject?>() {
-    val apiUrl = "https://api.vk.com"
+class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private val addSignature: Boolean = false): AsyncTask<Pair<String, MutableList<Pair<String, String>>>, Int, JsonObject?>() {
+    private val apiUrl = "https://api.vk.com"
+    private val userAgent = "VKAndroidApp/4.13-1182 (Android 6.0; SDK 23; x86; Google Nexus 5X; en)"
 
     override fun doInBackground(vararg input: Pair<String, MutableList<Pair<String, String>>>): JsonObject? {
         val parameters = input[0].component2()
         parameters.add(Pair("access_token", SecurityService.vkAccessToken!!))
-        val (_, _, result) = "$apiUrl/method/${input[0].component1()}".httpGet(parameters).responseString()
+        val path = "/method/${input[0].component1()}"
+        if (addSignature) { addSignature(path, parameters) }
+
+        val httpGet = "$apiUrl$path".httpGet(parameters)
+        httpGet.httpHeaders.put("User-Agent", userAgent)
+        val (req, resp, result) = httpGet.responseString()
+        if (result.component1() != null) {
+            Log.v("", result.component1())
+        }
         return result.component1()?.toJson()
     }
 
     override fun onPostExecute(result: JsonObject?) {
         callback.invoke(result)
     }
+
+    private fun addSignature(path: String, params: MutableList<Pair<String, String>>) {
+        val string = path + "?" + params.joinToString("&") { "${it.first}=${it.second}" } + SecurityService.appSecret
+        Log.v("", "Signature string " + string)
+        val md = MessageDigest.getInstance("MD5")
+        val md5String = md.digest(string.toByteArray(StandardCharsets.UTF_8)).toHexString()
+        params.add("sig" to md5String)
+        Log.v("", "Signature is " + md5String)
+    }
 }
 
 
 class MusicServiceMock : MusicService() {
-    override fun getUserPlaylist(activity: SearchActivity, name: String?, filter: String): List<Composition> {
+    override fun getUserPlaylist(activity: SearchActivity, name: String, filter: String): List<Composition> {
         return getMockCompositionList("user playlist ").filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
@@ -136,16 +179,16 @@ class MusicServiceMock : MusicService() {
 }
 
     fun getMockCompositionList(id: String = ""): List<Composition> {
-        return listOf(Composition(id + "name", "url", "artist", 0, "", "1:00"),
-                Composition(id + "name1", "url", "artist1", 0, "", "1:00"),
-                Composition(id + "name2", "url", "artist2", 0, "", "1:00"),
-                Composition(id + "name3", "url", "artist3", 0, "", "1:00"),
-                Composition(id + "name4", "url", "artist4", 0, "", "1:00"),
-                Composition(id + "name5", "url", "artist5", 0, "", "1:00"),
-                Composition(id + "name6", "url", "artist6", 0, "", "1:00"),
-                Composition(id + "name7", "url", "artist7", 0, "", "1:00"),
-                Composition(id + "name8", "url", "artist8", 0, "", "1:00"),
-                Composition(id + "name9", "url", "artist9", 0, "", "1:00"))
+        return listOf(Composition("",id + "name", "url", "artist", 0, "", "1:00"),
+                Composition("",id + "name1", "url", "artist1", 0, "", "1:00"),
+                Composition("",id + "name2", "url", "artist2", 0, "", "1:00"),
+                Composition("",id + "name3", "url", "artist3", 0, "", "1:00"),
+                Composition("",id + "name4", "url", "artist4", 0, "", "1:00"),
+                Composition("",id + "name5", "url", "artist5", 0, "", "1:00"),
+                Composition("",id + "name6", "url", "artist6", 0, "", "1:00"),
+                Composition("",id + "name7", "url", "artist7", 0, "", "1:00"),
+                Composition("",id + "name8", "url", "artist8", 0, "", "1:00"),
+                Composition("",id + "name9", "url", "artist9", 0, "", "1:00"))
     }
 
     fun getMockUserList(id: String = ""): List<User> {

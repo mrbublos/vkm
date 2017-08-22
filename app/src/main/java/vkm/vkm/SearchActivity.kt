@@ -48,6 +48,9 @@ class SearchActivity : AppCompatActivity() {
         initializeElements()
         initializeTabs()
         initializeButton()
+
+        // temp call for debugging
+        musicService.getUserPlaylist(this, "6")
     }
 
     fun initializeElements() {
@@ -88,12 +91,12 @@ class SearchActivity : AppCompatActivity() {
 
             when (tabHost.currentTabTag) {
                 "user" -> if (selectedUser != null) {
-                    musicService.getUserPlaylist(this, selectedUser?.userId)
+                    musicService.getUserPlaylist(this, selectedUser?.userId!!)
                 } else {
                     musicService.getUsers(this, filterText)
                 }
                 "group" -> if (selectedGroup != null) {
-                    musicService.getGroupPlaylist(this, filterText)
+                    musicService.getGroupPlaylist(this, filterText!!)
                 } else {
                     musicService.getGroups(this, filterText)
                 }
@@ -127,17 +130,15 @@ class SearchActivity : AppCompatActivity() {
         when (tabHost.currentTabTag) {
             "user" -> {
                 selectedUser = newSelectedElement
-                musicService.getUserPlaylist(this, selectedUser?.userId)
+                musicService.getUserPlaylist(this, selectedUser?.userId!!)
             }
             "group" -> {
                 selectedGroup = newSelectedElement
-                musicService.getGroupPlaylist(this, selectedGroup?.userId)
+                musicService.getGroupPlaylist(this, selectedGroup?.userId!!)
             }
         }
 
-        // hiding User and Group tabs
-        tabHost.getChildAt(0).visibility = View.GONE
-        tabHost.getChildAt(1).visibility = View.GONE
+        // TODO hide User and Group tabs
         tabHost.currentTab = 2
 
         newSelectedElement?.let {
