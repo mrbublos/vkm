@@ -7,10 +7,14 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
+import com.github.kittinunf.fuel.core.FuelManager
 import vkm.vkm.utils.AsyncPhotoDownloader
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.SwipeManager
 import vkm.vkm.utils.UserListAdapter
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.SocketAddress
 
 class SearchActivity : AppCompatActivity() {
 

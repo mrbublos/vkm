@@ -21,12 +21,20 @@ open class MusicService {
 
     open fun getUserPlaylist(activity: SearchActivity, name: String, filter: String = ""): List<Composition> {
         val params = mutableListOf(
-                "v" to "5.62",
+                "v" to "5.68",
                 "lang" to "en",
                 "https" to "1",
-                "owner_id" to name)
+                "owner_id" to name,
+                "count" to "200",
+                "extended" to "1",
+                "shuffle" to "0")
         callApi(true,"audio.get", params) { result ->
-            val items = result?.get("response") as JsonArray<Any?>
+            if (result == null) {
+                activity.setCompositionsList(listOf())
+                return@callApi
+            }
+
+            val items = result["response"] as JsonArray<*>
             val compositions = items.filter {
                 it is JsonObject
             }.map {
@@ -62,6 +70,11 @@ open class MusicService {
     open fun getGroups(activity: SearchActivity, filter: String = "") {
         // TODO paging, error handling
         callApi("groups.search", mutableListOf("q" to filter, "fields" to "photo_50")) { result ->
+            if (result == null) {
+                activity.setGroupList(listOf())
+                return@callApi
+            }
+
             val items = result?.get("response") as JsonArray<Any?>
             val groups = items.filter {
                 it is JsonObject
@@ -79,7 +92,11 @@ open class MusicService {
     open fun getUsers(activity: SearchActivity, filter: String = "") {
         // TODO add paging, error handling
         callApi("users.search", mutableListOf("q" to filter, "fields" to "photo_50, has_photo")) { result ->
-            if (result == null) { return@callApi }
+            if (result == null) {
+                activity.setUserList(listOf())
+                return@callApi
+            }
+
             val items = result?.get("response") as JsonArray<Any?>
             val users = items.filter {
                 it is JsonObject
@@ -115,26 +132,47 @@ open class MusicService {
 }
 
 class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private val addSignature: Boolean = false): AsyncTask<Pair<String, MutableList<Pair<String, String>>>, Int, JsonObject?>() {
-    private val apiUrl = "https://api.vk.com"
-    private val userAgent = "VKAndroidApp/4.13-1182 (Android 6.0; SDK 23; x86; Google Nexus 5X; en)"
+    private val _apiUrl = "https://api.vk.com"
+    private val _userAgent = "VKAndroidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
+    private var _params: MutableList<Pair<String, String>> = mutableListOf()
+    private var _method: String = ""
 
     override fun doInBackground(vararg input: Pair<String, MutableList<Pair<String, String>>>): JsonObject? {
         val parameters = input[0].component2()
         parameters.add(Pair("access_token", SecurityService.vkAccessToken!!))
-        val path = "/method/${input[0].component1()}"
+        _method = input[0].component1()
+        val path = "/method/$_method"
         if (addSignature) { addSignature(path, parameters) }
 
-        val httpGet = "$apiUrl$path".httpGet(parameters)
-        httpGet.httpHeaders.put("User-Agent", userAgent)
+        _params.addAll(parameters)
+
+
+        val httpGet = "$_apiUrl$path".httpGet(parameters)
+        httpGet.httpHeaders.put("User-Agent", _userAgent)
+        Log.v("vkAPI",  "Sending request " + httpGet.cUrlString())
         val (req, resp, result) = httpGet.responseString()
-        if (result.component1() != null) {
-            Log.v("", result.component1())
-        }
+        Log.v("vkAPI", "Response received " + result?.component1())
         return result.component1()?.toJson()
     }
 
     override fun onPostExecute(result: JsonObject?) {
-        callback.invoke(result)
+        when (result?.containsKey("error")) {
+            false -> callback.invoke(result)
+            else -> {
+                if ((result?.get("error") as JsonObject)["error_code"] == 25 && _method != "auth.refreshToken") {
+                    // token confirmation required
+                    VkApiCallTask({
+                        SecurityService.vkAccessToken = (it!!["response"] as JsonObject)["token"] as String
+                        // repeating the call
+                        VkApiCallTask(callback, addSignature).execute(_method to _params)
+                    }, false).execute("auth.refreshToken" to mutableListOf("v" to "5.68",
+                            "receipt" to ""))
+                } else {
+                    Log.e("vkAPI", "Received an error " + (result["error"] as JsonObject)["error_msg"])
+                    callback.invoke(null)
+                }
+            }
+        }
     }
 
     private fun addSignature(path: String, params: MutableList<Pair<String, String>>) {

@@ -1,8 +1,10 @@
 package vkm.vkm
 
 import android.content.Context
+import android.util.Log
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
+import com.google.android.c2dm.C2DMBaseReceiver
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -10,12 +12,13 @@ import java.util.*
 
 object SecurityService {
 
-    var user: User? = null
-
     val appId = "2274003"
     val appSecret = "hHbZxrka2uZ6jB1inYsH"
+    val name = "mydata.properties"
+
     var vkAccessToken: String? = null
     var context: Context? = null
+    var user: User? = null
 
     fun isLoggedIn(defaultToken: String?): Boolean {
         loadAccessToken()
@@ -49,6 +52,8 @@ object SecurityService {
                 vkAccessToken = res.component1()?.toJson()?.string("access_token")
                 dumpAccessToken()
                 resultString = "ok"
+            } else {
+                Log.e("vkm", res.component2().toString())
             }
         }
 
@@ -56,7 +61,6 @@ object SecurityService {
     }
 
     fun dumpAccessToken() {
-        val name = "mydata.properties"
         val settingsFile = File(context?.filesDir, name)
         val settings = Properties()
         if (settingsFile.exists()) { settings.load(FileInputStream(settingsFile)) }
@@ -66,12 +70,16 @@ object SecurityService {
     }
 
     private fun loadAccessToken() {
-        val name = "mydata.properties"
         val settingsFile = File(context?.filesDir, name)
         if (!settingsFile.exists()) { return }
 
         val settings = Properties()
         settings.load(FileInputStream(settingsFile))
         vkAccessToken = settings.getProperty("vkAccessToken")
+    }
+
+    fun clearAll() {
+        val settingsFile = File(context?.filesDir, name)
+        if (settingsFile.exists()) { settingsFile.delete() }
     }
 }
