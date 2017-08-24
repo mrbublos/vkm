@@ -139,9 +139,7 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
     private fun addSignature(path: String, params: MutableList<Pair<String, String>>) {
         val string = path + "?" + params.joinToString("&") { "${it.first}=${it.second}" } + SecurityService.appSecret
         Log.v("", "Signature string " + string)
-        val md = MessageDigest.getInstance("MD5")
-        val md5String = md.digest(string.toByteArray(StandardCharsets.UTF_8)).toHexString()
-        params.add("sig" to md5String)
-        Log.v("vkAPI", "Signature is " + md5String)
+        params.add("sig" to string.md5())
+        Log.v("vkAPI", "Signature is " + string.md5())
     }
 }
