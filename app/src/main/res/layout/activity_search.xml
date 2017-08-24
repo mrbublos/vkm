@@ -59,6 +59,7 @@
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="20dp"
+                android:layout_marginStart="5dp"
                 app:layout_constraintStart_toEndOf="@id/selected_user_photo"
                 app:layout_constraintEnd_toStartOf="@id/deselect_user_button"
                 app:layout_constraintTop_toTopOf="parent"
@@ -71,6 +72,7 @@
                 android:layout_width="0dp"
                 android:layout_height="20dp"
                 android:minWidth="100dp"
+                android:layout_marginStart="5dp"
                 app:layout_constraintStart_toEndOf="@id/selected_user_photo"
                 app:layout_constraintEnd_toStartOf="@id/deselect_user_button"
                 app:layout_constraintBottom_toBottomOf="parent"

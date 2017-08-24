@@ -26,11 +26,11 @@
         </activity>
         <activity
                 android:name=".SearchActivity"
-                android:label="@string/title_activity_main">
+                android:label="@string/search_activity_title">
         </activity>
         <activity
                 android:name=".HistoryActivity"
-                android:label="@string/title_activity_main">
+                android:label="@string/history_activity_title">
         </activity>
 
     </application>

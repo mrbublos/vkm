@@ -15,4 +15,9 @@
     <string name="login_hint">Login</string>
     <string name="empty_password_login">Login or password cannot be empty</string>
     <string name="login_button">Login</string>
+    <string name="search_activity_title">Search for music</string>
+    <string name="history_activity_title">History</string>
+
+    <!--colors-->
+    <color name="white">#FFFFFF</color>
 </resources>
