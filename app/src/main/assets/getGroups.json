@@ -9,6 +9,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c639817/v639817528/12f62/jA8vMWeGTUs.jpg",
       "photo_medium": "https://pp.userapi.com/c639817/v639817528/12f61/hJEh8WoyWyc.jpg",
       "photo_big": "https://pp.userapi.com/c639817/v639817528/12f5f/yrubRiRUDw8.jpg"
@@ -21,6 +22,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c639128/v639128757/24cac/DGSKOBENWtY.jpg",
       "photo_medium": "https://pp.userapi.com/c639128/v639128757/24cab/c_Xwy4MbS80.jpg",
       "photo_big": "https://pp.userapi.com/c639128/v639128757/24caa/vNeYC2Hb-o0.jpg"
@@ -33,6 +35,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c639329/v639329851/43d22/wkdSl3R_c5Y.jpg",
       "photo_medium": "https://pp.userapi.com/c639329/v639329851/43d21/kG9tgcUGoJA.jpg",
       "photo_big": "https://pp.userapi.com/c639329/v639329851/43d20/upOLomsdDR0.jpg"
@@ -45,6 +48,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c836435/v836435785/23cca/FnzwnICeeJ0.jpg",
       "photo_medium": "https://pp.userapi.com/c836435/v836435785/23cc9/SYJcYYPkjsI.jpg",
       "photo_big": "https://pp.userapi.com/c836435/v836435785/23cc7/GorflIw-dDs.jpg"
@@ -57,6 +61,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c836138/v836138505/48277/hs8Xd9zAYGo.jpg",
       "photo_medium": "https://pp.userapi.com/c836138/v836138505/48276/3yaDr9kg1Ac.jpg",
       "photo_big": "https://pp.userapi.com/c836138/v836138505/48274/zpW_0KOAvvI.jpg"
@@ -69,6 +74,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c604630/v604630192/2801b/VJDeJWIBvGY.jpg",
       "photo_medium": "https://pp.userapi.com/c604630/v604630192/2801a/PNDnDb-y22g.jpg",
       "photo_big": "https://pp.userapi.com/c604630/v604630192/28018/3nwMmwxfhYg.jpg"
@@ -81,6 +87,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c639229/v639229229/50a1/CazRgUPslEU.jpg",
       "photo_medium": "https://pp.userapi.com/c639229/v639229229/50a0/680tFypobGY.jpg",
       "photo_big": "https://pp.userapi.com/c639229/v639229229/509f/kmllAzOdePU.jpg"
@@ -93,6 +100,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c841224/v841224046/13a45/ENMbYQmzKus.jpg",
       "photo_medium": "https://pp.userapi.com/c841224/v841224046/13a44/-WupGieP8Cw.jpg",
       "photo_big": "https://pp.userapi.com/c841224/v841224046/13a43/vvVr81YeZjw.jpg"
@@ -105,6 +113,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c639531/v639531782/269b/mtngfetOt58.jpg",
       "photo_medium": "https://pp.userapi.com/c639531/v639531782/269a/lReQq96NNNs.jpg",
       "photo_big": "https://pp.userapi.com/c639531/v639531782/2699/uwJNQzOBvso.jpg"
@@ -117,6 +126,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c637229/v637229388/61605/m0kAUgJB368.jpg",
       "photo_medium": "https://pp.userapi.com/c637229/v637229388/61604/u3te47ZJniY.jpg",
       "photo_big": "https://pp.userapi.com/c637229/v637229388/61603/fDJ4332DlxE.jpg"
@@ -129,6 +139,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c637416/v637416814/3cbd9/6YPXEagbZCk.jpg",
       "photo_medium": "https://pp.userapi.com/c637416/v637416814/3cbd8/mah4B7NjCKs.jpg",
       "photo_big": "https://pp.userapi.com/c637416/v637416814/3cbd7/pYqQCFI9DkA.jpg"
@@ -141,6 +152,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c604330/v604330639/4818c/B1fWACLH-VE.jpg",
       "photo_medium": "https://pp.userapi.com/c604330/v604330639/4818b/sD3b6BZHHVM.jpg",
       "photo_big": "https://pp.userapi.com/c604330/v604330639/48189/DkPXTW2_3uw.jpg"
@@ -153,6 +165,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c837520/v837520791/39e87/Exc4edWlHWw.jpg",
       "photo_medium": "https://pp.userapi.com/c837520/v837520791/39e86/raxhvEGSuAY.jpg",
       "photo_big": "https://pp.userapi.com/c837520/v837520791/39e85/z5lxuBZwJn8.jpg"
@@ -165,6 +178,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c626731/v626731082/3c6a4/gSUFaDvV2Ro.jpg",
       "photo_medium": "https://pp.userapi.com/c626731/v626731082/3c6a3/vUbTqOh1f-U.jpg",
       "photo_big": "https://pp.userapi.com/c626731/v626731082/3c6a2/vd1jfTalOZ4.jpg"
@@ -177,6 +191,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c630420/v630420655/2f171/LkDXynIe-ds.jpg",
       "photo_medium": "https://pp.userapi.com/c630420/v630420655/2f170/SnC59HtAD5I.jpg",
       "photo_big": "https://pp.userapi.com/c630420/v630420655/2f16f/7qbHqyibrwA.jpg"
@@ -189,6 +204,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c836720/v836720948/15c56/kM0eqhgbzb8.jpg",
       "photo_medium": "https://pp.userapi.com/c836720/v836720948/15c55/WaThmdVN3tw.jpg",
       "photo_big": "https://pp.userapi.com/c836720/v836720948/15c50/zoGLhLkbTcQ.jpg"
@@ -201,6 +217,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c840027/v840027778/1cb8c/S6yZYGSKxw8.jpg",
       "photo_medium": "https://pp.userapi.com/c840027/v840027778/1cb8b/crVbQ-lfkN0.jpg",
       "photo_big": "https://pp.userapi.com/c840027/v840027778/1cb8a/P7lxq1ruENc.jpg"
@@ -213,6 +230,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c638328/v638328478/34d24/WwnI4Wom69w.jpg",
       "photo_medium": "https://pp.userapi.com/c638328/v638328478/34d23/hI7WmBAmgKg.jpg",
       "photo_big": "https://pp.userapi.com/c638328/v638328478/34d22/qLBpOE2rs18.jpg"
@@ -225,6 +243,7 @@
       "type": "page",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c629221/v629221852/4bfb3/XXCpxJ4xj3s.jpg",
       "photo_medium": "https://pp.userapi.com/c629221/v629221852/4bfb2/9SNAC9g-qM8.jpg",
       "photo_big": "https://pp.userapi.com/c629221/v629221852/4bfb1/hUTD4qD4saY.jpg"
@@ -237,6 +256,7 @@
       "type": "group",
       "is_admin": 0,
       "is_member": 0,
+      "has_photo": 1,
       "photo": "https://pp.userapi.com/c637317/v637317841/36d25/0JywYF3_LMs.jpg",
       "photo_medium": "https://pp.userapi.com/c637317/v637317841/36d24/2DySwNRnlGQ.jpg",
       "photo_big": "https://pp.userapi.com/c637317/v637317841/36d23/GttFo4R2WKM.jpg"

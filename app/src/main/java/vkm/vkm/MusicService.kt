@@ -25,8 +25,8 @@ open class MusicService {
         getMock().getUserPlaylist(activity, userId)
     }
 
-    open fun getGroupPlaylist(activity: SearchActivity, groupId: String?, filter: String = ""): List<Composition> {
-        return listOf()
+    open fun getGroupPlaylist(activity: SearchActivity, groupId: String?, filter: String = "") {
+        getMock().getGroupPlaylist(activity, groupId)
     }
 
     open fun getDownloaded(filter: String = ""): List<Composition> {
@@ -43,18 +43,22 @@ open class MusicService {
 
     open fun getGroups(activity: SearchActivity, filter: String = "") {
         // TODO paging, error handling
-//        callApi("groups.search", mutableListOf("q" to filter, "fields" to "photo_50"), VkParsers(activity).parseGroupList)
+        val params = mutableListOf("q" to filter, "fields" to "has_photo", "count" to "20")
+//        callApi("groups.search", params, VkParsers(activity).parseGroupList)
         getMock().getGroups(activity)
     }
 
     open fun getUsers(activity: SearchActivity, filter: String = "") {
         // TODO add paging, error handling
-//        callApi("users.search", mutableListOf("q" to filter, "fields" to "photo_50, has_photo"), VkParsers(activity).parseUserList)
+        val params = mutableListOf("q" to filter, "fields" to "photo_50, has_photo", "count" to "20")
+//        callApi("users.search", params, VkParsers(activity).parseUserList)
         getMock().getUsers(activity)
     }
 
     open fun getCompositions(activity: SearchActivity, filter: String = "") {
-        callApi("audio.search", mutableListOf("q" to filter, "fields" to "photo_50, has_photo"), VkParsers(activity).parseUserList)
+        val params = mutableListOf("q" to filter, "fields" to "photo, has_photo", "sort" to "2", "count" to "100")
+//        callApi(true, "audio.search", params, VkParsers(activity).parseCompositionList)
+        getMock().getCompositions(activity, filter)
     }
 
     fun getMock(): MusicServiceMock {
@@ -73,12 +77,15 @@ open class MusicService {
 
 class MusicServiceMock : MusicService() {
     override fun getUserPlaylist(activity: SearchActivity, userId: String, filter: String) {
-        val mock = activity.assets.open("getUserPlayList.json").toString()
+        Log.v("vkMOCK", "Running getUserPlaylistMock")
+        val mock = activity.assets.open("getUserPlayList.json").readAll()
         VkParsers(activity).parseUserPlaylist.invoke(mock.toJson())
     }
 
-    override fun getGroupPlaylist(activity: SearchActivity, groupId: String?, filter: String): List<Composition> {
-        return getMockCompositionList("group playlist ").filter { it.name.contains(filter) || it.artist.contains(filter) }
+    override fun getGroupPlaylist(activity: SearchActivity, groupId: String?, filter: String) {
+        Log.v("vkMOCK", "Running getGroupPlaylist")
+        val mock = activity.assets.open("getUserPlayList.json").readAll()
+        VkParsers(activity).parseUserPlaylist.invoke(mock.toJson())
     }
 
     override fun getDownloaded(filter: String): List<Composition> {
@@ -94,17 +101,21 @@ class MusicServiceMock : MusicService() {
     }
 
     override fun getGroups(activity: SearchActivity, filter: String) {
-        val mock = activity.assets.open("getGroups.json").toString()
+        Log.v("vkMOCK", "Running getGroups")
+        val mock = activity.assets.open("getGroups.json").readAll()
         VkParsers(activity).parseGroupList.invoke(mock.toJson())
     }
 
     override fun getUsers(activity: SearchActivity, filter: String) {
-        val mock = activity.assets.open("getUsers.json").toString()
+        Log.v("vkMOCK", "Running getUsers")
+        val mock = activity.assets.open("getUsers.json").readAll()
         VkParsers(activity).parseUserList.invoke(mock.toJson())
     }
 
     override fun getCompositions(activity: SearchActivity, filter: String) {
-        return activity.setCompositionsList(getMockCompositionList("compositions ").filter { it.name.contains(filter) || it.artist.contains(filter) })
+        Log.v("vkMOCK", "Running getCompositions")
+        val mock = activity.assets.open("getCompositionList.json").readAll()
+        VkParsers(activity).parseCompositionList.invoke(mock.toJson())
     }
 
     private fun getMockCompositionList(id: String = ""): List<Composition> {

@@ -54,16 +54,16 @@ class SearchActivity : AppCompatActivity() {
         initializeButton()
 
         // temp call for debugging
-        musicService.getUserPlaylist(this, "6")
+        musicService.getCompositions(this, "linkin")
     }
 
-    fun initializeElements() {
+    private fun initializeElements() {
         // hiding selected user container
         selectedUserContainer.visibility = View.GONE
         loadingSpinner.visibility = View.GONE
     }
 
-    fun initializeTabs() {
+    private fun initializeTabs() {
         // TODO consider switching to tabLayout
         tabHost.setup()
 
@@ -85,7 +85,7 @@ class SearchActivity : AppCompatActivity() {
         tabHost.setCurrentTabByTag("composition")
     }
 
-    fun initializeButton() {
+    private fun initializeButton() {
         lockUnlockScreen(false)
         button.setOnTouchListener { _, event ->
             filterText = textContainer.text.toString()
@@ -100,7 +100,7 @@ class SearchActivity : AppCompatActivity() {
                     musicService.getUsers(this, filterText)
                 }
                 "group" -> if (selectedGroup != null) {
-                    musicService.getGroupPlaylist(this, filterText!!)
+                    musicService.getGroupPlaylist(this, filterText)
                 } else {
                     musicService.getGroups(this, filterText)
                 }
@@ -130,7 +130,7 @@ class SearchActivity : AppCompatActivity() {
         compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, data)
     }
 
-    val selectUserOrGroup = { newSelectedElement: User? ->
+    private val selectUserOrGroup = { newSelectedElement: User? ->
         when (tabHost.currentTabTag) {
             "user" -> {
                 selectedUser = newSelectedElement
@@ -158,11 +158,6 @@ class SearchActivity : AppCompatActivity() {
 
             selectedUserButton.setOnTouchListener { _, event ->
                 selectedUserContainer.visibility = View.GONE
-
-                // hiding User and Group tabs
-                tabHost.getChildAt(0).visibility = View.VISIBLE
-                tabHost.getChildAt(1).visibility = View.VISIBLE
-
                 return@setOnTouchListener super.onTouchEvent(event)
             }
         }
@@ -173,7 +168,7 @@ class SearchActivity : AppCompatActivity() {
         return super.onTouchEvent(event)
     }
 
-    fun lockUnlockScreen(lock: Boolean) {
+    private fun lockUnlockScreen(lock: Boolean) {
         textContainer.isFocusable = !lock
         textContainer.isClickable = !lock
         button.isFocusable = !lock

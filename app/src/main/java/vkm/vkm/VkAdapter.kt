@@ -42,7 +42,7 @@ class VkParsers(private val activity: SearchActivity) {
                 val group = it as JsonObject
                 val newGroup = User(userId = "" + group.int("gid")!!,
                         fullname = group.string("name")!!,
-                        photoUrl = group.string("photo_50")!!)
+                        photoUrl = group.string("photo")!!)
                 newGroup
             }
             activity.setGroupList(groups)
@@ -58,9 +58,29 @@ class VkParsers(private val activity: SearchActivity) {
                 it is JsonObject
             }.map {
                 val composition = it as JsonObject
-                val compositionObject = Composition(id = "" + composition.int("aid")!!,
+                val compositionObject = Composition(id = "" + composition.int("id")!!,
                         name = composition.string("title")!!,
-                        ownerId = composition.string("owner_id")!!,
+                        ownerId = "" + composition.int("owner_id")!!,
+                        artist = composition.string("artist")!!,
+                        url = composition.string("url")!!)
+                compositionObject
+            }
+            activity.setCompositionsList(compositions)
+        }
+    }
+
+    val parseCompositionList = { result: JsonObject? ->
+        if (result == null) {
+            activity.setCompositionsList(listOf())
+        } else {
+            val items = (result["response"] as JsonObject)["items"] as JsonArray<*>
+            val compositions = items.filter {
+                it is JsonObject
+            }.map {
+                val composition = it as JsonObject
+                val compositionObject = Composition(id = "" + composition.int("id")!!,
+                        name = composition.string("title")!!,
+                        ownerId = "" + composition.int("owner_id")!!,
                         artist = composition.string("artist")!!,
                         url = composition.string("url")!!)
                 compositionObject
@@ -90,7 +110,7 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
         val httpGet = "$_apiUrl$path".httpGet(parameters)
         httpGet.httpHeaders.put("User-Agent", _userAgent)
         Log.v("vkAPI",  "Sending request " + httpGet.cUrlString())
-        val (req, resp, result) = httpGet.responseString()
+        val (_, _, result) = httpGet.responseString()
         Log.v("vkAPI", "Response received " + result.component1())
         return result.component1()?.toJson()
     }
@@ -103,6 +123,7 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
                     // token confirmation required, refreshing token
                     VkApiCallTask({ refreshTokenResult ->
                         SecurityService.vkAccessToken = (refreshTokenResult!!["response"] as JsonObject)["token"] as String
+
                         // repeating the call
                         VkApiCallTask(callback, addSignature, 1).execute(_method to _params)
                     }, false).execute("auth.refreshToken" to mutableListOf("v" to "5.68",

@@ -55,7 +55,7 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
 
     override fun onPostExecute(result: Pair<ImageView, User>) {
         val (view, user) = result
-        view.setImageBitmap(user.photo)
+        user.photo?.let { view.setImageBitmap(user.photo) }
         Log.v(this.toString(), "Bitmap set")
     }
 
@@ -67,25 +67,27 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
             return Pair(input[1] as ImageView, user)
         }
 
-        val _url = URL(user.photoUrl)
-        Log.v(this.toString(), "Starting download $_url")
-        val connection = _url.openConnection()
-        connection.connect()
+        user.photoUrl?.let {
+            val _url = URL(user.photoUrl)
+            Log.v(this.toString(), "Starting download $_url")
+            val connection = _url.openConnection()
+            connection.connect()
 
-        val out = ByteArrayOutputStream()
+            val out = ByteArrayOutputStream()
 
-        try {
-            BufferedInputStream(_url.openStream()).copyTo(out)
-            user.photo = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
-            cache.put(user.photoUrl, user.photo as Bitmap)
-            if (cache.size > limit) {
-                cache.remove(cache.keys.any() as String)
+            try {
+                BufferedInputStream(_url.openStream()).copyTo(out)
+                user.photo = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
+                cache.put(user.photoUrl, user.photo as Bitmap)
+                if (cache.size > limit) {
+                    cache.remove(cache.keys.any() as String)
+                }
+            } catch(e: Exception) {
+                Log.e(this.toString(), "Error downloading image", e)
             }
-        } catch(e: Exception) {
-            Log.e(this.toString(), "Error downloading image", e)
-        }
 
-        Log.v(this.toString(), "Download finished $_url")
+            Log.v(this.toString(), "Download finished $_url")
+        }
         return Pair(input[1] as ImageView, user)
     }
 }

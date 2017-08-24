@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
-import com.google.android.c2dm.C2DMBaseReceiver
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -17,6 +16,11 @@ object SecurityService {
     val name = "mydata.properties"
 
     var vkAccessToken: String? = null
+        set(value) {
+            field = value
+            value?.let { dumpAccessToken() }
+        }
+
     var context: Context? = null
     var user: User? = null
 
