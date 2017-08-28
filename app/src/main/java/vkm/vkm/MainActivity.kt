@@ -9,7 +9,7 @@ import android.Manifest.permission
 import android.Manifest.permission.WRITE_CALENDAR
 import android.content.pm.PackageManager
 import android.support.v4.content.ContextCompat
-
+import android.util.Log
 
 
 class MainActivity : AppCompatActivity() {
@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.v("vkm", "Dumping all lists")
         DownloadManager.stopDownload("")
         DownloadManager.dumpAll()
     }

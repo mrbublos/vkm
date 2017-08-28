@@ -139,6 +139,7 @@ object DownloadManager {
 
             val dest = dir.resolve("${composition.artist}-${composition.name}.mp3")
             if (dest.exists()) {
+                Log.v("vkm", "File already exists, skipping download")
                 downloaded(composition)
                 return null
             }
