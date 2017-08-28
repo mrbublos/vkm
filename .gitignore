@@ -54,3 +54,7 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+libs/
+proguard-rules.pro
+src/main/assets/myprops.properties
+src/test/

@@ -50,9 +50,15 @@ class HistoryActivity : AppCompatActivity() {
 
     fun handleTabSwitch(tabId: String) {
         when (tabId) {
-            "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getMock().getDownloaded())
-            "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getMock().getInProgress())
-            "inProgress" -> inProgressList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getMock().getInProgress())
+            "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getDownloaded())
+            "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getInProgress(), removeFromQueue)
+            "inProgress" -> inProgressList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getInProgress())
+        }
+    }
+
+    private val removeFromQueue = { composition: Composition? ->
+        composition?.let {
+            DownloadManager.removeFromQueue(composition)
         }
     }
 

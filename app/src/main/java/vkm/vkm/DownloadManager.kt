@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicReference
 
 object DownloadManager {
 
+    // TODO this should be a background service
+
     val _downloadedList = ConcurrentLinkedQueue<Composition>()
     val _inProgress = ConcurrentLinkedQueue<Composition>()
     val _queue = ConcurrentLinkedQueue<Composition>()
@@ -48,6 +50,10 @@ object DownloadManager {
 
     fun getInProgress(): List<Composition> {
         return _inProgress.mapNotNull { it }
+    }
+
+    fun removeFromQueue(composition: Composition) {
+        _queue.removeIf { it.id == composition.id }
     }
 
     fun dumpList(name: ListType, data: List<Composition> = listOf()) {

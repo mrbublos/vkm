@@ -14,6 +14,7 @@ object SecurityService {
     val appId = "2274003"
     val appSecret = "hHbZxrka2uZ6jB1inYsH"
     val name = "mydata.properties"
+    var receipt = ""
 
     var vkAccessToken: String? = null
         set(value) {
@@ -24,7 +25,7 @@ object SecurityService {
     var context: Context? = null
     var user: User? = null
 
-    fun isLoggedIn(defaultToken: String?): Boolean {
+    fun isLoggedIn(defaultToken: String? = null): Boolean {
         loadAccessToken()
         vkAccessToken = vkAccessToken ?: defaultToken
         return vkAccessToken != null

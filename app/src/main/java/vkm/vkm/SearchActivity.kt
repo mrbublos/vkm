@@ -7,14 +7,10 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
-import com.github.kittinunf.fuel.core.FuelManager
 import vkm.vkm.utils.AsyncPhotoDownloader
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.SwipeManager
 import vkm.vkm.utils.UserListAdapter
-import java.net.InetSocketAddress
-import java.net.Proxy
-import java.net.SocketAddress
 
 class SearchActivity : AppCompatActivity() {
 
@@ -95,12 +91,12 @@ class SearchActivity : AppCompatActivity() {
 
             when (tabHost.currentTabTag) {
                 "user" -> if (selectedUser != null) {
-                    musicService.getUserPlaylist(this, selectedUser?.userId!!)
+                    musicService.getPlaylist(this, selectedUser, filterText)
                 } else {
                     musicService.getUsers(this, filterText)
                 }
                 "group" -> if (selectedGroup != null) {
-                    musicService.getGroupPlaylist(this, filterText)
+                    musicService.getPlaylist(this, selectedGroup, filterText)
                 } else {
                     musicService.getGroups(this, filterText)
                 }
@@ -134,11 +130,11 @@ class SearchActivity : AppCompatActivity() {
         when (tabHost.currentTabTag) {
             "user" -> {
                 selectedUser = newSelectedElement
-                musicService.getUserPlaylist(this, selectedUser?.userId!!)
+                musicService.getPlaylist(this, selectedUser, filterText)
             }
             "group" -> {
                 selectedGroup = newSelectedElement
-                musicService.getGroupPlaylist(this, selectedGroup?.userId!!)
+                musicService.getPlaylist(this, selectedGroup, filterText)
             }
         }
 

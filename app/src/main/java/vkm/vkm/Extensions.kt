@@ -48,7 +48,7 @@ fun String.md5(charset: Charset = StandardCharsets.UTF_8): String {
 }
 
 fun InputStream.readAll(charset: Charset = StandardCharsets.UTF_8): String {
-    return this.bufferedReader(charset).use { it.readText() }
+    return this.use { it.bufferedReader(charset).use { it.readText() } }
 }
 
 fun Composition.serialize(): String {

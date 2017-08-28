@@ -7,8 +7,6 @@ import com.beust.klaxon.JsonObject
 import com.beust.klaxon.int
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 
 class VkParsers(private val activity: SearchActivity) {
     val parseUserList = { result: JsonObject? ->
@@ -42,6 +40,7 @@ class VkParsers(private val activity: SearchActivity) {
                 val group = it as JsonObject
                 val newGroup = User(userId = "" + group.int("gid")!!,
                         fullname = group.string("name")!!,
+                        isGroup = true,
                         photoUrl = group.string("photo")!!)
                 newGroup
             }
@@ -49,7 +48,7 @@ class VkParsers(private val activity: SearchActivity) {
         }
     }
 
-    val parseUserPlaylist = { result: JsonObject? ->
+    val parsePlaylist = { result: JsonObject? ->
         if (result == null) {
             activity.setCompositionsList(listOf())
         } else {
@@ -102,7 +101,7 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
         _method = input[0].component1()
         val path = "/method/$_method"
 
-        parameters.add(Pair("access_token", SecurityService.vkAccessToken!!))
+        parameters.add("access_token" to SecurityService.vkAccessToken!!)
 
         // should be the last computed parameter
         if (addSignature) { addSignature(path, parameters) }
@@ -126,8 +125,8 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
 
                         // repeating the call
                         VkApiCallTask(callback, addSignature, 1).execute(_method to _params)
-                    }, false).execute("auth.refreshToken" to mutableListOf("v" to "5.68",
-                            "receipt" to ""))
+                    }).execute("auth.refreshToken" to mutableListOf("v" to "5.68",
+                            "receipt" to SecurityService.receipt))
                 } else {
                     Log.e("vkAPI", "Received an error " + (result["error"] as JsonObject)["error_msg"])
                     callback.invoke(null)

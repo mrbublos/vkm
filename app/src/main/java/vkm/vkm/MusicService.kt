@@ -12,33 +12,31 @@ open class MusicService {
         Log.i(MainActivity.TAG, "MusicService Started")
     }
 
-    open fun getUserPlaylist(activity: SearchActivity, userId: String, filter: String = "") {
+    open fun getPlaylist(activity: SearchActivity, userOrGroup: User?, filter: String = "") {
+        if (userOrGroup == null) { return }
+        val prefix = if (userOrGroup.isGroup) "-" else ""
         val params = mutableListOf(
                 "v" to "5.68",
                 "lang" to "en",
                 "https" to "1",
-                "owner_id" to userId,
+                "owner_id" to prefix + userOrGroup.userId,
                 "count" to "200",
                 "extended" to "1",
                 "shuffle" to "0")
-//        callApi(true,"audio.get", params, VkParsers(activity).parseUserPlaylist)
-        getMock().getUserPlaylist(activity, userId)
-    }
-
-    open fun getGroupPlaylist(activity: SearchActivity, groupId: String?, filter: String = "") {
-        getMock().getGroupPlaylist(activity, groupId)
+//        callApi(true,"audio.get", params, VkParsers(activity).parsePlaylist)
+        getMock().getPlaylist(activity, userOrGroup)
     }
 
     open fun getDownloaded(filter: String = ""): List<Composition> {
-        return listOf(Composition()).filter { it.name.contains(filter) || it.artist.contains(filter) }
+        return DownloadManager.getDownloaded().filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
     open fun getInProgress(filter: String = ""): List<Composition> {
-        return listOf(Composition()).filter { it.name.contains(filter) || it.artist.contains(filter) }
+        return DownloadManager.getInProgress().filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
     open fun getInQueue(filter: String = ""): List<Composition> {
-        return listOf(Composition()).filter { it.name.contains(filter) || it.artist.contains(filter) }
+        return DownloadManager.getQueue().filter { it.name.contains(filter) || it.artist.contains(filter) }
     }
 
     open fun getGroups(activity: SearchActivity, filter: String = "") {
@@ -56,7 +54,13 @@ open class MusicService {
     }
 
     open fun getCompositions(activity: SearchActivity, filter: String = "") {
-        val params = mutableListOf("q" to filter, "fields" to "photo, has_photo", "sort" to "2", "count" to "100")
+        val params = mutableListOf("q" to filter,
+                "count" to "100",
+                "v" to "5.68",
+                "https" to "1",
+                "lang" to "en",
+                "search_own" to "0",
+                "performer_only" to "0")
 //        callApi(true, "audio.search", params, VkParsers(activity).parseCompositionList)
         getMock().getCompositions(activity, filter)
     }
@@ -76,28 +80,10 @@ open class MusicService {
 }
 
 class MusicServiceMock : MusicService() {
-    override fun getUserPlaylist(activity: SearchActivity, userId: String, filter: String) {
+    override fun getPlaylist(activity: SearchActivity, userOrGroup: User?, filter: String) {
         Log.v("vkMOCK", "Running getUserPlaylistMock")
         val mock = activity.assets.open("getUserPlayList.json").readAll()
-        VkParsers(activity).parseUserPlaylist.invoke(mock.toJson())
-    }
-
-    override fun getGroupPlaylist(activity: SearchActivity, groupId: String?, filter: String) {
-        Log.v("vkMOCK", "Running getGroupPlaylist")
-        val mock = activity.assets.open("getUserPlayList.json").readAll()
-        VkParsers(activity).parseUserPlaylist.invoke(mock.toJson())
-    }
-
-    override fun getDownloaded(filter: String): List<Composition> {
-        return getMockCompositionList("downloaded ").filter { it.name.contains(filter) || it.artist.contains(filter) }
-    }
-
-    override fun getInProgress(filter: String): List<Composition> {
-        return getMockCompositionList("inProgress ").filter { it.name.contains(filter) || it.artist.contains(filter) }
-    }
-
-    override fun getInQueue(filter: String): List<Composition> {
-        return getMockCompositionList("inProgress ").filter { it.name.contains(filter) || it.artist.contains(filter) }
+        VkParsers(activity).parsePlaylist.invoke(mock.toJson())
     }
 
     override fun getGroups(activity: SearchActivity, filter: String) {
@@ -116,18 +102,5 @@ class MusicServiceMock : MusicService() {
         Log.v("vkMOCK", "Running getCompositions")
         val mock = activity.assets.open("getCompositionList.json").readAll()
         VkParsers(activity).parseCompositionList.invoke(mock.toJson())
-    }
-
-    private fun getMockCompositionList(id: String = ""): List<Composition> {
-        return listOf(Composition("",id + "name", "url", "artist", 0, "", "1:00"),
-                Composition("",id + "name1", "url", "artist1", 0, "", "1:00"),
-                Composition("",id + "name2", "url", "artist2", 0, "", "1:00"),
-                Composition("",id + "name3", "url", "artist3", 0, "", "1:00"),
-                Composition("",id + "name4", "url", "artist4", 0, "", "1:00"),
-                Composition("",id + "name5", "url", "artist5", 0, "", "1:00"),
-                Composition("",id + "name6", "url", "artist6", 0, "", "1:00"),
-                Composition("",id + "name7", "url", "artist7", 0, "", "1:00"),
-                Composition("",id + "name8", "url", "artist8", 0, "", "1:00"),
-                Composition("",id + "name9", "url", "artist9", 0, "", "1:00"))
     }
 }
