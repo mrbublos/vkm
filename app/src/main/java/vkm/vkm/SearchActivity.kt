@@ -73,12 +73,12 @@ class SearchActivity : AppCompatActivity() {
         tabSpec.setContent(R.id.tab2)
         tabHost.addTab(tabSpec)
 
-        tabSpec = tabHost.newTabSpec("composition")
+        tabSpec = tabHost.newTabSpec("tracks")
         tabSpec.setIndicator(getString(R.string.tab_composition))
         tabSpec.setContent(R.id.tab3)
         tabHost.addTab(tabSpec)
 
-        tabHost.setCurrentTabByTag("composition")
+        tabHost.setCurrentTabByTag("tracks")
     }
 
     private fun initializeButton() {
@@ -100,7 +100,7 @@ class SearchActivity : AppCompatActivity() {
                 } else {
                     musicService.getGroups(this, filterText)
                 }
-                "composition" -> musicService.getCompositions(this, filterText)
+                "tracks" -> musicService.getCompositions(this, filterText)
             }
 
             return@setOnTouchListener super.onTouchEvent(event)
@@ -123,7 +123,12 @@ class SearchActivity : AppCompatActivity() {
     fun setCompositionsList(data: List<Composition>) {
         lockUnlockScreen(false)
         loadingSpinner.visibility = View.GONE
-        compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, data)
+        compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, data, elementTouchListener)
+    }
+
+    val elementTouchListener = { composition: Composition, view: View ->
+        DownloadManager.downloadComposition(composition)
+        view.bind<ImageView>(R.id.imageView).setImageDrawable(getDrawable(R.drawable.abc_ic_go_search_api_material))
     }
 
     private val selectUserOrGroup = { newSelectedElement: User? ->

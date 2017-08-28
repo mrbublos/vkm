@@ -76,13 +76,13 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
             val out = ByteArrayOutputStream()
 
             try {
-                BufferedInputStream(_url.openStream()).copyTo(out)
+                _url.openStream().use { it.copyTo(out) }
                 user.photo = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
                 cache.put(user.photoUrl, user.photo as Bitmap)
                 if (cache.size > limit) {
                     cache.remove(cache.keys.any() as String)
                 }
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.e(this.toString(), "Error downloading image", e)
             }
 

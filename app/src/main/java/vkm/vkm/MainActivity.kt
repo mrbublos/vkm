@@ -1,9 +1,16 @@
 package vkm.vkm
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import java.util.*
+import android.Manifest.permission
+import android.Manifest.permission.WRITE_CALENDAR
+import android.content.pm.PackageManager
+import android.support.v4.content.ContextCompat
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,11 +18,22 @@ class MainActivity : AppCompatActivity() {
         val TAG: String = "vkm.vkm"
     }
 
+    val EXTERNAL_STORAGE_WRITE_PERMISSION = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        SecurityService.context = applicationContext
+        // asking for writing permissions
+        val permissionCheck = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            initialize()
+        } else {
+            requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), EXTERNAL_STORAGE_WRITE_PERMISSION)
+        }
+    }
 
+    private fun initialize() {
+        SecurityService.context = applicationContext
         // importing local properties
         try {
             val localProperties = Properties()
@@ -33,7 +51,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        DownloadManager.stopDownload("")
         DownloadManager.dumpAll()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (EXTERNAL_STORAGE_WRITE_PERMISSION == requestCode) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                initialize()
+            } else {
+                finish()
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
     }
 }
 

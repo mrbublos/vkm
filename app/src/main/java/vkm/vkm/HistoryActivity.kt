@@ -3,6 +3,7 @@ package vkm.vkm
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.MotionEvent
+import android.view.View
 import android.widget.ListView
 import android.widget.TabHost
 import vkm.vkm.utils.CompositionListAdapter
@@ -56,9 +57,10 @@ class HistoryActivity : AppCompatActivity() {
         }
     }
 
-    private val removeFromQueue = { composition: Composition? ->
+    private val removeFromQueue = { composition: Composition?, view: View ->
         composition?.let {
             DownloadManager.removeFromQueue(composition)
+            view.visibility = View.GONE
         }
     }
 

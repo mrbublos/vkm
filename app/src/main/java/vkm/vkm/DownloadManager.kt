@@ -2,9 +2,9 @@ package vkm.vkm
 
 import android.content.Context
 import android.os.AsyncTask
+import android.os.Environment
 import android.util.Log
 import vkm.vkm.ListType.*
-import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URL
@@ -89,7 +89,9 @@ object DownloadManager {
     }
 
     fun getDownloadDir(): File {
-        return context?.filesDir!!
+        val destinationDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).resolve("vkm")
+        destinationDir.mkdirs()
+        return destinationDir
     }
 
     // download worker
@@ -97,24 +99,27 @@ object DownloadManager {
     private var currentDownload: AtomicReference<Composition?> = AtomicReference(null)
 
     private fun downloadNext() {
-        val nextDownload = DownloadManager._queue.peek()
-        if (currentDownload.compareAndSet(null, nextDownload)) {
-            DownloadManager._queue.remove(nextDownload)
-            _inProgress.offer(nextDownload)
-            CompositionDownloadTask().execute(nextDownload)
+        _queue.peek()?.let { nextDownload ->
+            if (currentDownload.compareAndSet(null, nextDownload)) {
+                _queue.remove(nextDownload)
+                _inProgress.offer(nextDownload)
+                CompositionDownloadTask().execute(nextDownload)
+            }
         }
     }
 
-    private fun stopDownload(error: String) {
-        val composition = currentDownload.get()
-        _queue.offer(composition)
-        _inProgress.remove(composition)
-        currentDownload.set(null)
-        // TODO error notification
+    fun stopDownload(error: String) {
+        currentDownload.get()?.let { composition ->
+            _queue.offer(composition)
+            _inProgress.remove(composition)
+            currentDownload.set(null)
+            // TODO error notification
+        }
     }
 
     private fun downloaded(composition: Composition) {
         val downloaded = currentDownload.get()
+        Log.v("vkm", "Finished downloading composition " + composition.artist + " " + composition.name)
         if (currentDownload.compareAndSet(composition, null)) {
             _downloadedList.offer(downloaded)
             _inProgress.remove(downloaded)
@@ -131,6 +136,13 @@ object DownloadManager {
         override fun doInBackground(vararg params: Composition): String? {
             val composition = params[0]
             val _url = URL(composition.url)
+
+            val dest = dir.resolve("${composition.artist}-${composition.name}.mp3")
+            if (dest.exists()) {
+                downloaded(composition)
+                return null
+            }
+
             Log.v(this.toString(), "Starting download track $_url")
             val connection = _url.openConnection()
             connection.connect()
@@ -138,16 +150,19 @@ object DownloadManager {
             val out = ByteArrayOutputStream()
 
             try {
-                BufferedInputStream(_url.openStream()).copyTo(out)
+                _url.openStream().use { it.copyTo(out) }
                 val bytes = out.toByteArray()
                 composition.hash = bytes.md5()
                 if (getDownloaded().find { it.hash == composition.hash } != null) { return null }
 
                 if (dir.canWrite() && dir.usableSpace > bytes.size) {
-                    val dest = dir.resolve("${composition.artist}-${composition.name}.mp3")
-                    // TODO check that file not exist already (otherwise it will be overwritten)
-                    dest.writeBytes(bytes)
-                    downloaded(composition)
+                    try {
+                        dest.writeBytes(bytes)
+                        downloaded(composition)
+                    } catch (e: Exception) {
+                        Log.e("vkm", "Error downloading track", e)
+                        return "Error writing file " + e.message
+                    }
                 } else {
                     return "Not enough free space or unable to write to the $dir"
                 }
@@ -159,6 +174,7 @@ object DownloadManager {
 
         override fun onPostExecute(error: String?) {
             error?.let {
+                Log.e("vkm", "Error downloading file " + error)
                 stopDownload(error)
             }
         }
