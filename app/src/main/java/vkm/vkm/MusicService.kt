@@ -3,9 +3,6 @@ package vkm.vkm
 import android.util.Log
 import com.beust.klaxon.JsonObject
 
-/**
- * todo decompile off app and get client_id and key
- */
 open class MusicService {
 
     init {
@@ -23,8 +20,8 @@ open class MusicService {
                 "count" to "200",
                 "extended" to "1",
                 "shuffle" to "0")
-//        callApi(true,"audio.get", params, VkParsers(activity).parsePlaylist)
-        getMock().getPlaylist(activity, userOrGroup)
+        callApi(true,"audio.get", params, VkParsers(activity).parsePlaylist)
+//        getMock().getPlaylist(activity, userOrGroup)
     }
 
     open fun getDownloaded(filter: String = ""): List<Composition> {
@@ -42,15 +39,15 @@ open class MusicService {
     open fun getGroups(activity: SearchActivity, filter: String = "") {
         // TODO paging, error handling
         val params = mutableListOf("q" to filter, "fields" to "has_photo", "count" to "20")
-//        callApi("groups.search", params, VkParsers(activity).parseGroupList)
-        getMock().getGroups(activity)
+        callApi("groups.search", params, VkParsers(activity).parseGroupList)
+//        getMock().getGroups(activity)
     }
 
     open fun getUsers(activity: SearchActivity, filter: String = "") {
         // TODO add paging, error handling
         val params = mutableListOf("q" to filter, "fields" to "photo_50, has_photo", "count" to "20")
-//        callApi("users.search", params, VkParsers(activity).parseUserList)
-        getMock().getUsers(activity)
+        callApi("users.search", params, VkParsers(activity).parseUserList)
+//        getMock().getUsers(activity)
     }
 
     open fun getCompositions(activity: SearchActivity, filter: String = "") {
@@ -61,8 +58,8 @@ open class MusicService {
                 "lang" to "en",
                 "search_own" to "0",
                 "performer_only" to "0")
-//        callApi(true, "audio.search", params, VkParsers(activity).parseCompositionList)
-        getMock().getCompositions(activity, filter)
+        callApi(true, "audio.search", params, VkParsers(activity).parseCompositionList)
+//        getMock().getCompositions(activity, filter)
     }
 
     fun getMock(): MusicServiceMock {

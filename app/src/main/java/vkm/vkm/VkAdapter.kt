@@ -6,7 +6,12 @@ import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.int
 import com.beust.klaxon.string
+import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.SocketAddress
 
 class VkParsers(private val activity: SearchActivity) {
     val parseUserList = { result: JsonObject? ->
@@ -74,7 +79,7 @@ class VkParsers(private val activity: SearchActivity) {
         } else {
             val items = (result["response"] as JsonObject)["items"] as JsonArray<*>
             val compositions = items.filter {
-                it is JsonObject
+                it is JsonObject && !it.string("url")!!.isEmpty()
             }.map {
                 val composition = it as JsonObject
                 val compositionObject = Composition(id = "" + composition.int("id")!!,
@@ -94,6 +99,11 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
     private val _userAgent = "VKAndroidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
     private var _params: MutableList<Pair<String, String>> = mutableListOf()
     private var _method: String = ""
+    private val proxy: Proxy? = Proxy(Proxy.Type.HTTP, InetSocketAddress("213.59.160.50", 3128))
+
+    init {
+        proxy?.let { FuelManager.instance.proxy = proxy }
+    }
 
     override fun doInBackground(vararg input: Pair<String, MutableList<Pair<String, String>>>): JsonObject? {
         val parameters = input[0].component2()
@@ -105,7 +115,6 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
 
         // should be the last computed parameter
         if (addSignature) { addSignature(path, parameters) }
-
         val httpGet = "$_apiUrl$path".httpGet(parameters)
         httpGet.httpHeaders.put("User-Agent", _userAgent)
         Log.v("vkAPI",  "Sending request " + httpGet.cUrlString())

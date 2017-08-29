@@ -2,14 +2,12 @@ package vkm.vkm
 
 import android.Manifest
 import android.content.Intent
-import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import java.util.*
-import android.Manifest.permission
-import android.Manifest.permission.WRITE_CALENDAR
 import android.content.pm.PackageManager
+import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,7 +41,6 @@ class MainActivity : AppCompatActivity() {
 
         if (SecurityService.isLoggedIn()) {
             startActivity(Intent(applicationContext, SearchActivity::class.java))
-            DownloadManager.initialize(applicationContext)
         } else {
             startActivity(Intent(applicationContext, LoginActivity::class.java))
         }
