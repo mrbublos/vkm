@@ -14,12 +14,11 @@ import android.widget.TextView
 import vkm.vkm.R
 import vkm.vkm.User
 import vkm.vkm.bind
-import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 
-class UserListAdapter(context: Context, resource: Int, data: List<User>, var elementTouchListener: (user: User?) -> Unit? = {}) : ArrayAdapter<User>(context, resource, data) {
+class UserListAdapter(context: Context, resource: Int, data: List<User>, private var elementClickListener: (user: User?) -> Unit? = {}) : ArrayAdapter<User>(context, resource, data) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         var view = convertView
@@ -34,9 +33,9 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>, var ele
             view?.bind<TextView>(R.id.user_name)?.text = item.fullname
             view?.bind<TextView>(R.id.user_id)?.text = item.userId
             AsyncPhotoDownloader().execute(item, view?.bind<ImageView>(R.id.user_photo))
-            view?.setOnTouchListener { v, event ->
-                elementTouchListener.invoke(item)
-                return@setOnTouchListener v.onTouchEvent(event)
+            view?.setOnClickListener {
+                elementClickListener.invoke(item)
+                return@setOnClickListener
             }
         }
 

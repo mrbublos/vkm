@@ -53,7 +53,7 @@ object DownloadManager {
     }
 
     fun removeFromQueue(composition: Composition) {
-        _queue.removeIf { it.id == composition.id }
+        _queue.remove(_queue.find { it.id == composition.id })
     }
 
     fun dumpList(name: ListType, data: List<Composition> = listOf()) {

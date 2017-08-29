@@ -8,10 +8,7 @@ import com.beust.klaxon.int
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
-import java.net.InetAddress
-import java.net.InetSocketAddress
 import java.net.Proxy
-import java.net.SocketAddress
 
 class VkParsers(private val activity: SearchActivity) {
     val parseUserList = { result: JsonObject? ->
@@ -99,7 +96,9 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
     private val _userAgent = "VKAndroidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
     private var _params: MutableList<Pair<String, String>> = mutableListOf()
     private var _method: String = ""
-    private val proxy: Proxy? = Proxy(Proxy.Type.HTTP, InetSocketAddress("213.59.160.50", 3128))
+    private val proxyAddress = PropertyContainer.proxies[3]
+//    private val proxy: Proxy? = Proxy(Proxy.Type.HTTP, InetSocketAddress(proxyAddress.first, proxyAddress.second.toInt()))
+    private val proxy: Proxy? = null
 
     init {
         proxy?.let { FuelManager.instance.proxy = proxy }
@@ -127,6 +126,11 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
         when (result?.containsKey("error")) {
             false -> callback.invoke(result)
             else -> {
+                if (result == null) {
+                    callback.invoke(null)
+                    return
+                }
+
                 if ((result?.get("error") as JsonObject)["error_code"] == 25 && _method != "auth.refreshToken" && recursionLevel == 0) {
                     // token confirmation required, refreshing token
                     VkApiCallTask({ refreshTokenResult ->

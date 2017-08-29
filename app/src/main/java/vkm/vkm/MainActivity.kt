@@ -39,6 +39,8 @@ class MainActivity : AppCompatActivity() {
             SecurityService.receipt = localProperties["receipt"] as String
         } catch (e: Exception) {}
 
+        DownloadManager.initialize(applicationContext)
+
         if (SecurityService.isLoggedIn()) {
             startActivity(Intent(applicationContext, SearchActivity::class.java))
         } else {

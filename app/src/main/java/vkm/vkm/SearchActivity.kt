@@ -128,7 +128,7 @@ class SearchActivity : AppCompatActivity() {
 
     val elementTouchListener = { composition: Composition, view: View ->
         DownloadManager.downloadComposition(composition)
-        view.bind<ImageView>(R.id.imageView).setImageDrawable(getDrawable(R.drawable.abc_ic_go_search_api_material))
+        view.bind<ImageView>(R.id.imageView).setImageDrawable(getDrawable(R.drawable.ic_downloading))
     }
 
     private val selectUserOrGroup = { newSelectedElement: User? ->
