@@ -35,8 +35,8 @@ object DownloadManager {
         dumpList(inProgress, getInProgress())
     }
 
-    fun downloadComposition(composition: Composition) {
-        _queue.offer(composition)
+    fun downloadComposition(composition: Composition?) {
+        composition?.let { _queue.offer(composition) }
         downloadNext()
     }
 
@@ -123,14 +123,14 @@ object DownloadManager {
         if (currentDownload.compareAndSet(composition, null)) {
             _downloadedList.offer(downloaded)
             _inProgress.remove(downloaded)
-            currentDownload.set(null)
+            dumpAll()
             downloadNext()
         } else {
             Log.e("vkm", "Parallel download of two tracks, Should not be like this!!!")
         }
     }
 
-    class CompositionDownloadTask: AsyncTask<Composition, Int, String?>() {
+    class CompositionDownloadTask: AsyncTask<Composition, Long, String?>() {
         private val dir = getDownloadDir()
 
         override fun doInBackground(vararg params: Composition): String? {
@@ -151,7 +151,17 @@ object DownloadManager {
             val out = ByteArrayOutputStream()
 
             try {
-                _url.openStream().use { it.copyTo(out) }
+                connection.getInputStream().use {
+                    var bytesCopied: Long = 0
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    var bytes = it.read(buffer)
+                    while (bytes >= 0) {
+                        out.write(buffer, 0, bytes)
+                        bytesCopied += bytes
+                        bytes = it.read(buffer)
+                    }
+                }
+
                 val bytes = out.toByteArray()
                 composition.hash = bytes.md5()
                 if (getDownloaded().find { it.hash == composition.hash } != null) { return null }

@@ -10,7 +10,7 @@ import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import java.net.Proxy
 
-class VkParsers(private val activity: SearchActivity) {
+class VkParsers(private val activity: SearchActivity, removeOldCompositions: Boolean = true) {
     val parseUserList = { result: JsonObject? ->
         if (result == null) {
             activity.setUserList(listOf())
@@ -66,7 +66,8 @@ class VkParsers(private val activity: SearchActivity) {
                         url = composition.string("url")!!)
                 compositionObject
             }
-            activity.setCompositionsList(compositions)
+            activity.totalCompositions = (result["response"] as JsonObject).int("count")!!
+            activity.setCompositionsList(compositions, removeOldCompositions)
         }
     }
 
@@ -87,6 +88,7 @@ class VkParsers(private val activity: SearchActivity) {
                 compositionObject
             }
             activity.setCompositionsList(compositions)
+            activity.totalCompositions = (result["response"] as JsonObject).int("count")!!
         }
     }
 }
@@ -105,6 +107,7 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
     }
 
     override fun doInBackground(vararg input: Pair<String, MutableList<Pair<String, String>>>): JsonObject? {
+        Log.v("vkm", "Starting VkApiCallTask")
         val parameters = input[0].component2()
         _params.addAll(parameters)
         _method = input[0].component1()

@@ -1,7 +1,7 @@
 package vkm.vkm
 
 object PropertyContainer {
-    val useMock = true
+    val useMock = false
     val proxies = listOf("213.59.160.50" to "3128",
             "93.91.112.185" to "80",
             "178.251.142.178" to "8081",

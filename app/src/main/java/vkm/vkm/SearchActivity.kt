@@ -31,14 +31,20 @@ class SearchActivity : AppCompatActivity() {
     val selectedUserId by bind<TextView>(R.id.selected_user_id)
     val selectedUserPhoto by bind<ImageView>(R.id.selected_user_photo)
     val selectedUserButton by bind<ImageView>(R.id.deselect_user_button)
+    val selectedUserDownloadAllButton by bind<ImageView>(R.id.download_all_user_button)
 
     // services
     val musicService = MusicService()
 
     // private vars
     var filterText: String = ""
-    var selectedUser: User? = null
+    var selectedElement: User? = null
     var selectedGroup: User? = null
+    var totalCompositions = 0
+    var currentOffset = 0
+
+    val sw: SwipeManager by lazy { SwipeManager(this) }
+    val compositionElementList = mutableListOf<Composition>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,9 +54,6 @@ class SearchActivity : AppCompatActivity() {
         initializeElements()
         initializeTabs()
         initializeButton()
-
-        // temp call for debugging
-        musicService.getCompositions(this, "linkin")
     }
 
     private fun initializeElements() {
@@ -83,15 +86,17 @@ class SearchActivity : AppCompatActivity() {
 
     private fun initializeButton() {
         lockUnlockScreen(false)
-        button.setOnTouchListener { _, event ->
+        button.setOnClickListener { _ ->
             filterText = textContainer.text.toString()
+            if (filterText.isEmpty()) { return@setOnClickListener }
+
             loadingSpinner.visibility = View.VISIBLE
 
             lockUnlockScreen(true)
 
             when (tabHost.currentTabTag) {
-                "user" -> if (selectedUser != null) {
-                    musicService.getPlaylist(this, selectedUser, filterText)
+                "user" -> if (selectedElement != null) {
+                    musicService.getPlaylist(this, selectedElement, filterText)
                 } else {
                     musicService.getUsers(this, filterText)
                 }
@@ -103,7 +108,7 @@ class SearchActivity : AppCompatActivity() {
                 "tracks" -> musicService.getCompositions(this, filterText)
             }
 
-            return@setOnTouchListener super.onTouchEvent(event)
+            return@setOnClickListener
         }
     }
 
@@ -120,10 +125,23 @@ class SearchActivity : AppCompatActivity() {
         groupList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, selectUserOrGroup)
     }
 
-    fun setCompositionsList(data: List<Composition>) {
+    fun setCompositionsList(data: List<Composition>, removeOld: Boolean = false) {
         lockUnlockScreen(false)
         loadingSpinner.visibility = View.GONE
-        compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, data, elementTouchListener)
+
+        if (removeOld) {
+            compositionElementList.clear()
+            currentOffset = 0
+        }
+        compositionElementList.addAll(data.filter { !it.url.isNullOrEmpty() })
+        if (compositionList.adapter == null) {
+            compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, compositionElementList, elementTouchListener)
+        } else {
+            (compositionList.adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
+        }
+
+        currentOffset += data.size
+        if (compositionElementList.size < totalCompositions && data.isNotEmpty()) { musicService.getPlaylist(this, selectedElement, "", currentOffset)}
     }
 
     val elementTouchListener = { composition: Composition, view: View ->
@@ -134,12 +152,12 @@ class SearchActivity : AppCompatActivity() {
     private val selectUserOrGroup = { newSelectedElement: User? ->
         when (tabHost.currentTabTag) {
             "user" -> {
-                selectedUser = newSelectedElement
-                musicService.getPlaylist(this, selectedUser, filterText)
+                selectedElement = newSelectedElement
+                musicService.getPlaylist(this, selectedElement, filterText)
             }
             "group" -> {
-                selectedGroup = newSelectedElement
-                musicService.getPlaylist(this, selectedGroup, filterText)
+                selectedElement = newSelectedElement
+                musicService.getPlaylist(this, selectedElement, filterText)
             }
         }
 
@@ -148,8 +166,8 @@ class SearchActivity : AppCompatActivity() {
 
         newSelectedElement?.let {
             selectedUserContainer.visibility = View.VISIBLE
-            selectedUserName.text = selectedUser?.fullname
-            selectedUserId.text = selectedUser?.userId
+            selectedUserName.text = selectedElement?.fullname
+            selectedUserId.text = selectedElement?.userId
 
             if (newSelectedElement.photo == null) {
                 AsyncPhotoDownloader().execute(newSelectedElement, selectedUserPhoto)
@@ -165,7 +183,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        SwipeManager.manageSwipe(event, this, HistoryActivity::class.java)
+        sw.mDetector.onTouchEvent(event)
         return super.onTouchEvent(event)
     }
 

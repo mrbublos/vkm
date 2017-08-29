@@ -22,7 +22,7 @@ open class MusicService {
                 "offset" to offset.toString(),
                 "shuffle" to "0")
         if (!PropertyContainer.useMock) {
-            callApi(true,"audio.get", params, VkParsers(activity).parsePlaylist)
+            callApi(true,"audio.get", params, VkParsers(activity, offset == 0).parsePlaylist)
         } else {
             getMock().getPlaylist(activity, userOrGroup, "", 0)
         }

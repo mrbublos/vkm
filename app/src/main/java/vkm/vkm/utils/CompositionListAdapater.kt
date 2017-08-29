@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.TextView
 import vkm.vkm.Composition
+import vkm.vkm.DownloadManager
 import vkm.vkm.R
 import vkm.vkm.bind
 
@@ -21,6 +23,9 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
         item?.let {
             view?.bind<TextView>(R.id.name)?.text = item.name
             view?.bind<TextView>(R.id.artist)?.text = item.artist
+            DownloadManager.getDownloaded().find { it.id == item.id }?.let {
+                view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+            }
             view?.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
                 return@setOnClickListener

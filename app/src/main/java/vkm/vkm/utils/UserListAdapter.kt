@@ -68,13 +68,12 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
 
         user.photoUrl?.let {
             val _url = URL(user.photoUrl)
-            Log.v(this.toString(), "Starting download $_url")
-            val connection = _url.openConnection()
-            connection.connect()
-
-            val out = ByteArrayOutputStream()
-
             try {
+                Log.v(this.toString(), "Starting download $_url")
+                val connection = _url.openConnection()
+                connection.connect()
+
+                val out = ByteArrayOutputStream()
                 _url.openStream().use { it.copyTo(out) }
                 user.photo = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
                 cache.put(user.photoUrl, user.photo as Bitmap)

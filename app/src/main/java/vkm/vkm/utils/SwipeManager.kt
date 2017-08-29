@@ -2,32 +2,25 @@ package vkm.vkm.utils
 
 import android.app.Activity
 import android.content.Intent
+import android.support.v4.view.GestureDetectorCompat
+import android.view.GestureDetector
 import android.view.MotionEvent
+import vkm.vkm.HistoryActivity
+import vkm.vkm.SearchActivity
 
-object SwipeManager {
-    // for swipe
-    var x1: Float = 0f
-    var x2: Float = 0f
-    var y1: Float = 0f
-    var y2: Float = 0f
-    val minDistance: Int = 150
+class SwipeManager(private val activity: Activity): GestureDetector.SimpleOnGestureListener() {
 
-    fun manageSwipe(event: MotionEvent?, activity: Activity, newActivityClass: Class<*>) {
-        when (event?.action) {
-            MotionEvent.ACTION_DOWN -> {
-                x1 = event.x
-                y1 = event.y
-            }
-            MotionEvent.ACTION_UP -> {
-                x2 = event.x
-                y2 = event.y
+    val mDetector = GestureDetectorCompat(activity, this)
 
-                val distance = x1 - x2
-                if (Math.abs(distance) > minDistance) {
-                    activity.startActivity(Intent(activity.applicationContext, newActivityClass))
-                    activity.finish()
-                }
-            }
+    override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+        var clazz: Class<*>? = null
+        when (activity) {
+            is SearchActivity -> clazz = HistoryActivity::class.java
+            is HistoryActivity -> clazz = SearchActivity::class.java
         }
+
+        activity.startActivity(Intent(activity.applicationContext, clazz))
+        activity.finish()
+        return true
     }
 }

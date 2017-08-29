@@ -19,6 +19,8 @@ class HistoryActivity : AppCompatActivity() {
     val queueList by bind<ListView>(R.id.tab3)
     val musicService = MusicService()
 
+    val sw: SwipeManager by lazy { SwipeManager(this) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
@@ -65,7 +67,7 @@ class HistoryActivity : AppCompatActivity() {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        SwipeManager.manageSwipe(event, this, SearchActivity::class.java)
+        sw.mDetector.onTouchEvent(event)
         return super.onTouchEvent(event)
     }
 }

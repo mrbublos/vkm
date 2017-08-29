@@ -30,6 +30,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        DownloadManager.initialize(applicationContext)
+        DownloadManager.downloadComposition(null)
+    }
+
     private fun initialize() {
         SecurityService.context = applicationContext
         // importing local properties
@@ -46,6 +52,13 @@ class MainActivity : AppCompatActivity() {
         } else {
             startActivity(Intent(applicationContext, LoginActivity::class.java))
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.v("vkm", "Dumping all lists")
+        DownloadManager.stopDownload("")
+        DownloadManager.dumpAll()
     }
 
     override fun onDestroy() {
