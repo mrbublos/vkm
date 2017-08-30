@@ -54,7 +54,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initializeElements() {
-        swipeCatcher.left = HistoryActivity::class.java
+        swipeCatcher.left = SettingsActivity::class.java
         swipeCatcher.right = HistoryActivity::class.java
         swipeCatcher.activity = this
 

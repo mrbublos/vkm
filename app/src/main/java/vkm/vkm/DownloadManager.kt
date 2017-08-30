@@ -5,7 +5,6 @@ import android.os.AsyncTask
 import android.os.Environment
 import android.util.Log
 import vkm.vkm.ListType.*
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URL
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -18,11 +17,15 @@ object DownloadManager {
     val _downloadedList = ConcurrentLinkedQueue<Composition>()
     val _inProgress = ConcurrentLinkedQueue<Composition>()
     val _queue = ConcurrentLinkedQueue<Composition>()
-    var context: Context? = null
+    private var context: Context? = null
 
     fun initialize(context: Context) {
         this.context = context
         Log.v("vkm", "Loading all lists")
+        loadAll()
+    }
+
+    fun loadAll() {
         loadList(downloaded, _downloadedList)
         loadList(queue, _queue)
         loadList(inProgress, _inProgress)
@@ -148,21 +151,8 @@ object DownloadManager {
             val connection = _url.openConnection()
             connection.connect()
 
-            val out = ByteArrayOutputStream()
-
             try {
-                connection.getInputStream().use {
-                    var bytesCopied: Long = 0
-                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                    var bytes = it.read(buffer)
-                    while (bytes >= 0) {
-                        out.write(buffer, 0, bytes)
-                        bytesCopied += bytes
-                        bytes = it.read(buffer)
-                    }
-                }
-
-                val bytes = out.toByteArray()
+                val bytes = connection.getInputStream().use { it.readBytes() }
                 composition.hash = bytes.md5()
                 if (getDownloaded().find { it.hash == composition.hash } != null) { return null }
 
@@ -189,6 +179,10 @@ object DownloadManager {
                 stopDownload(error)
             }
         }
+    }
+
+    fun removeAllMusic() {
+        getDownloadDir().delete()
     }
 }
 

@@ -22,7 +22,7 @@ class HistoryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_history)
 
         swipeCatcher.left = SearchActivity::class.java
-        swipeCatcher.right = SearchActivity::class.java
+        swipeCatcher.right = SettingsActivity::class.java
         swipeCatcher.activity = this
 
         initializeTabs()

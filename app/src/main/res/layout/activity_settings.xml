@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vkm.vkm.SwipeCatcher
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:id="@+id/swipeCatcher"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+            android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="504dp">
+
+        <!-- clear downloaded list -->
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:text="@string/clear_downloaded_list_setting"
+                    android:layout_gravity="start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/clear_downloaded_button"
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:elevation="6dp"
+                    />
+        </LinearLayout>
+
+        <!-- clear queue -->
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:text="@string/clear_download_queue_setting"
+                    android:layout_gravity="start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/clear_queue_button"
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+        </LinearLayout>
+
+        <!-- cancel download -->
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:text="@string/stop_current_download_setting"
+                    android:layout_gravity="start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/stop_download_button"
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+        </LinearLayout>
+
+        <!-- clear music dir -->
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:text="@string/save_all_lists_setting"
+                    android:layout_gravity="start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/clear_music_dir"
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+        </LinearLayout>
+
+        <!-- save lists -->
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:text="@string/save_all_lists_setting"
+                    android:layout_gravity="start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/dump_lists_button"
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+        </LinearLayout>
+
+        <!-- load lists -->
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:text="@string/load_lists_setting"
+                    android:layout_gravity="start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/load_lists_button"
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</vkm.vkm.SwipeCatcher>

@@ -16,6 +16,13 @@
     <string name="login_button">Login</string>
     <string name="search_activity_title">Search for music</string>
     <string name="history_activity_title">History</string>
+    <string name="clear_downloaded_list_setting">Clear downloaded list</string>
+    <string name="run_button_setting">run</string>
+    <string name="clear_download_queue_setting">Clear download queue</string>
+    <string name="stop_current_download_setting">Stop current download</string>
+    <string name="save_all_lists_setting">Save all lists</string>
+    <string name="load_lists_setting">Load lists</string>
+    <string name="commands_and_settings_label">Commands and settings</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>
