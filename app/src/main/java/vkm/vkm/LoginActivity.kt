@@ -34,13 +34,13 @@ class LoginActivity : AppCompatActivity() {
 
                 if (!areValuesValid()) {
                     lockUnlockScreen(false)
-                    return@setOnTouchListener view.onTouchEvent(event)
+                    return@setOnTouchListener false
                 }
 
                 LoginPerformer(this).execute(loginName.text.toString(), password.text.toString())
             }
 
-            return@setOnTouchListener view.onTouchEvent(event)
+            return@setOnTouchListener false
         }
     }
 

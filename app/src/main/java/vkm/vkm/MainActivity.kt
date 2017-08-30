@@ -36,6 +36,12 @@ class MainActivity : AppCompatActivity() {
         DownloadManager.downloadComposition(null)
     }
 
+    override fun onResume() {
+        super.onResume()
+        DownloadManager.initialize(applicationContext)
+        DownloadManager.downloadComposition(null)
+    }
+
     private fun initialize() {
         SecurityService.context = applicationContext
         // importing local properties
@@ -54,15 +60,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         Log.v("vkm", "Dumping all lists")
         DownloadManager.stopDownload("")
         DownloadManager.dumpAll()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onStop() {
+        super.onStop()
         Log.v("vkm", "Dumping all lists")
         DownloadManager.stopDownload("")
         DownloadManager.dumpAll()

@@ -4,47 +4,44 @@ import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import vkm.vkm.utils.AsyncPhotoDownloader
 import vkm.vkm.utils.CompositionListAdapter
-import vkm.vkm.utils.SwipeManager
 import vkm.vkm.utils.UserListAdapter
 
 class SearchActivity : AppCompatActivity() {
 
     // list tabs
-    val userList by bind<ListView>(R.id.tab1)
-    val groupList by bind<ListView>(R.id.tab2)
-    val compositionList by bind<ListView>(R.id.tab3)
+    private val userList by bind<ListView>(R.id.tab1)
+    private val groupList by bind<ListView>(R.id.tab2)
+    private val compositionList by bind<ListView>(R.id.tab3)
+    private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
 
     // active elements
-    val tabHost by bind<TabHost>(R.id.tabhost)
-    val button by bind<Button>(R.id.button)
-    val textContainer by bind<TextView>(R.id.search)
-    val loadingSpinner by bind<ProgressBar>(R.id.loading_spinner)
+    private val tabHost by bind<TabHost>(R.id.tabhost)
+    private val button by bind<Button>(R.id.button)
+    private val textContainer by bind<TextView>(R.id.search)
+    private val loadingSpinner by bind<ProgressBar>(R.id.loading_spinner)
 
     // selected user
-    val selectedUserContainer by bind<ConstraintLayout>(R.id.selected_user_container)
-    val selectedUserName by bind<TextView>(R.id.selected_user_name)
-    val selectedUserId by bind<TextView>(R.id.selected_user_id)
-    val selectedUserPhoto by bind<ImageView>(R.id.selected_user_photo)
-    val selectedUserButton by bind<ImageView>(R.id.deselect_user_button)
-    val selectedUserDownloadAllButton by bind<ImageView>(R.id.download_all_user_button)
+    private val selectedUserContainer by bind<ConstraintLayout>(R.id.selected_user_container)
+    private val selectedUserName by bind<TextView>(R.id.selected_user_name)
+    private val selectedUserId by bind<TextView>(R.id.selected_user_id)
+    private val selectedUserPhoto by bind<ImageView>(R.id.selected_user_photo)
+    private val selectedUserButton by bind<ImageView>(R.id.deselect_user_button)
 
     // services
-    val musicService = MusicService()
+    private val musicService = MusicService()
 
     // private vars
-    var filterText: String = ""
-    var selectedElement: User? = null
-    var selectedGroup: User? = null
+    private var filterText: String = ""
+    private var selectedElement: User? = null
+    private var selectedGroup: User? = null
     var totalCompositions = 0
     var currentOffset = 0
 
-    val sw: SwipeManager by lazy { SwipeManager(this) }
-    val compositionElementList = mutableListOf<Composition>()
+    private val compositionElementList = mutableListOf<Composition>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +54,10 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initializeElements() {
+        swipeCatcher.left = HistoryActivity::class.java
+        swipeCatcher.right = HistoryActivity::class.java
+        swipeCatcher.activity = this
+
         // hiding selected user container
         selectedUserContainer.visibility = View.GONE
         loadingSpinner.visibility = View.GONE
@@ -180,11 +181,6 @@ class SearchActivity : AppCompatActivity() {
                 return@setOnTouchListener super.onTouchEvent(event)
             }
         }
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        sw.mDetector.onTouchEvent(event)
-        return super.onTouchEvent(event)
     }
 
     private fun lockUnlockScreen(lock: Boolean) {

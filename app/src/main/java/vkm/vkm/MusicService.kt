@@ -21,6 +21,7 @@ open class MusicService {
                 "extended" to "1",
                 "offset" to offset.toString(),
                 "shuffle" to "0")
+
         if (!PropertyContainer.useMock) {
             callApi(true,"audio.get", params, VkParsers(activity, offset == 0).parsePlaylist)
         } else {
@@ -28,21 +29,12 @@ open class MusicService {
         }
     }
 
-    open fun getDownloaded(filter: String = ""): List<Composition> {
-        return DownloadManager.getDownloaded().filter { it.name.contains(filter) || it.artist.contains(filter) }
-    }
-
-    open fun getInProgress(filter: String = ""): List<Composition> {
-        return DownloadManager.getInProgress().filter { it.name.contains(filter) || it.artist.contains(filter) }
-    }
-
-    open fun getInQueue(filter: String = ""): List<Composition> {
-        return DownloadManager.getQueue().filter { it.name.contains(filter) || it.artist.contains(filter) }
-    }
-
     open fun getGroups(activity: SearchActivity, filter: String = "", offset:Int = 0) {
-        // TODO paging, error handling
-        val params = mutableListOf("q" to filter, "fields" to "has_photo", "count" to "20", "offset" to offset.toString())
+        val params = mutableListOf("q" to filter,
+                "fields" to "has_photo",
+                "count" to "20",
+                "offset" to offset.toString())
+
         if (!PropertyContainer.useMock) {
             callApi("groups.search", params, VkParsers(activity).parseGroupList)
         } else {
@@ -51,8 +43,11 @@ open class MusicService {
     }
 
     open fun getUsers(activity: SearchActivity, filter: String = "", offset:Int = 0) {
-        // TODO add paging, error handling
-        val params = mutableListOf("q" to filter, "fields" to "photo_50, has_photo", "count" to "20", "offset" to offset.toString())
+        val params = mutableListOf("q" to filter,
+                "fields" to "photo_50, has_photo",
+                "count" to "20",
+                "offset" to offset.toString())
+
         if (!PropertyContainer.useMock) {
             callApi("users.search", params, VkParsers(activity).parseUserList)
         } else {
@@ -68,6 +63,7 @@ open class MusicService {
                 "lang" to "en",
                 "search_own" to "0",
                 "performer_only" to "0")
+
         if (!PropertyContainer.useMock) {
             callApi(true, "audio.search", params, VkParsers(activity).parseCompositionList)
         } else {
@@ -75,7 +71,7 @@ open class MusicService {
         }
     }
 
-    fun getMock(): MusicServiceMock {
+    private fun getMock(): MusicServiceMock {
         return MusicServiceMock()
     }
 

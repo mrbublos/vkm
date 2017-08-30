@@ -28,7 +28,6 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             }
             view?.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
-                return@setOnClickListener
             }
         }
 

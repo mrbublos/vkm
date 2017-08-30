@@ -35,7 +35,6 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>, private
             AsyncPhotoDownloader().execute(item, view?.bind<ImageView>(R.id.user_photo))
             view?.setOnClickListener {
                 elementClickListener.invoke(item)
-                return@setOnClickListener
             }
         }
 

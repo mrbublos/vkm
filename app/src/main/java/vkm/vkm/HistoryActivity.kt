@@ -2,33 +2,33 @@ package vkm.vkm
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.MotionEvent
 import android.view.View
 import android.widget.ListView
 import android.widget.TabHost
 import vkm.vkm.utils.CompositionListAdapter
-import vkm.vkm.utils.SwipeManager
 
 class HistoryActivity : AppCompatActivity() {
 
-    val tabHost by bind<TabHost>(R.id.tabhost)
+    private val tabHost by bind<TabHost>(R.id.tabhost)
 
     // list tabs
-    val downloadedList by bind<ListView>(R.id.tab1)
-    val inProgressList by bind<ListView>(R.id.tab2)
-    val queueList by bind<ListView>(R.id.tab3)
-    val musicService = MusicService()
-
-    val sw: SwipeManager by lazy { SwipeManager(this) }
+    private val downloadedList by bind<ListView>(R.id.tab1)
+    private val inProgressList by bind<ListView>(R.id.tab2)
+    private val queueList by bind<ListView>(R.id.tab3)
+    private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
 
+        swipeCatcher.left = SearchActivity::class.java
+        swipeCatcher.right = SearchActivity::class.java
+        swipeCatcher.activity = this
+
         initializeTabs()
     }
 
-    fun initializeTabs() {
+    private fun initializeTabs() {
         tabHost.setup()
 
         var tabSpec = tabHost.newTabSpec("downloaded")
@@ -51,11 +51,11 @@ class HistoryActivity : AppCompatActivity() {
     }
 
 
-    fun handleTabSwitch(tabId: String) {
+    private fun handleTabSwitch(tabId: String) {
         when (tabId) {
-            "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getDownloaded())
-            "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getInProgress(), removeFromQueue)
-            "inProgress" -> inProgressList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, musicService.getInProgress())
+            "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded())
+            "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getInProgress(), removeFromQueue)
+            "inProgress" -> inProgressList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getInProgress())
         }
     }
 
@@ -64,10 +64,5 @@ class HistoryActivity : AppCompatActivity() {
             DownloadManager.removeFromQueue(composition)
             view.visibility = View.GONE
         }
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        sw.mDetector.onTouchEvent(event)
-        return super.onTouchEvent(event)
     }
 }
