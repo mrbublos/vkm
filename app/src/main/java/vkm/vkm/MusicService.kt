@@ -22,7 +22,7 @@ open class MusicService {
                 "offset" to offset.toString(),
                 "shuffle" to "0")
 
-        if (!PropertyContainer.useMock) {
+        if (!StateManager.useMock) {
             callApi(true,"audio.get", params, VkParsers(activity, offset == 0).parsePlaylist)
         } else {
             getMock().getPlaylist(activity, userOrGroup, "", 0)
@@ -35,7 +35,7 @@ open class MusicService {
                 "count" to "20",
                 "offset" to offset.toString())
 
-        if (!PropertyContainer.useMock) {
+        if (!StateManager.useMock) {
             callApi("groups.search", params, VkParsers(activity).parseGroupList)
         } else {
             getMock().getGroups(activity, "", 0)
@@ -48,7 +48,7 @@ open class MusicService {
                 "count" to "20",
                 "offset" to offset.toString())
 
-        if (!PropertyContainer.useMock) {
+        if (!StateManager.useMock) {
             callApi("users.search", params, VkParsers(activity).parseUserList)
         } else {
             getMock().getUsers(activity, "", 0)
@@ -64,7 +64,7 @@ open class MusicService {
                 "search_own" to "0",
                 "performer_only" to "0")
 
-        if (!PropertyContainer.useMock) {
+        if (!StateManager.useMock) {
             callApi(true, "audio.search", params, VkParsers(activity).parseCompositionList)
         } else {
             getMock().getCompositions(activity, filter, 0)

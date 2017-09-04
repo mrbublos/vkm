@@ -1,9 +1,6 @@
 package vkm.vkm
 
 import android.content.Context
-import android.util.Log
-import com.beust.klaxon.string
-import com.github.kittinunf.fuel.httpGet
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -19,14 +16,14 @@ object SecurityService {
     var vkAccessToken: String? = null
         set(value) {
             field = value
-            value?.let { dumpAccessToken() }
+            value?.let { dumpProperties() }
         }
 
     var context: Context? = null
     var user: User? = null
 
     fun isLoggedIn(defaultToken: String? = null): Boolean {
-        loadAccessToken()
+        loadProperties()
         vkAccessToken = vkAccessToken ?: defaultToken
         return vkAccessToken != null
     }
@@ -34,53 +31,26 @@ object SecurityService {
     fun logIn(newUser: User): String {
         // TODO store user in internal storage
         user = newUser
-        return performVkLogin()
+        return VkApi.performVkLogin()
     }
 
-    fun performVkLogin(): String {
-        val _user = user
-        var resultString = "Error logging in"
-
-        _user?.let {
-            val url = "https://oauth.vk.com/token"
-            val params = listOf(Pair("grant_type", "password"),
-                    Pair("client_id", appId),
-                    Pair("client_secret", appSecret),
-                    Pair("username", _user.userId),
-                    Pair("password", _user.password))
-
-            val result = url.httpGet(params).responseString()
-            val resp = result.component2()
-            val res = result.component3()
-
-            if (resp.httpStatusCode == 200) {
-                vkAccessToken = res.component1()?.toJson()?.string("access_token")
-                dumpAccessToken()
-                resultString = "ok"
-            } else {
-                Log.e("vkm", res.component2().toString())
-            }
-        }
-
-        return resultString
-    }
-
-    fun dumpAccessToken() {
+    fun dumpProperties() {
         val settingsFile = File(context?.filesDir, name)
         val settings = Properties()
         if (settingsFile.exists()) { settings.load(FileInputStream(settingsFile)) }
         settings.put("vkAccessToken", vkAccessToken)
         settings.put("mySecret", vkAccessToken)
+        settings.put("enableDownloadAll", StateManager.enableDownloadAll)
         settings.store(FileOutputStream(settingsFile), null)
     }
 
-    private fun loadAccessToken() {
+    private fun loadProperties() {
         val settingsFile = File(context?.filesDir, name)
         if (!settingsFile.exists()) { return }
-
         val settings = Properties()
         settings.load(FileInputStream(settingsFile))
-        vkAccessToken = settings.getProperty("vkAccessToken")
+        vkAccessToken = settings["vkAccessToken"] as String
+        StateManager.enableDownloadAll = settings["enableDownloadAll"] as Boolean
     }
 
     fun clearAll() {

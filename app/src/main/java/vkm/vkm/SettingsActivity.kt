@@ -3,6 +3,7 @@ package vkm.vkm
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import android.widget.Switch
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -13,6 +14,7 @@ class SettingsActivity : AppCompatActivity() {
     private val dumpLists by bind<Button>(R.id.dump_lists_button)
     private val clearMusicDir by bind<Button>(R.id.clear_music_dir)
     private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
+    private val enableDownloadAllSwitch by bind<Switch>(R.id.enable_download_all_button)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,28 +24,19 @@ class SettingsActivity : AppCompatActivity() {
         swipeCatcher.left = HistoryActivity::class.java
         swipeCatcher.right = SearchActivity::class.java
 
-        clearDownloaded.setOnClickListener {
-            DownloadManager._downloadedList.clear()
-        }
+        enableDownloadAllSwitch.isChecked = StateManager.enableDownloadAll
+        enableDownloadAllSwitch.setOnCheckedChangeListener { _, value -> StateManager.enableDownloadAll = value }
 
-        clearQueue.setOnClickListener {
-            DownloadManager._queue.clear()
-        }
+        clearDownloaded.setOnClickListener { DownloadManager._downloadedList.clear() }
 
-        stopDownload.setOnClickListener {
-            DownloadManager.stopDownload("")
-        }
+        clearQueue.setOnClickListener { DownloadManager._queue.clear() }
 
-        loadLists.setOnClickListener {
-            DownloadManager.loadAll()
-        }
+        stopDownload.setOnClickListener { DownloadManager.stopDownload("") }
 
-        dumpLists.setOnClickListener {
-            DownloadManager.dumpAll()
-        }
+        loadLists.setOnClickListener { DownloadManager.loadAll() }
 
-        clearMusicDir.setOnClickListener {
-            DownloadManager.removeAllMusic()
-        }
+        dumpLists.setOnClickListener { DownloadManager.dumpAll() }
+
+        clearMusicDir.setOnClickListener { DownloadManager.removeAllMusic() }
     }
 }

@@ -23,6 +23,9 @@
     <string name="save_all_lists_setting">Save all lists</string>
     <string name="load_lists_setting">Load lists</string>
     <string name="commands_and_settings_label">Commands and settings</string>
+    <string name="enable_download_all_button">Enable download all button</string>
+    <string name="disabled">disabled</string>
+    <string name="enabled">enabled</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

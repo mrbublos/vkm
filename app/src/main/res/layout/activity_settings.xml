@@ -1,136 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vkm.vkm.SwipeCatcher
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/swipeCatcher"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
             android:orientation="vertical"
-                  android:layout_width="match_parent"
-                  android:layout_height="504dp">
+            android:layout_width="match_parent"
+            android:layout_height="504dp"
+            android:layout_marginStart="10dp">
 
         <!-- clear downloaded list -->
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/enable_download_all_button"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Switch
+                    android:id="@+id/enable_download_all_button"
+                    android:textOn="@string/enabled"
+                    android:textOff="@string/disabled"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    tools:layout_editor_absoluteX="344dp"/>
+        </android.support.constraint.ConstraintLayout>
+
+
+        <!-- clear downloaded list -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
 
             <TextView
                     android:text="@string/clear_downloaded_list_setting"
-                    android:layout_gravity="start"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/clear_downloaded_button"
-                    android:layout_gravity="end"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:elevation="6dp"
-                    />
-        </LinearLayout>
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
 
         <!-- clear queue -->
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="40dp">
 
             <TextView
                     android:text="@string/clear_download_queue_setting"
-                    android:layout_gravity="start"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/clear_queue_button"
-                    android:layout_gravity="end"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-        </LinearLayout>
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
 
         <!-- cancel download -->
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="40dp">
 
             <TextView
                     android:text="@string/stop_current_download_setting"
-                    android:layout_gravity="start"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/stop_download_button"
-                    android:layout_gravity="end"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-        </LinearLayout>
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
 
         <!-- clear music dir -->
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="40dp">
 
             <TextView
                     android:text="@string/save_all_lists_setting"
-                    android:layout_gravity="start"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/clear_music_dir"
-                    android:layout_gravity="end"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-        </LinearLayout>
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
 
         <!-- save lists -->
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="40dp">
 
             <TextView
                     android:text="@string/save_all_lists_setting"
-                    android:layout_gravity="start"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/dump_lists_button"
-                    android:layout_gravity="end"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-        </LinearLayout>
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
 
         <!-- load lists -->
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="40dp">
 
             <TextView
                     android:text="@string/load_lists_setting"
-                    android:layout_gravity="start"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/load_lists_button"
-                    android:layout_gravity="end"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-        </LinearLayout>
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
 
     </LinearLayout>
 </vkm.vkm.SwipeCatcher>

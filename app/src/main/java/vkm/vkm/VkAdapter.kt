@@ -93,12 +93,42 @@ class VkParsers(private val activity: SearchActivity, removeOldCompositions: Boo
     }
 }
 
+object VkApi {
+    fun performVkLogin(): String {
+        val _user = SecurityService.user
+        var resultString = "Error logging in"
+
+        _user?.let {
+            val url = "https://oauth.vk.com/token"
+            val params = listOf(Pair("grant_type", "password"),
+                    Pair("client_id", SecurityService.appId),
+                    Pair("client_secret", SecurityService.appSecret),
+                    Pair("username", _user.userId),
+                    Pair("password", _user.password))
+
+            val result = url.httpGet(params).responseString()
+            val resp = result.component2()
+            val res = result.component3()
+
+            if (resp.httpStatusCode == 200) {
+                SecurityService.vkAccessToken = res.component1()?.toJson()?.string("access_token")
+                SecurityService.dumpProperties()
+                resultString = "ok"
+            } else {
+                Log.e("vkm", res.component2().toString())
+            }
+        }
+
+        return resultString
+    }
+}
+
 class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private val addSignature: Boolean = false, private val recursionLevel: Int = 0): AsyncTask<Pair<String, MutableList<Pair<String, String>>>, Int, JsonObject?>() {
     private val _apiUrl = "https://api.vk.com"
     private val _userAgent = "VKAndroidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
     private var _params: MutableList<Pair<String, String>> = mutableListOf()
     private var _method: String = ""
-    private val proxyAddress = PropertyContainer.proxies[3]
+    private val proxyAddress = StateManager.proxies[3]
 //    private val proxy: Proxy? = Proxy(Proxy.Type.HTTP, InetSocketAddress(proxyAddress.first, proxyAddress.second.toInt()))
     private val proxy: Proxy? = null
 
