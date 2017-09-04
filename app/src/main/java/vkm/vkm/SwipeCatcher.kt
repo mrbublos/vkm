@@ -22,6 +22,7 @@ class SwipeCatcher @JvmOverloads constructor(
     private val sw: SwipeManager by lazy { SwipeManager() }
 
     init {
+        // it will catch events, otherwise fling over empty space wont work
         setOnTouchListener { _, _ -> return@setOnTouchListener true }
     }
 
