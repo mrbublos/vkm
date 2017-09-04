@@ -23,6 +23,8 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
         item?.let {
             view?.bind<TextView>(R.id.name)?.text = item.name
             view?.bind<TextView>(R.id.artist)?.text = item.artist
+
+            // determining icon to display
             DownloadManager.getDownloaded().find { it.id == item.id }?.let {
                 view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
             }
@@ -32,7 +34,9 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             DownloadManager.getInProgress().find { it.id == item.id }?.let {
                 view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
             }
-            view?.setOnClickListener { v ->
+
+            // adding icon click listener
+            view?.bind<ImageView>(R.id.imageView)?.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
             }
         }
