@@ -106,7 +106,13 @@ object DownloadManager {
             if (currentDownload.compareAndSet(null, nextDownload)) {
                 _queue.remove(nextDownload)
                 _inProgress.offer(nextDownload)
-                CompositionDownloadTask().execute(nextDownload)
+                if (nextDownload.url.isEmpty()) {
+                    Log.v("vkm", "Track is not available for download, skipping")
+                    // TODO search track on alternative sources
+                    downloaded(nextDownload)
+                } else {
+                    CompositionDownloadTask().execute(nextDownload)
+                }
             }
         }
     }

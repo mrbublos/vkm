@@ -24,6 +24,12 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             view?.bind<TextView>(R.id.name)?.text = item.name
             view?.bind<TextView>(R.id.artist)?.text = item.artist
             DownloadManager.getDownloaded().find { it.id == item.id }?.let {
+                view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
+            }
+            DownloadManager.getQueue().find { it.id == item.id }?.let {
+                view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+            }
+            DownloadManager.getInProgress().find { it.id == item.id }?.let {
                 view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
             }
             view?.setOnClickListener { v ->
