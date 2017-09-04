@@ -13,6 +13,7 @@ class SettingsActivity : AppCompatActivity() {
     private val loadLists by bind<Button>(R.id.load_lists_button)
     private val dumpLists by bind<Button>(R.id.dump_lists_button)
     private val clearMusicDir by bind<Button>(R.id.clear_music_dir)
+    private val removeSettings by bind<Button>(R.id.remove_all_settings)
     private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
     private val enableDownloadAllSwitch by bind<Switch>(R.id.enable_download_all_button)
 
@@ -38,5 +39,7 @@ class SettingsActivity : AppCompatActivity() {
         dumpLists.setOnClickListener { DownloadManager.dumpAll() }
 
         clearMusicDir.setOnClickListener { DownloadManager.removeAllMusic() }
+
+        removeSettings.setOnClickListener { SecurityService.clearAll() }
     }
 }

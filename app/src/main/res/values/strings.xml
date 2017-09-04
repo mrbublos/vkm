@@ -27,6 +27,7 @@
     <string name="disabled">disabled</string>
     <string name="enabled">enabled</string>
     <string name="remove_all_downloaded_music">Remove all downloaded music</string>
+    <string name="remove_all_settings">Remove all settings</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

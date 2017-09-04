@@ -49,7 +49,7 @@ object SecurityService {
         val settings = Properties()
         settings.load(FileInputStream(settingsFile))
         vkAccessToken = settings["vkAccessToken"] as String?
-        StateManager.enableDownloadAll = settings["enableDownloadAll"] as Boolean? ?: true
+        StateManager.enableDownloadAll = (settings["enableDownloadAll"] as String?)?.toBoolean() ?: true
     }
 
     fun clearAll() {
