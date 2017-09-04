@@ -32,7 +32,7 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>, private
         item?.let {
             view?.bind<TextView>(R.id.user_name)?.text = item.fullname
             view?.bind<TextView>(R.id.user_id)?.text = item.userId
-            AsyncPhotoDownloader().execute(item, view?.bind<ImageView>(R.id.user_photo))
+            AsyncPhotoDownloader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, item, view?.bind<ImageView>(R.id.user_photo))
             view?.setOnClickListener {
                 elementClickListener.invoke(item)
             }
@@ -47,7 +47,7 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>, private
 class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
 
     companion object {
-        val cache: ConcurrentHashMap<String, Bitmap> = ConcurrentHashMap()
+        val photoCache: ConcurrentHashMap<String, Bitmap> = ConcurrentHashMap()
         val limit = 1000
     }
 
@@ -60,8 +60,8 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
 
     override fun doInBackground(vararg input: Any?): Pair<ImageView, User> {
         val user = input[0] as User
-        if (cache.containsKey(user.photoUrl)) {
-            user.photo = cache[user.photoUrl]
+        if (photoCache.containsKey(user.photoUrl)) {
+            user.photo = photoCache[user.photoUrl]
             return Pair(input[1] as ImageView, user)
         }
 
@@ -75,9 +75,9 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
                 val out = ByteArrayOutputStream()
                 _url.openStream().use { it.copyTo(out) }
                 user.photo = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
-                cache.put(user.photoUrl, user.photo as Bitmap)
-                if (cache.size > limit) {
-                    cache.remove(cache.keys.any() as String)
+                photoCache.put(user.photoUrl, user.photo as Bitmap)
+                if (photoCache.size > limit) {
+                    photoCache.remove(photoCache.keys.any() as String)
                 }
             } catch (e: Exception) {
                 Log.e(this.toString(), "Error downloading image", e)
