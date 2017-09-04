@@ -21,14 +21,13 @@ class SwipeCatcher @JvmOverloads constructor(
     var activity: Activity? = null
     private val sw: SwipeManager by lazy { SwipeManager() }
 
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return sw.mDetector.onTouchEvent(event)
+    init {
+        setOnTouchListener { _, _ -> return@setOnTouchListener true }
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         if (sw.mDetector.onTouchEvent(ev)) {
-            return false
+            return true
         }
         return super.dispatchTouchEvent(ev)
     }

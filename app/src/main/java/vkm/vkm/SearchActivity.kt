@@ -81,6 +81,7 @@ class SearchActivity : AppCompatActivity() {
         tabHost.addTab(tabSpec)
 
         tabHost.setCurrentTabByTag(StateManager.currentSearchTab)
+        tabHost.setOnTabChangedListener { tabId ->  StateManager.currentSearchTab = tabId }
     }
 
     private fun initializeButton() {
@@ -114,7 +115,7 @@ class SearchActivity : AppCompatActivity() {
     private fun initializeLists() {
         if (StateManager.userElementList.isNotEmpty()) { setUserList(StateManager.userElementList) }
         if (StateManager.groupElementList.isNotEmpty()) { setGroupList(StateManager.groupElementList) }
-        if (StateManager.compositionElementList.isNotEmpty()) { setCompositionsList(StateManager.compositionElementList, true) }
+        if (StateManager.compositionElementList.isNotEmpty()) { setCompositionsList(StateManager.compositionElementList) }
     }
 
     // callback functions
@@ -140,7 +141,9 @@ class SearchActivity : AppCompatActivity() {
             StateManager.compositionElementList.clear()
             StateManager.currentOffset = 0
         }
-        StateManager.compositionElementList.addAll(data.filter { !it.url.isNullOrEmpty() })
+
+        if (StateManager.compositionElementList != data) { StateManager.compositionElementList.addAll(data) }
+
         if (compositionList.adapter == null) {
             compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, StateManager.compositionElementList, elementTouchListener)
         } else {

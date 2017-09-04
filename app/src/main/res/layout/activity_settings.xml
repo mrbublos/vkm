@@ -10,8 +10,7 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="504dp"
-            android:layout_marginStart="10dp">
+            android:layout_height="match_parent">
 
         <!-- enable download all button -->
         <android.support.constraint.ConstraintLayout
@@ -223,6 +222,5 @@
                     android:layout_height="48dp"
                     tools:layout_editor_absoluteX="296dp"/>
         </android.support.constraint.ConstraintLayout>
-
     </LinearLayout>
 </vkm.vkm.SwipeCatcher>
