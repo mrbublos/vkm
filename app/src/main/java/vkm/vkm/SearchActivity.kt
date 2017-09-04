@@ -114,7 +114,7 @@ class SearchActivity : AppCompatActivity() {
     private fun initializeLists() {
         if (StateManager.userElementList.isNotEmpty()) { setUserList(StateManager.userElementList) }
         if (StateManager.groupElementList.isNotEmpty()) { setGroupList(StateManager.groupElementList) }
-        if (StateManager.compositionElementList.isNotEmpty()) { setCompositionsList(StateManager.compositionElementList) }
+        if (StateManager.compositionElementList.isNotEmpty()) { setCompositionsList(StateManager.compositionElementList, true) }
     }
 
     // callback functions
