@@ -66,7 +66,7 @@ class VkParsers(private val activity: SearchActivity, removeOldCompositions: Boo
                         url = composition.string("url")!!)
                 compositionObject
             }
-            activity.totalCompositions = (result["response"] as JsonObject).int("count")!!
+            StateManager.totalCompositions = (result["response"] as JsonObject).int("count")!!
             activity.setCompositionsList(compositions, removeOldCompositions)
         }
     }
@@ -88,7 +88,7 @@ class VkParsers(private val activity: SearchActivity, removeOldCompositions: Boo
                 compositionObject
             }
             activity.setCompositionsList(compositions)
-            activity.totalCompositions = (result["response"] as JsonObject).int("count")!!
+            StateManager.totalCompositions = (result["response"] as JsonObject).int("count")!!
         }
     }
 }

@@ -126,7 +126,7 @@
                 android:layout_height="40dp">
 
             <TextView
-                    android:text="@string/save_all_lists_setting"
+                    android:text="@string/remove_all_downloaded_music"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"

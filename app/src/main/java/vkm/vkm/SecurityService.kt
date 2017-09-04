@@ -39,8 +39,7 @@ object SecurityService {
         val settings = Properties()
         if (settingsFile.exists()) { settings.load(FileInputStream(settingsFile)) }
         settings.put("vkAccessToken", vkAccessToken)
-        settings.put("mySecret", vkAccessToken)
-        settings.put("enableDownloadAll", StateManager.enableDownloadAll)
+        settings.put("enableDownloadAll", StateManager.enableDownloadAll.toString())
         settings.store(FileOutputStream(settingsFile), null)
     }
 
@@ -49,8 +48,8 @@ object SecurityService {
         if (!settingsFile.exists()) { return }
         val settings = Properties()
         settings.load(FileInputStream(settingsFile))
-        vkAccessToken = settings["vkAccessToken"] as String
-        StateManager.enableDownloadAll = settings["enableDownloadAll"] as Boolean
+        vkAccessToken = settings["vkAccessToken"] as String?
+        StateManager.enableDownloadAll = settings["enableDownloadAll"] as Boolean? ?: true
     }
 
     fun clearAll() {

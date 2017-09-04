@@ -26,6 +26,7 @@
     <string name="enable_download_all_button">Enable download all button</string>
     <string name="disabled">disabled</string>
     <string name="enabled">enabled</string>
+    <string name="remove_all_downloaded_music">Remove all downloaded music</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>
