@@ -47,6 +47,11 @@ fun String.md5(charset: Charset = StandardCharsets.UTF_8): String {
     return this.toByteArray(charset).md5()
 }
 
+fun String?.beginning(length: Int): String {
+    if (this == null) { return "" }
+    return this.filterIndexed({ index, _ -> index < length })
+}
+
 fun InputStream.readAll(charset: Charset = StandardCharsets.UTF_8): String {
     return this.use { it.bufferedReader(charset).use { it.readText() } }
 }

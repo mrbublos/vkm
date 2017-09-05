@@ -149,7 +149,7 @@ object DownloadManager {
             val composition = params[0]
             val _url = URL(composition.url)
 
-            val dest = dir.resolve("${composition.artist}-${composition.name}.mp3")
+            val dest = dir.resolve("${composition.artist.trim().beginning(32).replace(' ', '_')}-${composition.name.trim().beginning(32).replace(' ', '_')}.mp3")
             if (dest.exists()) {
                 Log.v("vkm", "File already exists, skipping download")
                 downloaded(composition)
@@ -198,7 +198,7 @@ object DownloadManager {
 
         override fun onPostExecute(error: String?) {
             error?.let {
-                Log.e("vkm", "Error downloading file " + error)
+                Log.e("vkm", "Error downloading file (skipping)" + error)
                 stopDownload(error)
             }
         }
