@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import vkm.vkm.Composition
-import vkm.vkm.DownloadManager
-import vkm.vkm.R
-import vkm.vkm.bind
+import vkm.vkm.*
 
 class CompositionListAdapter(context: Context, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(context, resource, data) {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
@@ -25,14 +22,18 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             view?.bind<TextView>(R.id.artist)?.text = item.artist
 
             // determining icon to display
-            DownloadManager.getDownloaded().find { it.id == item.id }?.let {
-                view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
-            }
-            DownloadManager.getQueue().find { it.id == item.id }?.let {
-                view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
-            }
-            DownloadManager.getInProgress().find { it.id == item.id }?.let {
-                view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+            if (context is SearchActivity) {
+                DownloadManager.getDownloaded().find { it.id == item.id }?.let {
+                    view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
+                }
+                DownloadManager.getQueue().find { it.id == item.id }?.let {
+                    view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                }
+                DownloadManager.getInProgress().find { it.id == item.id }?.let {
+                    view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                }
+            } else if (context is HistoryActivity) {
+                view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
             }
 
             // adding icon click listener

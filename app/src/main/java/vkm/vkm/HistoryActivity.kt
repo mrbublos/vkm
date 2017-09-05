@@ -1,10 +1,12 @@
 package vkm.vkm
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.View
-import android.widget.ListView
-import android.widget.TabHost
+import android.widget.*
 import vkm.vkm.utils.CompositionListAdapter
 
 class HistoryActivity : AppCompatActivity() {
@@ -13,9 +15,11 @@ class HistoryActivity : AppCompatActivity() {
 
     // list tabs
     private val downloadedList by bind<ListView>(R.id.tab1)
-    private val inProgressList by bind<ListView>(R.id.tab2)
-    private val queueList by bind<ListView>(R.id.tab3)
+    private val queueList by bind<ListView>(R.id.tab2)
+    private val inProgressList by bind<LinearLayout>(R.id.tab3)
     private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
+    private val progressBar by bind<ProgressBar>(R.id.downloadProgress)
+    private var stopLiveUpdating = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +29,20 @@ class HistoryActivity : AppCompatActivity() {
         swipeCatcher.right = SettingsActivity::class.java
         swipeCatcher.activity = this
 
+        stopLiveUpdating = false
+
         initializeTabs()
+        updateProgress()
+    }
+
+    private fun updateProgress() {
+        Handler().postDelayed({
+            if (stopLiveUpdating || DownloadManager.getInProgress().firstOrNull() == null) { return@postDelayed }
+            Handler(Looper.getMainLooper()).post({
+                setInProgress(DownloadManager.getInProgress().firstOrNull())
+            })
+            updateProgress()
+        }, 1000)
     }
 
     private fun initializeTabs() {
@@ -46,23 +63,50 @@ class HistoryActivity : AppCompatActivity() {
         tabSpec.setContent(R.id.tab3)
         tabHost.addTab(tabSpec)
 
+        setInProgress(DownloadManager.getInProgress().firstOrNull())
         tabHost.setCurrentTabByTag("inProgress")
         tabHost.setOnTabChangedListener(TabHost.OnTabChangeListener(this::handleTabSwitch))
     }
 
 
+    fun setInProgress(composition: Composition?) {
+        inProgressList.bind<ImageView>(R.id.imageView).visibility = View.GONE
+        if (composition == null) {
+            inProgressList.bind<TextView>(R.id.artist).text = null
+            inProgressList.bind<TextView>(R.id.name).text = null
+            progressBar.visibility = View.GONE
+        } else {
+            inProgressList.bind<TextView>(R.id.artist).text = composition.artist
+            inProgressList.bind<TextView>(R.id.name).text = composition.name
+            progressBar.visibility = View.VISIBLE
+            progressBar.progress = DownloadManager.downloadedPercent
+            progressBar.secondaryProgress = DownloadManager.downloadedPercent
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopLiveUpdating = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        stopLiveUpdating = false
+        updateProgress()
+    }
+
     private fun handleTabSwitch(tabId: String) {
         when (tabId) {
             "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded())
-            "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getInProgress(), removeFromQueue)
-            "inProgress" -> inProgressList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getInProgress())
+            "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue(), removeFromQueue)
+            "inProgress" -> setInProgress(DownloadManager.getInProgress().firstOrNull())
         }
     }
 
     private val removeFromQueue = { composition: Composition?, view: View ->
         composition?.let {
             DownloadManager.removeFromQueue(composition)
-            view.visibility = View.GONE
+            (view.parent as View).visibility = View.GONE
         }
     }
 }

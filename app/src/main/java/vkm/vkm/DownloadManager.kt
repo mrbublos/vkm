@@ -5,6 +5,7 @@ import android.os.AsyncTask
 import android.os.Environment
 import android.util.Log
 import vkm.vkm.ListType.*
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URL
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -17,6 +18,8 @@ object DownloadManager {
     val _downloadedList = ConcurrentLinkedQueue<Composition>()
     val _inProgress = ConcurrentLinkedQueue<Composition>()
     val _queue = ConcurrentLinkedQueue<Composition>()
+    var downloadedPercent = 0
+
     private var context: Context? = null
 
     fun initialize(context: Context) {
@@ -158,7 +161,21 @@ object DownloadManager {
             connection.connect()
 
             try {
-                val bytes = connection.getInputStream().use { it.readBytes() }
+                val totalBytes = connection.contentLength
+                val out = ByteArrayOutputStream()
+                connection.getInputStream().use {
+                    var bytesCopied: Long = 0
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    var bytes = it.read(buffer)
+                    while (bytes >= 0) {
+                        out.write(buffer, 0, bytes)
+                        bytesCopied += bytes
+                        publishProgress(bytesCopied * 100 / totalBytes)
+                        bytes = it.read(buffer)
+                    }
+                }
+
+                val bytes = out.toByteArray()
                 composition.hash = bytes.md5()
                 if (getDownloaded().find { it.hash == composition.hash } != null) { return null }
 
@@ -185,10 +202,14 @@ object DownloadManager {
                 stopDownload(error)
             }
         }
+
+        override fun onProgressUpdate(vararg values: Long?) {
+            DownloadManager.downloadedPercent = values[0]?.toInt() ?: 0
+        }
     }
 
     fun removeAllMusic() {
-        getDownloadDir().delete()
+        getDownloadDir().deleteRecursively()
     }
 }
 

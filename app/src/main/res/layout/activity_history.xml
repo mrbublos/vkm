@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vkm.vkm.SwipeCatcher
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:id="@+id/swipeCatcher"
@@ -63,10 +64,25 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
 
-                    <ListView
+                    <LinearLayout
                             android:id="@+id/tab3"
+                            android:orientation="vertical"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+                            android:layout_height="wrap_content">
+
+                        <include layout="@layout/composition_list_element"
+                                 android:layout_width="match_parent"
+                                 android:layout_height="wrap_content"
+                                 android:id="@+id/compositionInProgress"/>
+                        <ProgressBar
+                                android:layout_marginStart="10dp"
+                                android:layout_marginEnd="10dp"
+                                android:id="@+id/downloadProgress"
+                                style="@android:style/Widget.ProgressBar.Horizontal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
 
                 </FrameLayout>
             </LinearLayout>
