@@ -105,16 +105,16 @@ object DownloadManager {
     private var currentDownload: AtomicReference<Composition?> = AtomicReference(null)
 
     private fun downloadNext() {
-        _queue.peek()?.let { nextDownload ->
-            if (currentDownload.compareAndSet(null, nextDownload)) {
-                _queue.remove(nextDownload)
-                _inProgress.offer(nextDownload)
-                if (nextDownload.url.isEmpty()) {
+        _queue.peek()?.let { itemToDownload ->
+            if (currentDownload.compareAndSet(null, itemToDownload)) {
+                _queue.remove(itemToDownload)
+                _inProgress.offer(itemToDownload)
+                if (itemToDownload.url.isEmpty()) {
                     Log.v("vkm", "Track is not available for download, skipping")
                     // TODO search track on alternative sources
-                    downloaded(nextDownload)
+                    finishDownload(itemToDownload, false)
                 } else {
-                    CompositionDownloadTask().execute(nextDownload)
+                    CompositionDownloadTask().execute(itemToDownload)
                 }
             }
         }
@@ -129,11 +129,11 @@ object DownloadManager {
         }
     }
 
-    private fun downloaded(composition: Composition) {
+    private fun finishDownload(composition: Composition, wasDownloaded: Boolean = true) {
         val downloaded = currentDownload.get()
         Log.v("vkm", "Finished downloading composition " + composition.artist + " " + composition.name)
         if (currentDownload.compareAndSet(composition, null)) {
-            _downloadedList.offer(downloaded)
+            if (wasDownloaded) { _downloadedList.offer(downloaded) }
             _inProgress.remove(downloaded)
             dumpAll()
             downloadNext()
@@ -152,7 +152,7 @@ object DownloadManager {
             val dest = dir.resolve("${composition.artist.trim().beginning(32).replace(' ', '_')}-${composition.name.trim().beginning(32).replace(' ', '_')}.mp3")
             if (dest.exists()) {
                 Log.v("vkm", "File already exists, skipping download")
-                downloaded(composition)
+                finishDownload(composition)
                 return null
             }
 
@@ -182,16 +182,18 @@ object DownloadManager {
                 if (dir.canWrite() && dir.usableSpace > bytes.size) {
                     try {
                         dest.writeBytes(bytes)
-                        downloaded(composition)
+                        finishDownload(composition)
                     } catch (e: Exception) {
                         Log.e("vkm", "Error downloading track", e)
-                        return "Error writing file " + e.message
+                        finishDownload(composition, false)
+                        return null
                     }
                 } else {
                     return "Not enough free space or unable to write to the $dir"
                 }
             } catch(e: Exception) {
                 Log.e(this.toString(), "Error downloading track", e)
+                finishDownload(composition, false)
             }
             return null
         }
