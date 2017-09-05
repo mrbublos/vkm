@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.View
 import android.widget.*
 import vkm.vkm.utils.CompositionListAdapter
@@ -99,7 +98,10 @@ class HistoryActivity : AppCompatActivity() {
         when (tabId) {
             "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded())
             "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue(), removeFromQueue)
-            "inProgress" -> setInProgress(DownloadManager.getInProgress().firstOrNull())
+            "inProgress" -> {
+                stopLiveUpdating = false
+                setInProgress(DownloadManager.getInProgress().firstOrNull())
+            }
         }
     }
 
