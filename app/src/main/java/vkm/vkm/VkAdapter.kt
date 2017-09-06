@@ -59,7 +59,7 @@ class VkParsers(private val activity: SearchActivity, removeOldCompositions: Boo
                 it is JsonObject
             }.map {
                 val composition = it as JsonObject
-                val compositionObject = Composition(id = "" + composition.int("id")!!,
+                val compositionObject = Composition(id = "" + composition.string("access_key")!!,
                         name = composition.string("title")!!,
                         ownerId = "" + composition.int("owner_id")!!,
                         artist = composition.string("artist")!!,
@@ -80,7 +80,7 @@ class VkParsers(private val activity: SearchActivity, removeOldCompositions: Boo
                 it is JsonObject && !it.string("url")!!.isEmpty()
             }.map {
                 val composition = it as JsonObject
-                val compositionObject = Composition(id = "" + composition.int("id")!!,
+                val compositionObject = Composition(id = "" + composition.string("access_key")!!,
                         name = composition.string("title")!!,
                         ownerId = "" + composition.int("owner_id")!!,
                         artist = composition.string("artist")!!,
