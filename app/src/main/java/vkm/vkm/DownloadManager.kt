@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.AsyncTask
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import vkm.vkm.ListType.*
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -125,7 +126,7 @@ object DownloadManager {
             _queue.offer(composition)
             _inProgress.remove(composition)
             currentDownload.set(null)
-            // TODO error notification
+            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -9,6 +9,7 @@
 
     <LinearLayout
             android:orientation="vertical"
+            android:layout_marginStart="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -40,7 +41,7 @@
         </android.support.constraint.ConstraintLayout>
 
 
-        <!-- clear downloaded list -->
+        <!-- Delete settings file -->
         <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -119,7 +120,7 @@
                     tools:layout_editor_absoluteX="296dp"/>
         </android.support.constraint.ConstraintLayout>
 
-        <!-- cancel download -->
+        <!-- stop current download -->
         <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -137,6 +138,32 @@
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/stop_download_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
+
+        <!-- start download -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/start_download"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/start_download_button"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"

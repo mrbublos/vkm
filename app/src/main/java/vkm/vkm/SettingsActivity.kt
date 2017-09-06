@@ -10,6 +10,7 @@ class SettingsActivity : AppCompatActivity() {
     private val clearDownloaded by bind<Button>(R.id.clear_downloaded_button)
     private val clearQueue by bind<Button>(R.id.clear_queue_button)
     private val stopDownload by bind<Button>(R.id.stop_download_button)
+    private val startDownload by bind<Button>(R.id.start_download_button)
     private val loadLists by bind<Button>(R.id.load_lists_button)
     private val dumpLists by bind<Button>(R.id.dump_lists_button)
     private val clearMusicDir by bind<Button>(R.id.clear_music_dir)
@@ -33,6 +34,8 @@ class SettingsActivity : AppCompatActivity() {
         clearQueue.setOnClickListener { DownloadManager._queue.clear() }
 
         stopDownload.setOnClickListener { DownloadManager.stopDownload("") }
+
+        startDownload.setOnClickListener { DownloadManager.downloadComposition(null) }
 
         loadLists.setOnClickListener { DownloadManager.loadAll() }
 
