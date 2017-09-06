@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.widget.FrameLayout
@@ -13,8 +14,9 @@ import android.widget.FrameLayout
 class SwipeCatcher @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-
-    val SWIPE_DISTANCE_MIN = 200
+    companion object {
+        var SWIPE_DISTANCE_MIN = 300
+    }
 
     var left: Class<out Activity>? = null
     var right: Class<out Activity>? = null
@@ -39,7 +41,8 @@ class SwipeCatcher @JvmOverloads constructor(
         val mDetector = GestureDetectorCompat(activity, this)
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-            if (e1 == null || e2 == null || Math.abs(e1.y - e2.y) > SWIPE_DISTANCE_MIN) { return false }
+            if (e1 == null || e2 == null || Math.abs(e1.x - e2.x) < SWIPE_DISTANCE_MIN) { return false }
+            Log.v("vkm", "Registered swipe distance " + Math.abs(e1.x - e2.x))
 
             val clazz: Class<*>? = if (velocityX > 0) left else right
             activity!!.startActivity(Intent(activity!!.applicationContext, clazz))
