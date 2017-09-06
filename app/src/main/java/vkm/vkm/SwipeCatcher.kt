@@ -39,7 +39,7 @@ class SwipeCatcher @JvmOverloads constructor(
         val mDetector = GestureDetectorCompat(activity, this)
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-            if (e1 == null || e2 == null || Math.abs(e1.x - e2.x) > SWIPE_DISTANCE_MIN) { return false }
+            if (e1 == null || e2 == null || Math.abs(e1.y - e2.y) > SWIPE_DISTANCE_MIN) { return false }
 
             val clazz: Class<*>? = if (velocityX > 0) left else right
             activity!!.startActivity(Intent(activity!!.applicationContext, clazz))
