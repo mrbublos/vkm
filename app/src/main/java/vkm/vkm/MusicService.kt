@@ -45,7 +45,7 @@ open class MusicService {
     open fun getUsers(activity: SearchActivity, filter: String = "", offset:Int = 0) {
         val params = mutableListOf("q" to filter,
                 "fields" to "photo_50, has_photo",
-                "count" to "20",
+                "count" to "200",
                 "offset" to offset.toString())
 
         if (!StateManager.useMock) {

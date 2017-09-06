@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import java.net.URLDecoder
 import java.util.*
 
 
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         try {
             val localProperties = Properties()
             assets.open("myprops.properties").use { localProperties.load(it) }
-            SecurityService.receipt = localProperties["receipt"] as String
+            SecurityService.receipt = URLDecoder.decode(localProperties["receipt"] as String, "UTF-8")
         } catch (e: Exception) {}
 
         DownloadManager.initialize(applicationContext)
