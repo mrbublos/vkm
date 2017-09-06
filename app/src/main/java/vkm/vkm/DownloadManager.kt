@@ -78,10 +78,12 @@ object DownloadManager {
     fun loadList(name: ListType, data: ConcurrentLinkedQueue<Composition>) {
         val file = getListFileName(name)
 
+        data.clear()
+
         if (file.exists()) {
             file.bufferedReader().use { reader ->
-                data.forEach {
-                    data.offer(reader.readLine().toComposition())
+                reader.readLines().forEach { line ->
+                    data.offer(line.toComposition())
                 }
             }
         }
@@ -89,9 +91,9 @@ object DownloadManager {
 
     private fun getListFileName(name: ListType): File {
         return when (name) {
-            downloaded -> File(context?.filesDir, "downloadedList.json")
-            queue -> File(context?.filesDir, "queue.json")
-            inProgress -> File(context?.filesDir, "inProgress.json")
+            downloaded -> File(getPropertiesDir(), "downloadedList.json")
+            queue -> File(getPropertiesDir(), "queue.json")
+            inProgress -> File(getPropertiesDir(), "inProgress.json")
         }
     }
 
@@ -99,6 +101,13 @@ object DownloadManager {
         val destinationDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).resolve("vkm")
         destinationDir.mkdirs()
         return destinationDir
+    }
+
+    fun getPropertiesDir(): File {
+        val destinationDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).resolve("vkm")
+        destinationDir.mkdirs()
+        return destinationDir
+//        return context?.filesDir
     }
 
     // download worker
@@ -148,7 +157,11 @@ object DownloadManager {
 
         override fun doInBackground(vararg params: Composition): String? {
             val composition = params[0]
-            val _url = URL(composition.url)
+            if (getDownloaded().find { it.id == composition.id } != null) {
+                Log.v("vkm", "File already was downloaded, skipping download")
+                finishDownload(composition)
+                return null
+            }
 
             val dest = dir.resolve("${composition.artist.trim().beginning(32).replace(' ', '_')}-${composition.name.trim().beginning(32).replace(' ', '_')}.mp3")
             if (dest.exists()) {
@@ -157,11 +170,11 @@ object DownloadManager {
                 return null
             }
 
-            Log.v(this.toString(), "Starting download track $_url")
-            val connection = _url.openConnection()
-            connection.connect()
-
             try {
+                val _url = URL(composition.url)
+                Log.v(this.toString(), "Starting download track $_url")
+                val connection = _url.openConnection()
+                connection.connect()
                 val totalBytes = connection.contentLength
                 val out = ByteArrayOutputStream()
                 connection.getInputStream().use {
@@ -178,14 +191,18 @@ object DownloadManager {
 
                 val bytes = out.toByteArray()
                 composition.hash = bytes.md5()
-                if (getDownloaded().find { it.hash == composition.hash } != null) { return null }
+                if (getDownloaded().find { it.hash == composition.hash } != null) {
+                    Log.v("vkm", "File already was downloaded, skipping saving")
+                    finishDownload(composition)
+                    return null
+                }
 
                 if (dir.canWrite() && dir.usableSpace > bytes.size) {
                     try {
                         dest.writeBytes(bytes)
                         finishDownload(composition)
                     } catch (e: Exception) {
-                        Log.e("vkm", "Error downloading track", e)
+                        Log.e("vkm", "Error saving track", e)
                         finishDownload(composition, false)
                         return null
                     }

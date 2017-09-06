@@ -202,13 +202,13 @@ class SearchActivity : AppCompatActivity() {
             // hiding download all until we have all tracks downloaded
             selectedUserDownloadButton.visibility = View.GONE
             selectedUserDownloadButton.setOnClickListener {
-                spinner(false)
+                spinner(true)
                 screen(true)
                 selectedUserDownloadButton.visibility = View.GONE
                 StateManager.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
                 (compositionList.adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
                 screen(false)
-                spinner(true)
+                spinner(false)
             }
 
             selectedUserButton.setOnClickListener {

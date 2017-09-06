@@ -11,7 +11,9 @@ import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KType
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaType
 
 fun <T : View> Activity.bind(@IdRes idRes: Int): Lazy<T> {
     @Suppress("UNCHECKED_CAST")
@@ -66,14 +68,16 @@ fun String.toComposition(): Composition {
     val map = mutableMapOf<String, String>()
     properties.forEach { serializedProperty ->
         val pair = serializedProperty.split(":")
-        map[pair[0]] = pair[1]
+        if (pair.size > 1) {
+            map[pair[0]] = pair[1]
+        }
     }
     composition::class.memberProperties.forEach {
         val kMutableProperty = it as KMutableProperty<*>
-        if (kMutableProperty.returnType.javaClass == Int::class) {
-            kMutableProperty.setter.call(map[it.name]!!.toInt())
-        } else {
-            kMutableProperty.setter.call(map[it.name])
+        when (kMutableProperty.returnType.javaType) {
+            Int::class.javaPrimitiveType,
+            Int::class.javaObjectType -> kMutableProperty.setter.call(composition, if (map[it.name] != null) map[it.name]!!.toInt() else 0)
+            String::class.java -> kMutableProperty.setter.call(composition, map[it.name] ?: "")
         }
     }
 
