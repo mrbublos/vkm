@@ -21,7 +21,7 @@ class SearchActivity : AppCompatActivity() {
     // active elements
     private val tabHost by bind<TabHost>(R.id.tabhost)
     private val button by bind<Button>(R.id.button)
-    private val textContainer by bind<TextView>(R.id.search)
+    private val textContainer by bind<EditText>(R.id.search)
     private val loadingSpinner by bind<ProgressBar>(R.id.loading_spinner)
 
     // selected user
