@@ -36,7 +36,7 @@ class HistoryActivity : AppCompatActivity() {
 
     private fun updateProgress() {
         Handler().postDelayed({
-            if (stopLiveUpdating || DownloadManager.getInProgress().firstOrNull() == null) { return@postDelayed }
+            if (stopLiveUpdating || (DownloadManager.getInProgress().firstOrNull() == null && DownloadManager.getQueue().isEmpty())) { return@postDelayed }
             Handler(Looper.getMainLooper()).post({
                 setInProgress(DownloadManager.getInProgress().firstOrNull())
             })
