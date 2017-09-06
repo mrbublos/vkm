@@ -180,10 +180,7 @@ class SearchActivity : AppCompatActivity() {
         selectedUserContainer.visibility = View.GONE
         StateManager.selectedElement = newSelectedElement
 
-        when (tabHost.currentTabTag) {
-            "user" -> musicService.getPlaylist(this, newSelectedElement, filterText)
-            "group" -> musicService.getPlaylist(this, newSelectedElement, filterText)
-        }
+        musicService.getPlaylist(this, newSelectedElement, filterText)
 
         // TODO hide User and Group tabs
         tabHost.currentTab = 2
