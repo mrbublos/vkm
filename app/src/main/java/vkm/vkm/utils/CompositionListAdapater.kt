@@ -22,22 +22,25 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             view?.bind<TextView>(R.id.artist)?.text = item.artist
 
             // determining icon to display
+            val bind = view?.bind<ImageView>(R.id.imageView)
+            bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_input_add))
+
             if (context is SearchActivity) {
                 DownloadManager.getDownloaded().find { it.id == item.id }?.let {
-                    view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
+                    bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
                 }
                 DownloadManager.getQueue().find { it.id == item.id }?.let {
-                    view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                    bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
                 }
                 DownloadManager.getInProgress().find { it.id == item.id }?.let {
-                    view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                    bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
                 }
             } else if (context is HistoryActivity) {
-                view?.bind<ImageView>(R.id.imageView)?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
+                bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
             }
 
             // adding icon click listener
-            view?.bind<ImageView>(R.id.imageView)?.setOnClickListener { v ->
+            bind?.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
             }
         }
