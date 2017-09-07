@@ -167,7 +167,9 @@ object DownloadManager {
                 return null
             }
 
-            val dest = dir.resolve("${composition.artist.trim().beginning(32).replace(' ', '_')}-${composition.name.trim().beginning(32).replace(' ', '_')}.mp3")
+            val artistNormalized = composition.artist.trim().beginning(32).replace(' ', '_').replace('/', '_')
+            val nameNormalized = composition.name.trim().beginning(32).replace(' ', '_').replace('/', '_')
+            val dest = dir.resolve("$artistNormalized-$nameNormalized.mp3")
             if (dest.exists()) {
                 Log.v("vkm", "File already exists, skipping download")
                 finishDownload(composition)

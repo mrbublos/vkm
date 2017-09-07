@@ -18,6 +18,8 @@ class HistoryActivity : AppCompatActivity() {
     private val inProgressList by bind<LinearLayout>(R.id.tab3)
     private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
     private val progressBar by bind<ProgressBar>(R.id.downloadProgress)
+    private val button by bind<Button>(R.id.button)
+    private val filterText by bind<EditText>(R.id.search)
     private var stopLiveUpdating = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +34,7 @@ class HistoryActivity : AppCompatActivity() {
 
         initializeTabs()
         updateProgress()
+        initializeButton()
     }
 
     private fun updateProgress() {
@@ -67,6 +70,17 @@ class HistoryActivity : AppCompatActivity() {
         tabHost.setOnTabChangedListener(TabHost.OnTabChangeListener(this::handleTabSwitch))
     }
 
+    private fun initializeButton() {
+        button.setOnClickListener {
+            val text = filterText.text.toString()
+
+            when (tabHost.currentTabTag) {
+                "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded().filter { it.matches(text) })
+                "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue().filter { it.matches(text) }, removeFromQueue)
+                "inProgress" -> {}
+            }
+        }
+    }
 
     fun setInProgress(composition: Composition?) {
         inProgressList.bind<ImageView>(R.id.imageView).visibility = View.GONE

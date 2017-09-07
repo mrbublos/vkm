@@ -88,4 +88,9 @@ fun Composition.uid(): String {
     return "${this.ownerId}/${this.id}"
 }
 
+
+fun Composition.matches(string: String): Boolean {
+    return this.name.contains(string) || this.artist.contains(string)
+}
+
 private fun <T> unsafeLazy(initializer: () -> T) = lazy(LazyThreadSafetyMode.NONE, initializer)
