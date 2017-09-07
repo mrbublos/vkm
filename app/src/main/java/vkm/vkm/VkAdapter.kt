@@ -10,7 +10,7 @@ import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import java.net.Proxy
 
-class VkParsers(private val activity: SearchActivity, removeOldCompositions: Boolean = true) {
+class VkParsers(private val activity: SearchActivity) {
     val parseUserList = { result: JsonObject? ->
         if (result == null) {
             activity.setUserList(listOf())
@@ -67,7 +67,7 @@ class VkParsers(private val activity: SearchActivity, removeOldCompositions: Boo
                 compositionObject
             }
             StateManager.totalCompositions = (result["response"] as JsonObject).int("count")!!
-            activity.setCompositionsList(compositions, removeOldCompositions)
+            activity.setCompositionsList(compositions)
         }
     }
 

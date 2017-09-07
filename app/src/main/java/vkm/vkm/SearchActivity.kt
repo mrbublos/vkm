@@ -96,6 +96,8 @@ class SearchActivity : AppCompatActivity() {
                 "user" -> {
                     if (StateManager.selectedElement != null) {
                         musicService.getPlaylist(this, StateManager.selectedElement, filterText)
+                        StateManager.compositionElementList.clear()
+                        StateManager.currentOffset = 0
                     } else {
                         musicService.getUsers(this, filterText)
                     }
@@ -103,11 +105,17 @@ class SearchActivity : AppCompatActivity() {
                 "group" -> {
                     if (StateManager.selectedElement != null) {
                         musicService.getPlaylist(this, StateManager.selectedElement, filterText)
+                        StateManager.compositionElementList.clear()
+                        StateManager.currentOffset = 0
                     } else {
                         musicService.getGroups(this, filterText)
                     }
                 }
-                "tracks" -> musicService.getCompositions(this, filterText)
+                "tracks" -> {
+                    StateManager.compositionElementList.clear()
+                    StateManager.currentOffset = 0
+                    musicService.getCompositions(this, filterText)
+                }
             }
 
             return@setOnClickListener
@@ -141,14 +149,9 @@ class SearchActivity : AppCompatActivity() {
         groupList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
-    fun setCompositionsList(data: List<Composition>, removeOld: Boolean = false) {
+    fun setCompositionsList(data: List<Composition>) {
         screen(false)
         spinner(false)
-
-        if (removeOld) {
-            StateManager.compositionElementList.clear()
-            StateManager.currentOffset = 0
-        }
 
         if (StateManager.compositionElementList != data) {
             StateManager.compositionElementList.addAll(data)

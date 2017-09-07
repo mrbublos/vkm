@@ -23,7 +23,7 @@ open class MusicService {
                 "shuffle" to "0")
 
         if (!StateManager.useMock) {
-            callApi(true,"audio.get", params, VkParsers(activity, offset == 0).parsePlaylist)
+            callApi(true,"audio.get", params, VkParsers(activity).parsePlaylist)
         } else {
             getMock().getPlaylist(activity, userOrGroup, "", 0)
         }
