@@ -83,7 +83,11 @@ object DownloadManager {
         if (file.exists()) {
             file.bufferedReader().use { reader ->
                 reader.readLines().forEach { line ->
-                    data.offer(line.toComposition())
+                    try {
+                        data.offer(line.toComposition())
+                    } catch(e: Exception) {
+                        Log.e("vkm", "Unable to parse composition, skipping")
+                    }
                 }
             }
         }
