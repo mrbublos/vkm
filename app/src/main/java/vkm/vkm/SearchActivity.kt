@@ -220,8 +220,6 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun screen(locked: Boolean) {
-        textContainer.isFocusable = !locked
-        textContainer.isClickable = !locked
         button.isFocusable = !locked
         button.isClickable = !locked
     }
