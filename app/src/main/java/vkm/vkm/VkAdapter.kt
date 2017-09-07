@@ -110,7 +110,7 @@ object VkApi {
             val resp = result.component2()
             val res = result.component3()
 
-            if (resp.httpStatusCode == 200) {
+            if (resp.statusCode == 200) {
                 SecurityService.vkAccessToken = res.component1()?.toJson()?.string("access_token")
                 SecurityService.dumpProperties()
                 resultString = "ok"
