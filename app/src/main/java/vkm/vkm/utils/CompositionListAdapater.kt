@@ -26,17 +26,24 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             var iconSet = false
 
             if (context is SearchActivity) {
-                DownloadManager.getDownloaded().find { it.uid() == item.uid() }?.let {
-                    bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
+                if (item.url.trim().isEmpty()) {
                     iconSet = true
-                }
-                DownloadManager.getQueue().find { it.uid() == item.uid() }?.let {
-                    bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
-                    iconSet = true
-                }
-                DownloadManager.getInProgress().find { it.uid() == item.uid() }?.let {
-                    bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
-                    iconSet = true
+                    bind?.visibility = View.GONE
+                } else {
+                    bind?.visibility = View.VISIBLE
+
+                    DownloadManager.getDownloaded().find { it.uid() == item.uid() }?.let {
+                        bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
+                        iconSet = true
+                    }
+                    DownloadManager.getQueue().find { it.uid() == item.uid() }?.let {
+                        bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                        iconSet = true
+                    }
+                    DownloadManager.getInProgress().find { it.uid() == item.uid() }?.let {
+                        bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                        iconSet = true
+                    }
                 }
             } else if (context is HistoryActivity) {
                 bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
