@@ -148,11 +148,11 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
         // should be the last computed parameter
         if (addSignature) { addSignature(path, parameters) }
         val httpGet = "$_apiUrl$path".httpGet(parameters)
-        httpGet.httpHeaders.put("User-Agent", _userAgent)
+        httpGet.headers.put("User-Agent", _userAgent)
         Log.v("vkAPI",  "Sending request " + httpGet.cUrlString())
         val (_, _, result) = httpGet.responseString()
         Log.v("vkAPI", "Response received " + result.component1())
-        return result.component1()?.toJson()
+        return try { result.component1()?.toJson() } catch (e: Exception) { null }
     }
 
     override fun onPostExecute(result: JsonObject?) {
