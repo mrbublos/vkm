@@ -84,4 +84,8 @@ fun String.toComposition(): Composition {
     return composition
 }
 
+fun Composition.uid(): String {
+    return "${this.ownerId}/${this.id}"
+}
+
 private fun <T> unsafeLazy(initializer: () -> T) = lazy(LazyThreadSafetyMode.NONE, initializer)

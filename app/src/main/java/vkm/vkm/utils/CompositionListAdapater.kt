@@ -23,21 +23,27 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
 
             // determining icon to display
             val bind = view?.bind<ImageView>(R.id.imageView)
-            bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_input_add))
+            var iconSet = false
 
             if (context is SearchActivity) {
-                DownloadManager.getDownloaded().find { it.id == item.id }?.let {
+                DownloadManager.getDownloaded().find { it.uid() == item.uid() }?.let {
                     bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
+                    iconSet = true
                 }
-                DownloadManager.getQueue().find { it.id == item.id }?.let {
+                DownloadManager.getQueue().find { it.uid() == item.uid() }?.let {
                     bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                    iconSet = true
                 }
-                DownloadManager.getInProgress().find { it.id == item.id }?.let {
+                DownloadManager.getInProgress().find { it.uid() == item.uid() }?.let {
                     bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                    iconSet = true
                 }
             } else if (context is HistoryActivity) {
                 bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
+                iconSet = true
             }
+
+            if (!iconSet) { bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_input_add)) }
 
             // adding icon click listener
             bind?.setOnClickListener { v ->
