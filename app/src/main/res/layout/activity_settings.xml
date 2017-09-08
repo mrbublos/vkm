@@ -68,6 +68,32 @@
         </android.support.constraint.ConstraintLayout>
 
 
+        <!-- Rehash downloaded list -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/rehash_downloaded_composition"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/rehash_downloaded_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
+
         <!-- clear downloaded list -->
         <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"

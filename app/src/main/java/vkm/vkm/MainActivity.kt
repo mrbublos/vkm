@@ -75,14 +75,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        Log.v("vkm", "Dumping all lists")
+        "Dumping all lists".log()
         DownloadManager.stopDownload("")
         DownloadManager.dumpAll()
     }
 
     override fun onStop() {
         super.onStop()
-        Log.v("vkm", "Dumping all lists")
+        "Dumping all lists".log()
         DownloadManager.stopDownload("")
         DownloadManager.dumpAll()
     }

@@ -29,6 +29,7 @@
     <string name="remove_all_downloaded_music">Remove all downloaded music</string>
     <string name="remove_all_settings">Remove all settings</string>
     <string name="start_download">Start download</string>
+    <string name="rehash_downloaded_composition">Rehash downloaded composition</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

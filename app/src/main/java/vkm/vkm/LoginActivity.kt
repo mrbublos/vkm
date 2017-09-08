@@ -58,7 +58,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    fun areValuesValid(): Boolean {
+    private fun areValuesValid(): Boolean {
         if (loginName.text.isEmpty() || password.text.isEmpty()) {
             error.text = getString(R.string.empty_password_login)
             return false
@@ -67,7 +67,7 @@ class LoginActivity : AppCompatActivity() {
         return true
     }
 
-    fun lockUnlockScreen(lock: Boolean) {
+    private fun lockUnlockScreen(lock: Boolean) {
         loginName.isFocusable = !lock
         loginName.isClickable = !lock
         password.isFocusable = !lock
@@ -80,7 +80,7 @@ class LoginActivity : AppCompatActivity() {
 class LoginPerformer(val activity: LoginActivity): AsyncTask<String, Any, String>() {
 
     override fun onPostExecute(result: String) {
-        Log.v(this.toString(), "Login result $result")
+        "Login result $result".log()
         activity.loginCallback(result)
     }
 

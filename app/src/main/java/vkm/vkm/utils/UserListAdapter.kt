@@ -14,6 +14,7 @@ import android.widget.TextView
 import vkm.vkm.R
 import vkm.vkm.User
 import vkm.vkm.bind
+import vkm.vkm.log
 import java.io.ByteArrayOutputStream
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
@@ -54,7 +55,7 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
     override fun onPostExecute(result: Pair<ImageView, User>) {
         val (view, user) = result
         user.photo?.let { view.setImageBitmap(user.photo) }
-        Log.v(this.toString(), "Bitmap set")
+        "Bitmap set".log()
     }
 
 
@@ -68,7 +69,7 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
         user.photoUrl?.let {
             val _url = URL(user.photoUrl)
             try {
-                Log.v(this.toString(), "Starting download $_url")
+                "Starting download $_url".log()
                 val connection = _url.openConnection()
                 connection.connect()
 
@@ -83,7 +84,7 @@ class AsyncPhotoDownloader : AsyncTask<Any, Unit, Pair<ImageView, User>>() {
                 Log.e(this.toString(), "Error downloading image", e)
             }
 
-            Log.v(this.toString(), "Download finished $_url")
+            "Download finished $_url".log()
         }
         return Pair(input[1] as ImageView, user)
     }

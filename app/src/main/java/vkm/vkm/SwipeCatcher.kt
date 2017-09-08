@@ -42,7 +42,7 @@ class SwipeCatcher @JvmOverloads constructor(
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
             if (e1 == null || e2 == null || Math.abs(e1.x - e2.x) < SWIPE_DISTANCE_MIN) { return false }
-            Log.v("vkm", "Registered swipe distance " + Math.abs(e1.x - e2.x))
+            "Registered swipe distance ${Math.abs(e1.x - e2.x)}".log()
 
             val clazz: Class<*>? = if (velocityX > 0) left else right
             activity!!.startActivity(Intent(activity!!.applicationContext, clazz))

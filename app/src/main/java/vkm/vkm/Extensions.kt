@@ -38,7 +38,8 @@ fun ByteArray?.toHexString(): String {
     return ret.toString()
 }
 
-fun ByteArray.md5(): String {
+fun ByteArray?.md5(): String {
+    if (this == null) { return ""}
     return MessageDigest.getInstance("MD5").digest(this).toHexString()
 }
 
@@ -61,12 +62,18 @@ fun String?.beginning(length: Int): String {
     return filterIndexed({ index, _ -> index < length })
 }
 
+fun String.log() {
+    if (this.isNotEmpty()) {
+        Log.v("vkm", this)
+    }
+}
+
 fun String.toComposition(): Composition {
     val composition = Composition()
-    val properties = split("||")
+    val properties = split("|VKM|")
     val map = mutableMapOf<String, String>()
     properties.forEach { serializedProperty ->
-        val pair = serializedProperty.split(":")
+        val pair = serializedProperty.split("=VKM=")
         if (pair.size > 1) {
             map[pair[0]] = pair[1]
         }
@@ -91,13 +98,8 @@ fun String?.toast(context: Context?, length: Int = Toast.LENGTH_SHORT) {
 }
 
 fun Composition.serialize(): String {
-    return Composition::class.memberProperties.joinToString(separator = "||") { "${it.name}:${it.get(this)}" }
+    return Composition::class.memberProperties.joinToString(separator = "|VKM|") { "${it.name}=VKM=${it.get(this)}" }
 }
-
-fun Composition.uid(): String {
-    return "$ownerId/$id"
-}
-
 
 fun Composition.matches(string: String): Boolean {
     return name.contains(string) || artist.contains(string)

@@ -24,7 +24,7 @@ object DownloadManager {
 
     fun initialize(context: Context) {
         this.context = context
-        Log.v("vkm", "Loading all lists")
+        "Loading all lists".log()
         loadAll()
     }
 
@@ -35,10 +35,20 @@ object DownloadManager {
     }
 
     fun dumpAll() {
-        Log.v("vkm", "Dumping all lists")
+        "Dumping all lists".log()
         dumpList(downloaded, getDownloaded())
         dumpList(queue, getQueue())
         dumpList(inProgress, getInProgress())
+    }
+
+    fun clearDownloaded() {
+        _downloadedList.clear()
+        "Cleared downloaded list".log()
+    }
+
+    fun clearQueue() {
+        _queue.clear()
+        "Cleared queue list".log()
     }
 
     fun downloadComposition(composition: Composition?) {
@@ -62,19 +72,22 @@ object DownloadManager {
         _queue.remove(_queue.find { it.id == composition.id })
     }
 
-    fun dumpList(name: ListType, data: List<Composition> = listOf()) {
+    @Synchronized
+    private fun dumpList(name: ListType, data: List<Composition> = listOf()) {
         val file = getListFileName(name)
         if (file.exists()) { file.delete() }
 
         file.bufferedWriter().use { writer ->
             data.forEach {
-                writer.write(it.serialize())
+                val serialize = it.serialize()
+                writer.write(serialize)
+                "Serializing composition ${serialize}".log()
                 writer.newLine()
             }
         }
     }
 
-    fun loadList(name: ListType, data: ConcurrentLinkedQueue<Composition>) {
+    private fun loadList(name: ListType, data: ConcurrentLinkedQueue<Composition>) {
         val file = getListFileName(name)
 
         data.clear()
@@ -110,7 +123,6 @@ object DownloadManager {
         val destinationDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).resolve("vkm")
         destinationDir.mkdirs()
         return destinationDir
-//        return context?.filesDir
     }
 
     // download worker
@@ -123,7 +135,7 @@ object DownloadManager {
                 _queue.remove(itemToDownload)
                 _inProgress.offer(itemToDownload)
                 if (itemToDownload.url.isEmpty()) {
-                    Log.v("vkm", "Track is not available for download, skipping")
+                    "Track is not available for download, skipping".log()
                     // TODO search track on alternative sources
                     finishDownload(itemToDownload, false)
                 } else {
@@ -144,7 +156,7 @@ object DownloadManager {
 
     private fun finishDownload(composition: Composition, wasDownloaded: Boolean = true) {
         val downloaded = currentDownload.get()
-        Log.v("vkm", "Finished downloading composition " + composition.artist + " " + composition.name)
+        "Finished downloading composition " + composition.artist + " ${composition.name}".log()
         if (currentDownload.compareAndSet(composition, null)) {
             if (wasDownloaded) { _downloadedList.offer(downloaded) }
             _inProgress.remove(downloaded)
@@ -161,21 +173,21 @@ object DownloadManager {
         override fun doInBackground(vararg params: Composition): String? {
             val composition = params[0]
             if (getDownloaded().find { it.id == composition.id } != null) {
-                Log.v("vkm", "File already was downloaded, skipping download")
+                "File already was downloaded, skipping download".log()
                 finishDownload(composition)
                 return null
             }
 
             val dest = dir.resolve(composition.fileName())
             if (dest.exists()) {
-                Log.v("vkm", "File already exists, skipping download")
+                "File already exists, skipping download".log()
                 finishDownload(composition)
                 return null
             }
 
             try {
                 val _url = URL(composition.url)
-                Log.v(this.toString(), "Starting download track $_url")
+                "Starting download track $_url".log()
                 val connection = _url.openConnection()
                 connection.connect()
                 val totalBytes = connection.contentLength
@@ -194,8 +206,8 @@ object DownloadManager {
 
                 val bytes = out.toByteArray()
                 composition.hash = bytes.md5()
-                if (getDownloaded().find { it.hash == composition.hash } != null) {
-                    Log.v("vkm", "File already was downloaded, skipping saving")
+                if (getDownloaded().find { it.hash.isNotEmpty() && it.hash == composition.hash } != null) {
+                    "File already was downloaded, skipping saving".log()
                     finishDownload(composition)
                     return null
                 }
@@ -233,6 +245,14 @@ object DownloadManager {
 
     fun removeAllMusic() {
         getDownloadDir().deleteRecursively()
+    }
+
+    @Synchronized
+    fun rehashAndDump() {
+        _downloadedList.filter { it.hash.isEmpty() }.forEach {
+            it.hash = it.localFile()?.readBytes().md5()
+        }
+        dumpList(downloaded, getDownloaded())
     }
 }
 

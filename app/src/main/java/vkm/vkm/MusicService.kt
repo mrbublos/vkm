@@ -87,25 +87,25 @@ open class MusicService {
 
 class MusicServiceMock : MusicService() {
     override fun getPlaylist(activity: SearchActivity, userOrGroup: User?, filter: String, offset:Int) {
-        Log.v("vkMOCK", "Running getUserPlaylistMock")
+        "Running getUserPlaylistMock".log()
         val mock = activity.assets.open("getUserPlayList.json").readAll()
         VkParsers(activity).parsePlaylist.invoke(mock.toJson())
     }
 
     override fun getGroups(activity: SearchActivity, filter: String, offset:Int) {
-        Log.v("vkMOCK", "Running getGroups")
+        "Running getGroups".log()
         val mock = activity.assets.open("getGroups.json").readAll()
         VkParsers(activity).parseGroupList.invoke(mock.toJson())
     }
 
     override fun getUsers(activity: SearchActivity, filter: String, offset:Int) {
-        Log.v("vkMOCK", "Running getUsers")
+        "Running getUsers".log()
         val mock = activity.assets.open("getUsers.json").readAll()
         VkParsers(activity).parseUserList.invoke(mock.toJson())
     }
 
     override fun getCompositions(activity: SearchActivity, filter: String, offset:Int) {
-        Log.v("vkMOCK", "Running getCompositions")
+        "Running getCompositions".log()
         val mock = activity.assets.open("getCompositionList.json").readAll()
         VkParsers(activity).parseCompositionList.invoke(mock.toJson())
     }

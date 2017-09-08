@@ -137,7 +137,7 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
     }
 
     override fun doInBackground(vararg input: Pair<String, MutableList<Pair<String, String>>>): JsonObject? {
-        Log.v("vkm", "Starting VkApiCallTask")
+        "Starting VkApiCallTask".log()
         val parameters = input[0].component2()
         _params.addAll(parameters)
         _method = input[0].component1()
@@ -149,9 +149,9 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
         if (addSignature) { addSignature(path, parameters) }
         val httpGet = "$_apiUrl$path".httpGet(parameters)
         httpGet.headers.put("User-Agent", _userAgent)
-        Log.v("vkAPI",  "Sending request " + httpGet.cUrlString())
+        "Sending request ${httpGet.cUrlString()}".log()
         val (_, _, result) = httpGet.responseString()
-        Log.v("vkAPI", "Response received " + result.component1())
+        "Response received ${result.component1()}".log()
         return try { result.component1()?.toJson() } catch (e: Exception) { null }
     }
 
@@ -164,7 +164,7 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
                     return
                 }
 
-                if ((result?.get("error") as JsonObject)["error_code"] == 25 && _method != "auth.refreshToken" && recursionLevel == 0) {
+                if ((result["error"] as JsonObject)["error_code"] == 25 && _method != "auth.refreshToken" && recursionLevel == 0) {
                     // token confirmation required, refreshing token
                     VkApiCallTask({ refreshTokenResult ->
                         SecurityService.vkAccessToken = (refreshTokenResult!!["response"] as JsonObject)["token"] as String
@@ -183,8 +183,8 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
 
     private fun addSignature(path: String, params: MutableList<Pair<String, String>>) {
         val string = path + "?" + params.joinToString("&") { "${it.first}=${it.second}" } + SecurityService.appSecret
-        Log.v("", "Signature string " + string)
+        "Signature string $string".log()
         params.add("sig" to string.md5())
-        Log.v("vkAPI", "Signature is " + string.md5())
+        "Signature is ${string.md5()}".log()
     }
 }
