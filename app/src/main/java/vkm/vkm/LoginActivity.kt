@@ -26,9 +26,9 @@ class LoginActivity : AppCompatActivity() {
         initializeButtons()
     }
 
-    fun initializeButtons() {
+    private fun initializeButtons() {
 
-        button.setOnTouchListener { view, event ->
+        button.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 lockUnlockScreen(true)
 

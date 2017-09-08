@@ -23,37 +23,33 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
 
             // determining icon to display
             val bind = view?.bind<ImageView>(R.id.imageView)
-            var iconSet = false
+            var withAction = false
 
             if (context is SearchActivity) {
                 if (item.url.trim().isEmpty()) {
-                    iconSet = true
-                    bind?.visibility = View.GONE
+                    withAction = false
+                    bind?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
                 } else {
-                    bind?.visibility = View.VISIBLE
-
                     DownloadManager.getDownloaded().find { it.uid() == item.uid() }?.let {
                         bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
-                        iconSet = true
+                        withAction = true
                     }
                     DownloadManager.getQueue().find { it.uid() == item.uid() }?.let {
                         bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
-                        iconSet = true
+                        withAction = false
                     }
                     DownloadManager.getInProgress().find { it.uid() == item.uid() }?.let {
                         bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
-                        iconSet = true
+                        withAction = false
                     }
                 }
             } else if (context is HistoryActivity) {
                 bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
-                iconSet = true
+                withAction = true
             }
 
-            if (!iconSet) { bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_input_add)) }
-
             // adding icon click listener
-            bind?.setOnClickListener { v ->
+            bind?.takeIf { withAction }?.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
             }
         }

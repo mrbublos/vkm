@@ -4,6 +4,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp">
 
+    <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="5dp"
+            app:srcCompat="@drawable/ic_play"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/audioControl"/>
+
     <TextView
             android:text=""
             android:layout_marginStart="5dp"
@@ -11,12 +20,13 @@
             android:layout_height="25dp"
             android:id="@+id/artist"
             android:layout_below="@+id/name"
-            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@id/audioControl"
             android:layout_toStartOf="@+id/imageView"/>
 
     <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_marginEnd="5dp"
             app:srcCompat="@drawable/ic_add"
             android:layout_centerVertical="true"
@@ -30,7 +40,7 @@
             android:layout_height="20dp"
             android:id="@+id/name"
             android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
+            android:layout_toEndOf="@id/audioControl"
             android:layout_toStartOf="@+id/imageView"/>
 
 </RelativeLayout>

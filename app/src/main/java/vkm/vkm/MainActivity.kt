@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     val EXTERNAL_STORAGE_WRITE_PERMISSION = 1
+    var initialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,14 +36,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        DownloadManager.initialize(applicationContext)
-        DownloadManager.downloadComposition(null)
+        if (initialized) {
+            DownloadManager.initialize(applicationContext)
+            DownloadManager.downloadComposition(null)
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        DownloadManager.initialize(applicationContext)
-        DownloadManager.downloadComposition(null)
+        if (initialized) {
+            DownloadManager.initialize(applicationContext)
+            DownloadManager.downloadComposition(null)
+        }
     }
 
     private fun initialize() {
@@ -65,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             startActivity(Intent(applicationContext, LoginActivity::class.java))
         }
+        initialized = true
     }
 
     override fun onPause() {
