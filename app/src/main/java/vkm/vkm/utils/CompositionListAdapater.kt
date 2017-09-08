@@ -22,9 +22,17 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             view?.bind<TextView>(R.id.artist)?.text = item.artist
 
             // determining icon to display
-            val actionButton = view?.bind<ImageView>(R.id.imageView)
             var withAction = false
-            val trackAvailable = item.url.trim().isNotEmpty()
+            val trackAvailable = item.hash.isNotEmpty() || item.url.trim().isNotEmpty()
+
+            val actionButton = view?.bind<ImageView>(R.id.imageView)
+            val audioControl = view?.bind<ImageView>(R.id.audioControl)
+
+            if (trackAvailable) {
+                audioControl?.setOnClickListener { onPlayPressed(audioControl, item) }
+            } else {
+                audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
+            }
 
             if (context is SearchActivity) {
                 if (trackAvailable) {
@@ -39,6 +47,7 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
                     DownloadManager.getInProgress().find { it.equalsTo(item) }?.let {
                         actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
                         withAction = false
+                        audioControl?.visibility = View.GONE
                     }
                 } else {
                     withAction = false
@@ -53,16 +62,6 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             actionButton?.takeIf { withAction }?.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
             }
-
-            val audioControl = view?.bind<ImageView>(R.id.audioControl)
-
-            if (trackAvailable) {
-                audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_play))
-                audioControl?.setOnClickListener { onPlayPressed(audioControl, item) }
-            } else {
-                audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
-            }
-
         }
 
         return view

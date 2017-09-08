@@ -84,8 +84,9 @@ class HistoryActivity : AppCompatActivity() {
         }
     }
 
-    fun setInProgress(composition: Composition?) {
+    private fun setInProgress(composition: Composition?) {
         inProgressList.bind<ImageView>(R.id.imageView).visibility = View.GONE
+        inProgressList.bind<ImageView>(R.id.audioControl).visibility = View.GONE
         if (composition == null) {
             inProgressList.bind<TextView>(R.id.artist).text = null
             inProgressList.bind<TextView>(R.id.name).text = null
