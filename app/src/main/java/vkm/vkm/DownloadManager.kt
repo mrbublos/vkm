@@ -254,6 +254,20 @@ object DownloadManager {
         }
         dumpList(downloaded, getDownloaded())
     }
+
+    @Synchronized
+    fun restoreDownloaded() {
+        clearDownloaded()
+        getDownloadDir().listFiles().forEach { file ->
+            takeIf { file.isFile }.let {
+                val fileName = file.name.beginning(file.name.length - 4) // cutting .mp3
+                val data = fileName.replace('_', ' ').split('-')
+                _downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
+            }
+        }
+        "Download list restored".log()
+        dumpList(downloaded, getDownloaded())
+    }
 }
 
 enum class ListType {

@@ -40,6 +40,33 @@
                     tools:layout_editor_absoluteX="344dp"/>
         </android.support.constraint.ConstraintLayout>
 
+        <!-- show dangerous commands -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/show_dangerous_commands"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Switch
+                    android:id="@+id/show_danger_commands"
+                    android:textOn="@string/enabled"
+                    android:textOff="@string/disabled"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:checked="false"
+                    tools:layout_editor_absoluteX="344dp"/>
+        </android.support.constraint.ConstraintLayout>
 
         <!-- Delete settings file -->
         <android.support.constraint.ConstraintLayout
@@ -86,6 +113,32 @@
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/rehash_downloaded_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
+
+        <!-- Restore downloaded list -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/restore_downloaded_list"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/restore_downloaded_button"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
