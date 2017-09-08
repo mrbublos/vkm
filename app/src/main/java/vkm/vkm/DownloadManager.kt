@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.AsyncTask
 import android.os.Environment
 import android.util.Log
-import android.widget.Toast
 import vkm.vkm.ListType.*
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -139,7 +138,7 @@ object DownloadManager {
             _queue.offer(composition)
             _inProgress.remove(composition)
             currentDownload.set(null)
-            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+            error.toast(context)
         }
     }
 
@@ -167,9 +166,7 @@ object DownloadManager {
                 return null
             }
 
-            val artistNormalized = composition.artist.trim().beginning(32).replace(' ', '_').replace('/', '_')
-            val nameNormalized = composition.name.trim().beginning(32).replace(' ', '_').replace('/', '_')
-            val dest = dir.resolve("$artistNormalized-$nameNormalized.mp3")
+            val dest = dir.resolve(composition.fileName())
             if (dest.exists()) {
                 Log.v("vkm", "File already exists, skipping download")
                 finishDownload(composition)

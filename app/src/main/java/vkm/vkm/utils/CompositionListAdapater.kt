@@ -17,43 +17,75 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
 
         val item = getItem(position)
 
-        item?.let {
+        item?.let { item ->
             view?.bind<TextView>(R.id.name)?.text = item.name
             view?.bind<TextView>(R.id.artist)?.text = item.artist
 
             // determining icon to display
-            val bind = view?.bind<ImageView>(R.id.imageView)
+            val actionButton = view?.bind<ImageView>(R.id.imageView)
             var withAction = false
+            val trackAvailable = item.url.trim().isNotEmpty()
 
             if (context is SearchActivity) {
-                if (item.url.trim().isEmpty()) {
-                    withAction = false
-                    bind?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
+                if (trackAvailable) {
+                    withAction = true
+                    DownloadManager.getDownloaded().find { it.equalsTo(item) }?.let {
+                        actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
+                    }
+                    DownloadManager.getQueue().find { it.equalsTo(item) }?.let {
+                        actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                        withAction = false
+                    }
+                    DownloadManager.getInProgress().find { it.equalsTo(item) }?.let {
+                        actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+                        withAction = false
+                    }
                 } else {
-                    DownloadManager.getDownloaded().find { it.uid() == item.uid() }?.let {
-                        bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
-                        withAction = true
-                    }
-                    DownloadManager.getQueue().find { it.uid() == item.uid() }?.let {
-                        bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
-                        withAction = false
-                    }
-                    DownloadManager.getInProgress().find { it.uid() == item.uid() }?.let {
-                        bind?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
-                        withAction = false
-                    }
+                    withAction = false
+                    actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
                 }
             } else if (context is HistoryActivity) {
-                bind?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
+                actionButton?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
                 withAction = true
             }
 
             // adding icon click listener
-            bind?.takeIf { withAction }?.setOnClickListener { v ->
+            actionButton?.takeIf { withAction }?.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
             }
+
+            val audioControl = view?.bind<ImageView>(R.id.audioControl)
+
+            if (trackAvailable) {
+                audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_play))
+                audioControl?.setOnClickListener { onPlayPressed(audioControl, item) }
+            } else {
+                audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
+            }
+
         }
 
         return view
+    }
+
+    private fun onPlayPressed(audioControl: ImageView, item: Composition) {
+        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
+        val onStop = { audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_play)) }
+        val playerStarted = if (item.hash.isEmpty()) {
+            // play from url
+            MusicPlayer.play(item.url, onStop)
+        } else {
+            // play from disk
+            MusicPlayer.play(item.fileName(), onStop)
+        }
+        if (!playerStarted) {
+            onStop()
+        } else {
+            audioControl.setOnClickListener {
+                MusicPlayer.stop()
+                onStop()
+                audioControl.setOnClickListener { onPlayPressed(audioControl, item) }
+            }
+        }
     }
 }

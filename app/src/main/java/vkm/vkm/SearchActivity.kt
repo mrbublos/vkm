@@ -56,6 +56,8 @@ class SearchActivity : AppCompatActivity() {
 
         selectUserOrGroup(StateManager.selectedElement)
         spinner(false)
+
+        MusicPlayer.context = this
     }
 
     private fun initializeTabs() {
@@ -175,7 +177,9 @@ class SearchActivity : AppCompatActivity() {
     private val compositionTouchListener = { composition: Composition, view: View ->
         if (!DownloadManager.getDownloaded().contains(composition)) {
             DownloadManager.downloadComposition(composition)
-            view.bind<ImageView>(R.id.imageView).setImageDrawable(getDrawable(R.drawable.ic_downloading))
+            val actionButton = view.bind<ImageView>(R.id.imageView)
+            actionButton.setImageDrawable(getDrawable(R.drawable.ic_downloading))
+            actionButton.setOnClickListener {}
         }
     }
 
@@ -220,6 +224,11 @@ class SearchActivity : AppCompatActivity() {
 
     private fun showDownloadAllButton() {
         selectedUserDownloadButton.visibility = if (StateManager.enableDownloadAll) View.VISIBLE else View.GONE
+    }
+
+    override fun onStop() {
+        super.onStop()
+        MusicPlayer.stop()
     }
 
     private fun screen(locked: Boolean) {

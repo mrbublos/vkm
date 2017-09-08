@@ -32,6 +32,8 @@ class HistoryActivity : AppCompatActivity() {
 
         stopLiveUpdating = false
 
+        MusicPlayer.context = this
+
         initializeTabs()
         updateProgress()
         initializeButton()
@@ -108,9 +110,14 @@ class HistoryActivity : AppCompatActivity() {
         updateProgress()
     }
 
+    override fun onStop() {
+        super.onStop()
+        MusicPlayer.stop()
+    }
+
     private fun handleTabSwitch(tabId: String) {
         when (tabId) {
-            "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded())
+            "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded(), remove)
             "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue(), removeFromQueue)
             "inProgress" -> {
                 stopLiveUpdating = false
@@ -123,6 +130,18 @@ class HistoryActivity : AppCompatActivity() {
         composition?.let {
             DownloadManager.removeFromQueue(composition)
             (view.parent as View).visibility = View.GONE
+        }
+    }
+
+    private val remove = { composition: Composition?, view: View ->
+        composition?.let {
+            try {
+                composition.localFile()?.delete()
+                DownloadManager._downloadedList.remove(composition)
+                (view.parent as View).visibility = View.GONE
+            } catch (e: Exception) {
+                "Unable to remove track".toast(this)
+            }
         }
     }
 }
