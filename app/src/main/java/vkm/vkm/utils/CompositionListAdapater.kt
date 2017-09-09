@@ -81,7 +81,9 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
 
     private fun onPlayPressed(audioControl: ImageView, item: Composition) {
         MusicPlayer.stop(true)
-        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
+        // TODO loading icon
+//        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+//        (audioControl.parent as View).invalidate()
         val onStop = { audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_play)) }
         val seekBar = (audioControl.parent as View).bind<SeekBar>(R.id.seekBar)
         val trackLength = if (item.hash.isEmpty()) {
@@ -94,6 +96,7 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
         if (trackLength == 0) {
             onStop()
         } else {
+            audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
             initSeekBar(seekBar)
             audioControl.setOnClickListener {
                 MusicPlayer.stop()
