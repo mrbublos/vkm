@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
-                android:layout_height="50dp">
+                android:layout_height="wrap_content">
 
     <ImageView
             android:layout_width="35dp"
@@ -11,18 +11,8 @@
             app:srcCompat="@drawable/ic_play"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
+            android:layout_above="@+id/middle"
             android:id="@+id/audioControl"/>
-
-    <TextView
-            android:text=""
-            android:layout_marginStart="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="25dp"
-            android:id="@+id/artist"
-            android:layout_below="@+id/name"
-            android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@id/audioControl"
-            android:layout_toStartOf="@+id/imageView"/>
 
     <ImageView
             android:layout_width="25dp"
@@ -33,14 +23,36 @@
             android:layout_alignParentEnd="true"
             android:id="@+id/imageView"/>
 
-    <TextView
-            android:text=""
-            android:layout_marginStart="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:id="@+id/name"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@id/audioControl"
-            android:layout_toStartOf="@+id/imageView"/>
+
+    <LinearLayout android:orientation="vertical"
+                  android:id="@id/middle"
+                  android:layout_toEndOf="@id/audioControl"
+                  android:layout_toStartOf="@id/imageView"
+                  android:layout_alignParentBottom="true"
+                  android:layout_alignParentTop="true"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content">
+        <TextView
+                android:text="@string/test"
+                android:layout_marginStart="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:id="@+id/artist"/>
+
+
+        <TextView
+                android:text="@string/test"
+                android:layout_marginStart="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:id="@+id/name"/>
+
+        <SeekBar android:layout_width="match_parent"
+                 android:layout_height="10dp"
+                 android:layout_margin="5dp"
+                 android:visibility="gone"
+                 android:id="@+id/seekBar"/>
+    </LinearLayout>
+
 
 </RelativeLayout>

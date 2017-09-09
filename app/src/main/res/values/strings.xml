@@ -32,6 +32,7 @@
     <string name="rehash_downloaded_composition">Rehash downloaded composition</string>
     <string name="show_dangerous_commands">Show dangerous commands</string>
     <string name="restore_downloaded_list">Restore downloaded list</string>
+    <string name="test">test</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

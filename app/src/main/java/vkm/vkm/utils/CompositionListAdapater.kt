@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.TextView
 import vkm.vkm.*
 
@@ -27,9 +28,20 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
 
             val actionButton = view?.bind<ImageView>(R.id.imageView)
             val audioControl = view?.bind<ImageView>(R.id.audioControl)
+            val seekBar = view?.bind<SeekBar>(R.id.seekBar)
+
+            seekBar?.visibility = View.GONE
 
             if (trackAvailable) {
                 audioControl?.setOnClickListener { onPlayPressed(audioControl, item) }
+                if (item.url == MusicPlayer.resource) {
+                    audioControl?.apply {
+                        setImageDrawable(context.getDrawable(R.drawable.ic_stop))
+                        initSeekBar(seekBar)
+                    }
+                } else {
+                    audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_play))
+                }
             } else {
                 audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
             }
@@ -68,23 +80,42 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
     }
 
     private fun onPlayPressed(audioControl: ImageView, item: Composition) {
+        MusicPlayer.stop(true)
         audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
         val onStop = { audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_play)) }
-        val playerStarted = if (item.hash.isEmpty()) {
+        val seekBar = (audioControl.parent as View).bind<SeekBar>(R.id.seekBar)
+        val trackLength = if (item.hash.isEmpty()) {
             // play from url
-            MusicPlayer.play(item.url, onStop)
+            MusicPlayer.play(item.url, seekBar, onStop)
         } else {
             // play from disk
-            MusicPlayer.play(item.fileName(), onStop)
+            MusicPlayer.play(item.fileName(), seekBar, onStop)
         }
-        if (!playerStarted) {
+        if (trackLength == 0) {
             onStop()
         } else {
+            initSeekBar(seekBar)
             audioControl.setOnClickListener {
                 MusicPlayer.stop()
+                hideSeekBar(seekBar)
                 onStop()
                 audioControl.setOnClickListener { onPlayPressed(audioControl, item) }
             }
+        }
+    }
+
+    private fun hideSeekBar(seekBar: SeekBar?) {
+        seekBar?.let {
+            seekBar.visibility = View.GONE
+            (seekBar.parent?.parent as View?)?.invalidate()
+        }
+    }
+
+    private fun initSeekBar(seekBar: SeekBar?) {
+        seekBar?.apply {
+            visibility = View.VISIBLE
+            setOnSeekBarChangeListener(MusicPlayer)
+            max = MusicPlayer.trackLength / 1000
         }
     }
 }
