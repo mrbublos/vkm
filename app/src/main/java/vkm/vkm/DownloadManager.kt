@@ -61,7 +61,7 @@ object DownloadManager {
     }
 
     fun getDownloaded(): List<Composition> {
-        return _downloadedList.mapNotNull { it }
+        return _downloadedList.mapNotNull { it }.reversed()
     }
 
     fun getInProgress(): List<Composition> {
