@@ -245,6 +245,7 @@ object DownloadManager {
 
     fun removeAllMusic() {
         getDownloadDir().deleteRecursively()
+        "All music removed".toast(context)
     }
 
     @Synchronized
@@ -253,6 +254,7 @@ object DownloadManager {
             it.hash = it.localFile()?.readBytes().md5()
         }
         dumpList(downloaded, getDownloaded())
+        "Rehashing complete".toast(context)
     }
 
     @Synchronized
@@ -265,7 +267,7 @@ object DownloadManager {
                 _downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
             }
         }
-        "Download list restored".log()
+        "Download list restored".toast(context)
         dumpList(downloaded, getDownloaded())
     }
 }

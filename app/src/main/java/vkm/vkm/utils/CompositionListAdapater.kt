@@ -4,10 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.ImageView
-import android.widget.SeekBar
-import android.widget.TextView
+import android.widget.*
 import vkm.vkm.*
 
 class CompositionListAdapter(context: Context, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(context, resource, data) {
@@ -33,13 +30,14 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             seekBar?.visibility = View.GONE
 
             if (trackAvailable) {
-                audioControl?.setOnClickListener { onPlayPressed(audioControl, item) }
-                if (item.url == MusicPlayer.resource) {
+                if (MusicPlayer.isCurrentTrack(item)) {
                     audioControl?.apply {
                         setImageDrawable(context.getDrawable(R.drawable.ic_stop))
                         initSeekBar(seekBar)
+                        setOnClickListener { onStopPressed(seekBar, audioControl, item) }
                     }
                 } else {
+                    audioControl?.setOnClickListener { onPlayPressed(audioControl, item) }
                     audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_play))
                 }
             } else {
@@ -79,31 +77,27 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
         return view
     }
 
+    private fun onStopPressed(seekBar: SeekBar?, audioControl: ImageView, item: Composition) {
+        MusicPlayer.stop()
+        hideSeekBar(seekBar)
+        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_play))
+        audioControl.setOnClickListener { onPlayPressed(audioControl, item) }
+    }
+
     private fun onPlayPressed(audioControl: ImageView, item: Composition) {
         MusicPlayer.stop(true)
+        (MusicPlayer.currentSeekBar?.parent?.parent as View?)?.bind<View>(R.id.audioControl)?.callOnClick()
+
         // TODO loading icon
-//        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
-//        (audioControl.parent as View).invalidate()
-        val onStop = { audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_play)) }
+        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+        ((audioControl.parent.parent as ListView).adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
+
         val seekBar = (audioControl.parent as View).bind<SeekBar>(R.id.seekBar)
-        val trackLength = if (item.hash.isEmpty()) {
-            // play from url
-            MusicPlayer.play(item.url, seekBar, onStop)
-        } else {
-            // play from disk
-            MusicPlayer.play(item.fileName(), seekBar, onStop)
-        }
+        val trackLength = MusicPlayer.play(if (item.hash.isEmpty()) item.url else item.fileName(), seekBar, { onStopPressed(seekBar, audioControl, item) })
         if (trackLength == 0) {
-            onStop()
-        } else {
             audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
             initSeekBar(seekBar)
-            audioControl.setOnClickListener {
-                MusicPlayer.stop()
-                hideSeekBar(seekBar)
-                onStop()
-                audioControl.setOnClickListener { onPlayPressed(audioControl, item) }
-            }
+            audioControl.setOnClickListener { onStopPressed(seekBar, audioControl, item) }
         }
     }
 

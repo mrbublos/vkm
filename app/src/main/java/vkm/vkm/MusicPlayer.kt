@@ -42,9 +42,11 @@ object MusicPlayer: SeekBar.OnSeekBarChangeListener {
             Log.e("vkm", "Unable to play track", e)
             "Unable to play track".toast(context)
             trackLength = 0
+            onStop.invoke()
             return trackLength
         }
         trackLength = mp?.duration ?: 0
+        onStop.takeIf { trackLength == 0 }?.invoke()
         return trackLength
     }
 
@@ -55,9 +57,9 @@ object MusicPlayer: SeekBar.OnSeekBarChangeListener {
     fun stop(soft: Boolean = false) {
         if (isPlaying()) {
             mp?.stop()
-            (MusicPlayer.currentSeekBar?.parent?.parent as View?)?.bind<View>(R.id.audioControl)?.callOnClick()
-            currentSeekBar = null
             if (!soft) { destroy() }
+            resource = null
+            currentSeekBar = null
         }
     }
 
@@ -95,4 +97,6 @@ object MusicPlayer: SeekBar.OnSeekBarChangeListener {
                 }
             }, 1000)
     }
+
+    fun isCurrentTrack(item: Composition) = item.url == MusicPlayer.resource || item.fileName() == MusicPlayer.resource
 }

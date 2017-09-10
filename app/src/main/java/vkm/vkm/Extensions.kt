@@ -111,7 +111,6 @@ fun Composition.fileName(): String {
 }
 
 fun Composition.localFile(): File? {
-    if (hash.isEmpty()) { return null }
     val file = DownloadManager.getDownloadDir().resolve(fileName())
     return if (file.exists()) file else null
 }
