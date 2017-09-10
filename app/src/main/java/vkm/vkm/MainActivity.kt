@@ -4,11 +4,9 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Point
-import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import java.net.URLDecoder
 import java.util.*
 
@@ -19,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         val TAG: String = "vkm.vkm"
     }
 
-    val EXTERNAL_STORAGE_WRITE_PERMISSION = 1
+    private val EXTERNAL_STORAGE_WRITE_PERMISSION = 1
     var initialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initialize() {
         SecurityService.context = applicationContext
-        var point = Point()
+        val point = Point()
         windowManager.defaultDisplay.getSize(point)
         SwipeCatcher.SWIPE_DISTANCE_MIN = Math.max(point.x  / 3, 200)
 

@@ -89,8 +89,8 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
         (MusicPlayer.currentSeekBar?.parent?.parent as View?)?.bind<View>(R.id.audioControl)?.callOnClick()
 
         // TODO loading icon
-        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
-        ((audioControl.parent.parent as ListView).adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
+//        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+//        ((audioControl.parent.parent as ListView).adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
 
         val seekBar = (audioControl.parent as View).bind<SeekBar>(R.id.seekBar)
         val trackLength = MusicPlayer.play(if (item.hash.isEmpty()) item.url else item.fileName(), seekBar, { onStopPressed(seekBar, audioControl, item) })

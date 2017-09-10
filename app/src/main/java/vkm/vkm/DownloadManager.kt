@@ -81,7 +81,7 @@ object DownloadManager {
             data.forEach {
                 val serialize = it.serialize()
                 writer.write(serialize)
-                "Serializing composition ${serialize}".log()
+                "Serializing composition $serialize".log()
                 writer.newLine()
             }
         }
