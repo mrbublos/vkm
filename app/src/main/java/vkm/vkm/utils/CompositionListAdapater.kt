@@ -31,14 +31,25 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
 
             if (trackAvailable) {
                 if (MusicPlayer.isCurrentTrack(item)) {
+                    initSeekBar(view)
                     audioControl?.apply {
-                        setImageDrawable(context.getDrawable(R.drawable.ic_stop))
-                        initSeekBar(seekBar)
-                        setOnClickListener { onStopPressed(seekBar, audioControl, item) }
+                        if (MusicPlayer.isLoading) {
+                            setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+                        } else {
+                            setImageDrawable(context.getDrawable(R.drawable.ic_stop))
+                            MusicPlayer.takeIf { it.currentlyAnimatedView != view }?.apply {
+                                "Restarting slider updater".log()
+                                currentlyAnimatedView = view
+                                runSeekBarUpdate(view)
+                            }
+                        }
+                        setOnClickListener { onStopPressed(view, item) }
                     }
                 } else {
-                    audioControl?.setOnClickListener { onPlayPressed(audioControl, item) }
-                    audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_play))
+                    audioControl?.apply {
+                        setOnClickListener { onPlayPressed(view, item) }
+                        setImageDrawable(context.getDrawable(R.drawable.ic_play))
+                    }
                 }
             } else {
                 audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
@@ -77,39 +88,39 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
         return view
     }
 
-    private fun onStopPressed(seekBar: SeekBar?, audioControl: ImageView, item: Composition) {
+    private fun onStopPressed(animatedView: View?, item: Composition) {
         MusicPlayer.stop()
-        hideSeekBar(seekBar)
-        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_play))
-        audioControl.setOnClickListener { onPlayPressed(audioControl, item) }
-    }
-
-    private fun onPlayPressed(audioControl: ImageView, item: Composition) {
-        MusicPlayer.stop(true)
-        (MusicPlayer.currentSeekBar?.parent?.parent as View?)?.bind<View>(R.id.audioControl)?.callOnClick()
-
-        // TODO loading icon
-//        audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
-//        ((audioControl.parent.parent as ListView).adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
-
-        val seekBar = (audioControl.parent as View).bind<SeekBar>(R.id.seekBar)
-        val trackLength = MusicPlayer.play(if (item.hash.isEmpty()) item.url else item.fileName(), seekBar, { onStopPressed(seekBar, audioControl, item) })
-        if (trackLength == 0) {
-            audioControl.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
-            initSeekBar(seekBar)
-            audioControl.setOnClickListener { onStopPressed(seekBar, audioControl, item) }
+        hideSeekBar(animatedView)
+        animatedView?.bind<ImageView>(R.id.audioControl)?.apply {
+            setImageDrawable(context.getDrawable(R.drawable.ic_play))
+            setOnClickListener { onPlayPressed(this, item) }
         }
     }
 
-    private fun hideSeekBar(seekBar: SeekBar?) {
-        seekBar?.let {
-            seekBar.visibility = View.GONE
-            (seekBar.parent?.parent as View?)?.invalidate()
+    private fun onPlayPressed(viewToAnimate: View?, item: Composition) {
+        // stopping previously played, if exists
+        MusicPlayer.currentlyAnimatedView?.bind<ImageView>(R.id.audioControl)?.callOnClick()
+
+        viewToAnimate?.bind<ImageView>(R.id.audioControl)?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+
+        MusicPlayer.play(if (item.hash.isEmpty()) item.url else item.fileName(), viewToAnimate, { onStopPressed(viewToAnimate, item) }, {
+            initSeekBar(MusicPlayer.currentlyAnimatedView)
+            viewToAnimate?.bind<ImageView>(R.id.audioControl)?.apply {
+                setImageDrawable(context.getDrawable(R.drawable.ic_stop))
+                setOnClickListener { onStopPressed(viewToAnimate, item) }
+            }
+        })
+    }
+
+    private fun hideSeekBar(view: View?) {
+        view?.bind<SeekBar?>(R.id.seekBar)?.apply {
+            visibility = View.GONE
+            view.invalidate()
         }
     }
 
-    private fun initSeekBar(seekBar: SeekBar?) {
-        seekBar?.apply {
+    private fun initSeekBar(view: View?) {
+        view?.bind<SeekBar>(R.id.seekBar)?.apply {
             visibility = View.VISIBLE
             setOnSeekBarChangeListener(MusicPlayer)
             max = MusicPlayer.trackLength / 1000

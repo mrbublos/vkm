@@ -81,10 +81,10 @@ object DownloadManager {
             data.forEach {
                 val serialize = it.serialize()
                 writer.write(serialize)
-                "Serializing composition $serialize".log()
                 writer.newLine()
             }
         }
+        "Dumping $name finished".log()
     }
 
     private fun loadList(name: ListType, data: ConcurrentLinkedQueue<Composition>) {

@@ -25,7 +25,7 @@ fun <T : View> Activity.bind(@IdRes idRes: Int): Lazy<T> {
     }
 }
 
-fun <T : View> View.bind(@IdRes idRes: Int): T {
+fun <T : View?> View.bind(@IdRes idRes: Int): T {
     @Suppress("UNCHECKED_CAST")
     return findViewById(idRes) as T
 }
@@ -63,7 +63,7 @@ fun String?.beginning(length: Int): String {
 
 fun String.log() {
     if (this.isNotEmpty()) {
-        Log.v("vkm", this)
+        Log.v("vkmLog", this)
     }
 }
 

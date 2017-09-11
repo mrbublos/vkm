@@ -5,14 +5,17 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
 import android.util.Log
+import android.view.View
 import android.widget.SeekBar
+import java.util.concurrent.atomic.AtomicBoolean
 
 object MusicPlayer: SeekBar.OnSeekBarChangeListener {
     private var mp: MediaPlayer? = null
     lateinit var context: Context
     var resource: String? = null
     var trackLength = 0
-    var currentSeekBar: SeekBar? = null
+    var currentlyAnimatedView: View? = null
+    var isLoading = false
 
     // TODO make slider a fragment
 
@@ -20,8 +23,9 @@ object MusicPlayer: SeekBar.OnSeekBarChangeListener {
         return mp?.isPlaying ?: false
     }
 
-    fun play(resource: String, seekBar: SeekBar?, onStop: () -> Unit = {}): Int? {
+    fun play(resource: String, viewToPlay: View?, onStop: () -> Unit = {}, onStart: () -> Unit) {
         try {
+            "Starting ${resource} playing".log()
             initMediaPlayer()
             this.resource = resource
             mp?.apply {
@@ -31,22 +35,31 @@ object MusicPlayer: SeekBar.OnSeekBarChangeListener {
                 } else {
                     setDataSource(context, Uri.parse(DownloadManager.getDownloadDir().resolve(resource).path))
                 }
-                prepare()
-                setOnCompletionListener { onStop.invoke() }
-                currentSeekBar = seekBar
-                runSeekBarUpdate(seekBar)
-                start()
+                currentlyAnimatedView = viewToPlay
+                setOnPreparedListener { player ->
+                    isLoading = false
+                    player.setOnCompletionListener { onStop.invoke() }
+                    trackLength = player.duration
+                    onStart.invoke()
+                    runSeekBarUpdate(currentlyAnimatedView)
+                    player.start()
+                }
+
+                setOnErrorListener { player, what, extra ->
+                    isLoading = false
+                    trackLength = 0
+                    onStop.invoke()
+                    return@setOnErrorListener true
+                }
+
+                isLoading = true
+                prepareAsync()
             }
         } catch (e: Exception) {
             Log.e("vkm", "Unable to play track", e)
             "Unable to play track".toast(context)
             trackLength = 0
-            onStop.invoke()
-            return trackLength
         }
-        trackLength = mp?.duration ?: 0
-        onStop.takeIf { trackLength == 0 }?.invoke()
-        return trackLength
     }
 
     fun pause() {
@@ -58,7 +71,8 @@ object MusicPlayer: SeekBar.OnSeekBarChangeListener {
             mp?.stop()
             if (!soft) { destroy() }
             resource = null
-            currentSeekBar = null
+            currentlyAnimatedView = null
+            "Stopping music player".log()
         }
     }
 
@@ -88,11 +102,11 @@ object MusicPlayer: SeekBar.OnSeekBarChangeListener {
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 
-    private fun runSeekBarUpdate(seekBar: SeekBar?) {
+    fun runSeekBarUpdate(view: View?) {
         Handler().postDelayed({
-                seekBar?.takeIf { MusicPlayer.isPlaying() && seekBar == currentSeekBar }?.let {
-                    it.progress = (MusicPlayer.mp?.currentPosition ?: 0) / 1000
-                    runSeekBarUpdate(seekBar)
+                view?.takeIf { isPlaying() && currentlyAnimatedView == view }?.bind<SeekBar>(R.id.seekBar)?.apply {
+                    progress = (mp?.currentPosition ?: 0) / 1000
+                    runSeekBarUpdate(view)
                 }
             }, 1000)
     }
