@@ -3,6 +3,7 @@ package vkm.vkm
 object StateManager {
     var useMock = false
     var enableDownloadAll = true
+    var enableTextSuggestions = true
     val compositionElementList = mutableListOf<Composition>()
     var userElementList = mutableListOf<User>()
     var groupElementList = mutableListOf<User>()

@@ -20,6 +20,7 @@ class SettingsActivity : AppCompatActivity() {
     private val restoreDownloaded by bind<Button>(R.id.restore_downloaded_button)
     private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
     private val enableDownloadAllSwitch by bind<Switch>(R.id.enable_download_all_button)
+    private val enableTextSuggestionSwitch by bind<Switch>(R.id.enable_suggestions_button)
     private val showDangerousCommands by bind<Switch>(R.id.show_danger_commands)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +35,9 @@ class SettingsActivity : AppCompatActivity() {
 
         enableDownloadAllSwitch.isChecked = StateManager.enableDownloadAll
         enableDownloadAllSwitch.setOnCheckedChangeListener { _, value -> StateManager.enableDownloadAll = value }
+
+        enableTextSuggestionSwitch.isChecked = StateManager.enableTextSuggestions
+        enableTextSuggestionSwitch.setOnCheckedChangeListener { _, value -> StateManager.enableTextSuggestions = value }
 
         showDangerousCommands.setOnCheckedChangeListener { _, value -> dangerousCommandsVisibility(value) }
 

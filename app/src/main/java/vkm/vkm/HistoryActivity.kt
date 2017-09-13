@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
+import android.text.InputType
 import android.view.View
 import android.widget.*
 import vkm.vkm.utils.CompositionListAdapter
@@ -19,7 +20,7 @@ class HistoryActivity : AppCompatActivity() {
     private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
     private val progressBar by bind<ProgressBar>(R.id.downloadProgress)
     private val button by bind<Button>(R.id.button)
-    private val filterText by bind<EditText>(R.id.search)
+    private val searchInput by bind<EditText>(R.id.search)
     private var stopLiveUpdating = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +34,8 @@ class HistoryActivity : AppCompatActivity() {
         stopLiveUpdating = false
 
         MusicPlayer.context = this
+
+        searchInput.inputType = if (StateManager.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
 
         initializeTabs()
         updateProgress()
@@ -74,7 +77,7 @@ class HistoryActivity : AppCompatActivity() {
 
     private fun initializeButton() {
         button.setOnClickListener {
-            val text = filterText.text.toString()
+            val text = searchInput.text.toString()
 
             when (tabHost.currentTabTag) {
                 "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded().filter { it.matches(text) })

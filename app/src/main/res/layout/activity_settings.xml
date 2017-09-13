@@ -40,6 +40,137 @@
                     tools:layout_editor_absoluteX="344dp"/>
         </android.support.constraint.ConstraintLayout>
 
+        <!-- enable suggestions all button -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/enable_text_suggestions"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Switch
+                    android:id="@+id/enable_suggestions_button"
+                    android:textOn="@string/enabled"
+                    android:textOff="@string/disabled"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    tools:layout_editor_absoluteX="344dp"/>
+        </android.support.constraint.ConstraintLayout>
+
+        <!-- stop current download -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/stop_current_download_setting"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/stop_download_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
+
+        <!-- start download -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/start_download"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/start_download_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
+
+        <!-- clear downloaded list -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/clear_downloaded_list_setting"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/clear_downloaded_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
+
+        <!-- clear queue -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/clear_download_queue_setting"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/clear_queue_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    tools:layout_editor_absoluteX="296dp"/>
+        </android.support.constraint.ConstraintLayout>
+
         <!-- show dangerous commands -->
         <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"
@@ -139,110 +270,6 @@
             <Button
                     android:text="@string/run_button_setting"
                     android:id="@+id/restore_downloaded_button"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
-        </android.support.constraint.ConstraintLayout>
-
-        <!-- clear downloaded list -->
-        <android.support.constraint.ConstraintLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-            <TextView
-                    android:text="@string/clear_downloaded_list_setting"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
-
-            <Button
-                    android:text="@string/run_button_setting"
-                    android:id="@+id/clear_downloaded_button"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
-        </android.support.constraint.ConstraintLayout>
-
-        <!-- clear queue -->
-        <android.support.constraint.ConstraintLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-            <TextView
-                    android:text="@string/clear_download_queue_setting"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
-
-            <Button
-                    android:text="@string/run_button_setting"
-                    android:id="@+id/clear_queue_button"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
-        </android.support.constraint.ConstraintLayout>
-
-        <!-- stop current download -->
-        <android.support.constraint.ConstraintLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-            <TextView
-                    android:text="@string/stop_current_download_setting"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
-
-            <Button
-                    android:text="@string/run_button_setting"
-                    android:id="@+id/stop_download_button"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
-        </android.support.constraint.ConstraintLayout>
-
-        <!-- start download -->
-        <android.support.constraint.ConstraintLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-            <TextView
-                    android:text="@string/start_download"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
-
-            <Button
-                    android:text="@string/run_button_setting"
-                    android:id="@+id/start_download_button"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"

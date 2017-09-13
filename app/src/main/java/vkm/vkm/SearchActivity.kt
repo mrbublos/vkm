@@ -3,6 +3,7 @@ package vkm.vkm
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.v7.app.AppCompatActivity
+import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -21,7 +22,7 @@ class SearchActivity : AppCompatActivity() {
     // active elements
     private val tabHost by bind<TabHost>(R.id.tabhost)
     private val button by bind<Button>(R.id.button)
-    private val textContainer by bind<EditText>(R.id.search)
+    private val searchInput by bind<EditText>(R.id.search)
     private val loadingSpinner by bind<ProgressBar>(R.id.loading_spinner)
 
     // selected user
@@ -58,6 +59,8 @@ class SearchActivity : AppCompatActivity() {
         spinner(false)
 
         MusicPlayer.context = this
+
+        searchInput.inputType = if (StateManager.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
     }
 
     private fun initializeTabs() {
@@ -86,7 +89,7 @@ class SearchActivity : AppCompatActivity() {
     private fun initializeButton() {
         screen(false)
         button.setOnClickListener { _ ->
-            filterText = textContainer.text.toString()
+            filterText = searchInput.text.toString()
             if (filterText.isEmpty()) {
                 return@setOnClickListener
             }
