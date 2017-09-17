@@ -9,15 +9,12 @@ import vkm.vkm.*
 
 class CompositionListAdapter(context: Context, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(context, resource, data) {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
-        var view = convertView
-
-        if (view == null) { view = LayoutInflater.from(context).inflate(R.layout.composition_list_element, null) }
-
+        val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.composition_list_element, null)
         val item = getItem(position)
 
-        item?.let { item ->
-            view?.bind<TextView>(R.id.name)?.text = item.name
-            view?.bind<TextView>(R.id.artist)?.text = item.artist
+        item?.let {
+            view.bind<TextView>(R.id.name).text = item.name
+            view.bind<TextView>(R.id.artist).text = item.artist
 
             // determining icon to display
             var withAction = false
@@ -58,6 +55,8 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
             if (context is SearchActivity) {
                 if (trackAvailable) {
                     withAction = true
+                    actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_add))
+
                     DownloadManager.getDownloaded().find { it.equalsTo(item) }?.let {
                         actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
                     }
