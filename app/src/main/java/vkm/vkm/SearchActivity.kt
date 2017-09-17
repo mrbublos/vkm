@@ -7,7 +7,6 @@ import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.*
-import vkm.vkm.utils.AsyncPhotoDownloader
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.UserListAdapter
 
@@ -201,7 +200,7 @@ class SearchActivity : AppCompatActivity() {
             selectedUserId.text = it.userId
 
             if (it.photo == null) {
-                AsyncPhotoDownloader().execute(it, selectedUserPhoto)
+                UserListAdapter.schedulePhotoDownload(selectedUserPhoto, it)
             } else {
                 selectedUserPhoto.setImageBitmap(it.photo)
             }

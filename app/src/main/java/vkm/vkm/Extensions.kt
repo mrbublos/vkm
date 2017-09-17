@@ -61,9 +61,15 @@ fun String?.beginning(length: Int): String {
     return filterIndexed({ index, _ -> index < length })
 }
 
-fun String.log() {
-    if (this.isNotEmpty()) {
+fun String?.log() {
+    this?.takeIf { isNotEmpty() }?.let {
         Log.v("vkmLog", this)
+    }
+}
+
+fun String?.logE(e: Throwable? = null) {
+    this?.takeIf { isNotEmpty() }?.let {
+        Log.e("vkmLog", this, e)
     }
 }
 

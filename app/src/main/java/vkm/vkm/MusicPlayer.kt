@@ -3,11 +3,12 @@ package vkm.vkm
 import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
-import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 
 object MusicPlayer: SeekBar.OnSeekBarChangeListener {
     private var mp: MediaPlayer? = null
@@ -103,12 +104,12 @@ object MusicPlayer: SeekBar.OnSeekBarChangeListener {
     override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 
     fun runSeekBarUpdate(view: View?) {
-        Handler().postDelayed({
-                view?.takeIf { isPlaying() && currentlyAnimatedView == view }?.bind<SeekBar>(R.id.seekBar)?.apply {
-                    progress = (mp?.currentPosition ?: 0) / 1000
-                    runSeekBarUpdate(view)
-                }
-            }, 1000)
+        launch(UI) {
+            while (isPlaying() && currentlyAnimatedView == view) {
+                view?.bind<SeekBar>(R.id.seekBar)?.progress = (mp?.currentPosition ?: 0) / 1000
+                delay(1000)
+            }
+        }
     }
 
     fun isCurrentTrack(item: Composition) = item.url == MusicPlayer.resource || item.fileName() == MusicPlayer.resource
