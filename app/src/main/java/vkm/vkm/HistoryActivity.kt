@@ -145,6 +145,7 @@ class HistoryActivity : AppCompatActivity() {
                 (view.parent as View).visibility = View.GONE
             } catch (e: Exception) {
                 "Unable to remove track".toast(this)
+                return@let
             }
         }
     }

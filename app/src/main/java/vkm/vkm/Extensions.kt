@@ -95,11 +95,12 @@ fun String.toComposition(): Composition {
     return composition
 }
 
-fun String?.toast(context: Context?, length: Int = Toast.LENGTH_SHORT) {
-    if (this == null) { return }
+fun String?.toast(context: Context?, length: Int = Toast.LENGTH_SHORT): String? {
+    if (this == null) { return this }
     context?.let {
         Toast.makeText(context, this, length).show()
     }
+    return this
 }
 
 fun Composition.serialize(): String {

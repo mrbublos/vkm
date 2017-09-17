@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.AsyncTask
 import android.os.Environment
 import android.util.Log
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.launch
 import vkm.vkm.ListType.*
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -139,7 +141,15 @@ object DownloadManager {
                     // TODO search track on alternative sources
                     finishDownload(itemToDownload, false)
                 } else {
-                    CompositionDownloadTask().execute(itemToDownload)
+                    launch(CommonPool) {
+                        val error = downloadTrack(itemToDownload)
+                        if (error != null) {
+                            "Error downloading file $error".logE()
+                            finishDownload(itemToDownload, false)
+                        } else {
+                            finishDownload(itemToDownload)
+                        }
+                    }
                 }
             }
         }
@@ -158,89 +168,73 @@ object DownloadManager {
         val downloaded = currentDownload.get()
         "Finished downloading composition " + composition.artist + " ${composition.name}".log()
         if (currentDownload.compareAndSet(composition, null)) {
-            if (wasDownloaded) { _downloadedList.offer(downloaded) }
             _inProgress.remove(downloaded)
             dumpAll()
-            downloadNext()
+            if (wasDownloaded) {
+                _downloadedList.offer(downloaded)
+                downloadNext()
+            }
         } else {
             Log.e("vkm", "Parallel download of two tracks, Should not be like this!!!")
         }
     }
 
-    class CompositionDownloadTask: AsyncTask<Composition, Long, String?>() {
-        private val dir = getDownloadDir()
-
-        override fun doInBackground(vararg params: Composition): String? {
-            val composition = params[0]
-            if (getDownloaded().find { it.id == composition.id } != null) {
-                "File already was downloaded, skipping download".log()
-                finishDownload(composition)
-                return null
-            }
-
-            val dest = dir.resolve(composition.fileName())
-            if (dest.exists()) {
-                "File already exists, skipping download".log()
-                finishDownload(composition)
-                return null
-            }
-
-            try {
-                val _url = URL(composition.url)
-                "Starting download track $_url".log()
-                val connection = _url.openConnection()
-                connection.connect()
-                val totalBytes = connection.contentLength
-                val out = ByteArrayOutputStream()
-                connection.getInputStream().use {
-                    var bytesCopied: Long = 0
-                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                    var bytes = it.read(buffer)
-                    while (bytes >= 0) {
-                        out.write(buffer, 0, bytes)
-                        bytesCopied += bytes
-                        publishProgress(bytesCopied * 100 / totalBytes)
-                        bytes = it.read(buffer)
-                    }
-                }
-
-                val bytes = out.toByteArray()
-                composition.hash = bytes.md5()
-                if (getDownloaded().find { it.hash.isNotEmpty() && it.hash == composition.hash } != null) {
-                    "File already was downloaded, skipping saving".log()
-                    finishDownload(composition)
-                    return null
-                }
-
-                if (dir.canWrite() && dir.usableSpace > bytes.size) {
-                    try {
-                        dest.writeBytes(bytes)
-                        finishDownload(composition)
-                    } catch (e: Exception) {
-                        Log.e("vkm", "Error saving track", e)
-                        finishDownload(composition, false)
-                        return null
-                    }
-                } else {
-                    return "Not enough free space or unable to write to the $dir"
-                }
-            } catch(e: Exception) {
-                Log.e(this.toString(), "Error downloading track", e)
-                finishDownload(composition, false)
-            }
+    private suspend fun downloadTrack(vararg params: Composition): String? {
+        val dir = getDownloadDir()
+        val composition = params[0]
+        if (getDownloaded().find { it.id == composition.id } != null) {
+            "File already was downloaded, skipping download".log()
             return null
         }
 
-        override fun onPostExecute(error: String?) {
-            error?.let {
-                Log.e("vkm", "Error downloading file (skipping)" + error)
-                stopDownload(error)
-            }
+        val dest = dir.resolve(composition.fileName())
+        if (dest.exists()) {
+            "File already exists, skipping download".log()
+            return null
         }
 
-        override fun onProgressUpdate(vararg values: Long?) {
-            DownloadManager.downloadedPercent = values[0]?.toInt() ?: 0
+        try {
+            val _url = URL(composition.url)
+            "Starting download track $_url".log()
+            val connection = _url.openConnection()
+            connection.connect()
+            val totalBytes = connection.contentLength
+            val out = ByteArrayOutputStream()
+            connection.getInputStream().use {
+                var bytesCopied: Long = 0
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                var bytes = it.read(buffer)
+                while (bytes >= 0) {
+                    out.write(buffer, 0, bytes)
+                    bytesCopied += bytes
+                    DownloadManager.downloadedPercent = (bytesCopied * 100 / totalBytes).toInt()
+                    bytes = it.read(buffer)
+                }
+            }
+
+            val bytes = out.toByteArray()
+            composition.hash = bytes.md5()
+            if (getDownloaded().find { it.hash.isNotEmpty() && it.hash == composition.hash } != null) {
+                "File already was downloaded, skipping saving".log()
+                return null
+            }
+
+            if (dir.canWrite() && dir.usableSpace > bytes.size) {
+                try {
+                    dest.writeBytes(bytes)
+                    finishDownload(composition)
+                } catch (e: Exception) {
+                    Log.e("vkm", "Error saving track", e)
+                    return "Error saving fie"
+                }
+            } else {
+                return "Not enough free space or unable to write to the $dir".toast(context)
+            }
+        } catch(e: Exception) {
+            Log.e(this.toString(), "Error downloading track", e)
+            return "Error downloading track"
         }
+        return null
     }
 
     fun removeAllMusic() {
