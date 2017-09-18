@@ -7,8 +7,12 @@ import android.graphics.Point
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import java.net.URLDecoder
 import java.util.*
+import kotlin.coroutines.experimental.Continuation
+import kotlin.coroutines.experimental.suspendCoroutine
 
 
 class MainActivity : AppCompatActivity() {
@@ -19,16 +23,27 @@ class MainActivity : AppCompatActivity() {
 
     private val EXTERNAL_STORAGE_WRITE_PERMISSION = 1
     var initialized = false
+    var permissionContinuation: Continuation<IntArray>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // asking for writing permissions
         val permissionCheck = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+        launch (UI) {
+            "starting permissions".log()
+            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                suspendCoroutine<IntArray> {
+                    permissionContinuation = it
+                    requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), EXTERNAL_STORAGE_WRITE_PERMISSION)
+                }.takeIf { it.isNotEmpty() && it[0] != PackageManager.PERMISSION_GRANTED }?.let {
+                    finish()
+                    return@launch
+                }
+            }
+            permissionContinuation = null
+            "permissions received".log()
             initialize()
-        } else {
-            requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), EXTERNAL_STORAGE_WRITE_PERMISSION)
         }
     }
 
@@ -73,25 +88,25 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        "Dumping all lists".log()
-        DownloadManager.stopDownload("")
-        DownloadManager.dumpAll()
+        if (initialized) {
+            "Dumping all lists".log()
+            DownloadManager.stopDownload("")
+            DownloadManager.dumpAll()
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        "Dumping all lists".log()
-        DownloadManager.stopDownload("")
-        DownloadManager.dumpAll()
+        if (initialized) {
+            "Dumping all lists".log()
+            DownloadManager.stopDownload("")
+            DownloadManager.dumpAll()
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (EXTERNAL_STORAGE_WRITE_PERMISSION == requestCode) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initialize()
-            } else {
-                finish()
-            }
+            permissionContinuation?.resume(grantResults)
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
