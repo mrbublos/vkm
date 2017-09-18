@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
                 suspendCoroutine<IntArray> {
                     permissionContinuation = it
                     requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), EXTERNAL_STORAGE_WRITE_PERMISSION)
-                }.takeIf { it.isNotEmpty() || it[0] != PackageManager.PERMISSION_GRANTED }?.let {
+                }.takeIf { it.isEmpty() || it[0] != PackageManager.PERMISSION_GRANTED }?.let {
                     finish()
                     return@launch
                 }
