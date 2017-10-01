@@ -37,7 +37,7 @@
         </LinearLayout>
 
         <android.support.constraint.ConstraintLayout
-                android:id="@+id/selected_user_container"
+                android:id="@+id/selectedUserContainer"
                 android:layout_width="match_parent"
                 android:layout_height="50dp">
 
@@ -45,7 +45,7 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_marginStart="5dp"
-                    android:id="@+id/selected_user_photo"
+                    android:id="@+id/selectedUserPhoto"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -58,7 +58,7 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     app:srcCompat="@android:drawable/ic_delete"
-                    android:id="@+id/deselect_user_button"
+                    android:id="@+id/deselectUserButton"
                     app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -69,23 +69,23 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     app:srcCompat="@android:drawable/ic_input_add"
-                    android:id="@+id/download_all_user_button"
+                    android:id="@+id/selectedUserDownloadAllButton"
                     app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/deselect_user_button"
+                    app:layout_constraintEnd_toStartOf="@id/deselectUserButton"
                     tools:layout_editor_absoluteX="352dp"/>
 
             <TextView
                     android:layout_width="0dp"
                     android:layout_height="20dp"
                     android:layout_marginStart="5dp"
-                    app:layout_constraintStart_toEndOf="@id/selected_user_photo"
-                    app:layout_constraintEnd_toStartOf="@id/download_all_user_button"
+                    app:layout_constraintStart_toEndOf="@id/selectedUserPhoto"
+                    app:layout_constraintEnd_toStartOf="@id/selectedUserDownloadAllButton"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_weight="1"
                     android:minWidth="100dp"
-                    android:id="@+id/selected_user_name"
+                    android:id="@+id/selectedUserName"
                     tools:layout_editor_absoluteX="0dp"/>
 
             <TextView
@@ -93,18 +93,18 @@
                     android:layout_height="20dp"
                     android:minWidth="100dp"
                     android:layout_marginStart="5dp"
-                    app:layout_constraintStart_toEndOf="@id/selected_user_photo"
-                    app:layout_constraintEnd_toStartOf="@id/download_all_user_button"
+                    app:layout_constraintStart_toEndOf="@id/selectedUserPhoto"
+                    app:layout_constraintEnd_toStartOf="@id/selectedUserDownloadAllButton"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/selected_user_name"
+                    app:layout_constraintTop_toBottomOf="@+id/selectedUserName"
                     app:layout_constraintVertical_weight="1"
-                    android:id="@+id/selected_user_id"
+                    android:id="@+id/selectedUserId"
                     tools:layout_editor_absoluteX="0dp"/>
 
         </android.support.constraint.ConstraintLayout>
 
         <TabHost
-                android:id="@+id/tabhost"
+                android:id="@+id/tabHost"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -124,22 +124,22 @@
                         android:layout_height="match_parent">
 
                     <ListView
-                            android:id="@+id/tab2"
+                            android:id="@+id/groupList"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
 
                     <ListView
-                            android:id="@+id/tab3"
+                            android:id="@+id/compositionList"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
 
                     <ListView
-                            android:id="@+id/tab1"
+                            android:id="@+id/userList"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
 
                     <ProgressBar
-                            android:id="@+id/loading_spinner"
+                            android:id="@+id/loadingSpinner"
                             android:progressDrawable="@drawable/circle_progress_bar"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>

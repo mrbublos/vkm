@@ -11,12 +11,12 @@ import vkm.vkm.utils.CompositionListAdapter
 
 class HistoryActivity : AppCompatActivity() {
 
-    private val tabHost by bind<TabHost>(R.id.tabhost)
+    private val tabHost by bind<TabHost>(R.id.tabHost)
 
     // list tabs
-    private val downloadedList by bind<ListView>(R.id.tab1)
-    private val queueList by bind<ListView>(R.id.tab2)
-    private val inProgressList by bind<LinearLayout>(R.id.tab3)
+    private val downloadedList by bind<ListView>(R.id.userList)
+    private val queueList by bind<ListView>(R.id.groupList)
+    private val inProgressList by bind<LinearLayout>(R.id.compositionList)
     private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
     private val progressBar by bind<ProgressBar>(R.id.downloadProgress)
     private val button by bind<Button>(R.id.button)
@@ -57,17 +57,17 @@ class HistoryActivity : AppCompatActivity() {
 
         var tabSpec = tabHost.newTabSpec("downloaded")
         tabSpec.setIndicator(getString(R.string.tab_downloaded))
-        tabSpec.setContent(R.id.tab1)
+        tabSpec.setContent(R.id.userList)
         tabHost.addTab(tabSpec)
 
         tabSpec = tabHost.newTabSpec("queue")
         tabSpec.setIndicator(getString(R.string.tab_queue))
-        tabSpec.setContent(R.id.tab2)
+        tabSpec.setContent(R.id.groupList)
         tabHost.addTab(tabSpec)
 
         tabSpec = tabHost.newTabSpec("inProgress")
         tabSpec.setIndicator(getString(R.string.tab_in_progress))
-        tabSpec.setContent(R.id.tab3)
+        tabSpec.setContent(R.id.compositionList)
         tabHost.addTab(tabSpec)
 
         setInProgress(DownloadManager.getInProgress().firstOrNull())

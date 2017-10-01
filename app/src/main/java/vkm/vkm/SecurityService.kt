@@ -12,8 +12,16 @@ object SecurityService {
     val appSecret = "hHbZxrka2uZ6jB1inYsH"
     val name = "mydata.properties"
     var receipt = ""
+    var spotifyAppId = ""
+    var spotifyAppSecret = ""
 
     var vkAccessToken: String? = null
+        set(value) {
+            field = value
+            value?.let { dumpProperties() }
+        }
+
+    var spotifyAccessToken: String? = null
         set(value) {
             field = value
             value?.let { dumpProperties() }
@@ -40,6 +48,7 @@ object SecurityService {
         if (settingsFile.exists()) { settings.load(FileInputStream(settingsFile)) }
         settings.put("vkAccessToken", vkAccessToken)
         settings.put("enableDownloadAll", StateManager.enableDownloadAll.toString())
+        settings.put("spotifyAccessToken", spotifyAccessToken)
         settings.store(FileOutputStream(settingsFile), null)
     }
 
@@ -49,6 +58,7 @@ object SecurityService {
         val settings = Properties()
         settings.load(FileInputStream(settingsFile))
         vkAccessToken = settings["vkAccessToken"] as String?
+        spotifyAccessToken = settings["spotifyAccessToken"] as String?
         StateManager.enableDownloadAll = (settings["enableDownloadAll"] as String?)?.toBoolean() ?: true
     }
 

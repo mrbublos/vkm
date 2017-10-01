@@ -4,6 +4,8 @@ object StateManager {
     var useMock = false
     var enableDownloadAll = true
     var enableTextSuggestions = true
+    var useSpotify = false
+    var useVk = true
     val compositionElementList = mutableListOf<Composition>()
     var userElementList = mutableListOf<User>()
     var groupElementList = mutableListOf<User>()

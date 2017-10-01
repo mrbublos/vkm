@@ -3,11 +3,16 @@ package vkm.vkm
 import android.app.Activity
 import android.content.Context
 import android.support.annotation.IdRes
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.result.Result
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -59,6 +64,11 @@ fun String.md5(charset: Charset = StandardCharsets.UTF_8): String {
 fun String?.beginning(length: Int): String {
     if (this == null) { return "" }
     return filterIndexed({ index, _ -> index < length })
+}
+
+fun String?.base64(charset: Charset = StandardCharsets.UTF_8): String {
+    if (this == null) { return "" }
+    return String(Base64.encode(this.toByteArray(charset), Base64.DEFAULT), StandardCharsets.UTF_8)
 }
 
 fun String?.log() {
@@ -124,6 +134,10 @@ fun Composition.localFile(): File? {
 
 fun Composition?.equalsTo(other: Composition?): Boolean {
     return this?.name?.trim() == other?.name?.trim() && this?.artist?.trim() == other?.artist?.trim()
+}
+
+suspend fun Request.execute(): Triple<Request, Response, Result<String, FuelError>> {
+    return this.responseString()
 }
 
 private fun <T> unsafeLazy(initializer: () -> T) = lazy(LazyThreadSafetyMode.NONE, initializer)
