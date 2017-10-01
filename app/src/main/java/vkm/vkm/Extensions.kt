@@ -95,11 +95,15 @@ fun String.toComposition(): Composition {
     }
     composition::class.memberProperties.forEach {
         val kMutableProperty = it as KMutableProperty<*>
-        when (kMutableProperty.returnType.javaType) {
-            Int::class.javaPrimitiveType,
-            Int::class.javaObjectType -> kMutableProperty.setter.call(composition, if (map[it.name] != null) map[it.name]!!.toInt() else 0)
-            String::class.java -> kMutableProperty.setter.call(composition, map[it.name] ?: "")
-        }
+        map[it.name]?.let { propertyValue ->
+            when (kMutableProperty.returnType.javaType) {
+                Int::class.javaPrimitiveType,
+                Int::class.javaObjectType -> kMutableProperty.setter.call(composition, propertyValue.toInt())
+                Long::class.javaPrimitiveType,
+                Long::class.javaObjectType -> kMutableProperty.setter.call(composition, propertyValue.toLong())
+                String::class.java -> kMutableProperty.setter.call(composition, propertyValue)
+            }
+       }
     }
 
     return composition

@@ -54,6 +54,7 @@ object DownloadManager {
     }
 
     fun downloadComposition(composition: Composition?) {
+        composition?.vkmId = System.currentTimeMillis()
         composition?.let { _queue.offer(composition) }
         downloadNext()
     }
@@ -91,7 +92,6 @@ object DownloadManager {
 
     private fun loadList(name: ListType, data: ConcurrentLinkedQueue<Composition>) {
         val file = getListFileName(name)
-
         data.clear()
 
         if (file.exists()) {
@@ -104,6 +104,7 @@ object DownloadManager {
                     }
                 }
             }
+            data.sortedByDescending { it.vkmId }
         }
     }
 
