@@ -1,39 +1,20 @@
 package vkm.vkm
 
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
 import android.support.v7.app.AppCompatActivity
 import android.text.InputType
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.ImageView
+import kotlinx.android.synthetic.main.activity_search.*
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.UserListAdapter
 
 class SearchActivity : AppCompatActivity() {
 
-    // list tabs
-    private val userList by bind<ListView>(R.id.tab1)
-    private val groupList by bind<ListView>(R.id.tab2)
-    private val compositionList by bind<ListView>(R.id.tab3)
-    private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
-
-    // active elements
-    private val tabHost by bind<TabHost>(R.id.tabhost)
-    private val button by bind<Button>(R.id.button)
-    private val searchInput by bind<EditText>(R.id.search)
-    private val loadingSpinner by bind<ProgressBar>(R.id.loading_spinner)
-
-    // selected user
-    private val selectedUserContainer by bind<ConstraintLayout>(R.id.selected_user_container)
-    private val selectedUserName by bind<TextView>(R.id.selected_user_name)
-    private val selectedUserId by bind<TextView>(R.id.selected_user_id)
-    private val selectedUserPhoto by bind<ImageView>(R.id.selected_user_photo)
-    private val selectedUserButton by bind<ImageView>(R.id.deselect_user_button)
-    private val selectedUserDownloadButton by bind<ImageView>(R.id.download_all_user_button)
-
     // services
-    private val musicService = MusicService()
+    private var musicService: MusicService = VkMusicService()
 
     // private vars
     private var filterText: String = ""
@@ -42,7 +23,6 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Log.e(MainActivity.TAG, "Setting content view")
         setContentView(R.layout.activity_search)
-
         initializeElements()
         initializeTabs()
         initializeButton()
@@ -59,7 +39,7 @@ class SearchActivity : AppCompatActivity() {
 
         MusicPlayer.context = this
 
-        searchInput.inputType = if (StateManager.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        search.inputType = if (StateManager.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
     }
 
     private fun initializeTabs() {
@@ -68,17 +48,17 @@ class SearchActivity : AppCompatActivity() {
 
         var tabSpec = tabHost.newTabSpec("user")
         tabSpec.setIndicator(getString(R.string.tab_user))
-        tabSpec.setContent(R.id.tab1)
+        tabSpec.setContent(R.id.userList)
         tabHost.addTab(tabSpec)
 
         tabSpec = tabHost.newTabSpec("group")
         tabSpec.setIndicator(getString(R.string.tab_group))
-        tabSpec.setContent(R.id.tab2)
+        tabSpec.setContent(R.id.groupList)
         tabHost.addTab(tabSpec)
 
         tabSpec = tabHost.newTabSpec("tracks")
         tabSpec.setIndicator(getString(R.string.tab_composition))
-        tabSpec.setContent(R.id.tab3)
+        tabSpec.setContent(R.id.compositionList)
         tabHost.addTab(tabSpec)
 
         tabHost.setCurrentTabByTag(StateManager.currentSearchTab)
@@ -88,7 +68,7 @@ class SearchActivity : AppCompatActivity() {
     private fun initializeButton() {
         screen(false)
         button.setOnClickListener { _ ->
-            filterText = searchInput.text.toString()
+            filterText = search.text.toString()
             if (filterText.isEmpty()) {
                 return@setOnClickListener
             }
@@ -206,18 +186,18 @@ class SearchActivity : AppCompatActivity() {
             }
 
             // hiding download all until we have all tracks downloaded
-            selectedUserDownloadButton.visibility = View.GONE
-            selectedUserDownloadButton.setOnClickListener {
+            selectedUserDownloadAllButton.visibility = View.GONE
+            selectedUserDownloadAllButton.setOnClickListener {
                 spinner(true)
                 screen(true)
-                selectedUserDownloadButton.visibility = View.GONE
+                selectedUserDownloadAllButton.visibility = View.GONE
                 StateManager.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
                 (compositionList.adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
                 screen(false)
                 spinner(false)
             }
 
-            selectedUserButton.setOnClickListener {
+            deselectUserButton.setOnClickListener {
                 selectedUserContainer.visibility = View.GONE
                 StateManager.selectedElement = null
             }
@@ -225,7 +205,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showDownloadAllButton() {
-        selectedUserDownloadButton.visibility = if (StateManager.enableDownloadAll) View.VISIBLE else View.GONE
+        selectedUserDownloadAllButton.visibility = if (StateManager.enableDownloadAll) View.VISIBLE else View.GONE
     }
 
     override fun onStop() {
