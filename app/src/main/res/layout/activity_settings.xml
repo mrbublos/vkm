@@ -26,10 +26,10 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Switch
-                    android:id="@+id/enable_download_all_button"
+                    android:id="@+id/enableDownloadAll"
                     android:textOn="@string/enabled"
                     android:textOff="@string/disabled"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -53,10 +53,10 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Switch
-                    android:id="@+id/enable_suggestions_button"
+                    android:id="@+id/enableSuggestions"
                     android:textOn="@string/enabled"
                     android:textOff="@string/disabled"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -80,17 +80,17 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/stop_download_button"
+                    android:id="@+id/stopDownload"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    />
         </android.support.constraint.ConstraintLayout>
 
         <!-- start download -->
@@ -106,17 +106,17 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/start_download_button"
+                    android:id="@+id/startDownload"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    />
         </android.support.constraint.ConstraintLayout>
 
         <!-- clear downloaded list -->
@@ -132,17 +132,17 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/clear_downloaded_button"
+                    android:id="@+id/clearDownloaded"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    />
         </android.support.constraint.ConstraintLayout>
 
         <!-- clear queue -->
@@ -158,17 +158,17 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/clear_queue_button"
+                    android:id="@+id/clearQueue"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    />
         </android.support.constraint.ConstraintLayout>
 
         <!-- select proxy -->
@@ -209,10 +209,10 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Switch
-                    android:id="@+id/show_danger_commands"
+                    android:id="@+id/showDangerousCommands"
                     android:textOn="@string/enabled"
                     android:textOff="@string/disabled"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -237,17 +237,17 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/remove_all_settings"
+                    android:id="@+id/removeAllSettings"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    />
         </android.support.constraint.ConstraintLayout>
 
 
@@ -264,17 +264,17 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/rehash_downloaded_button"
+                    android:id="@+id/rehashDownloaded"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    />
         </android.support.constraint.ConstraintLayout>
 
         <!-- Restore downloaded list -->
@@ -289,18 +289,16 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    android:layout_height="24dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/restore_downloaded_button"
+                    android:id="@+id/restoreDownloaded"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    android:layout_height="48dp"/>
         </android.support.constraint.ConstraintLayout>
 
         <!-- clear music dir -->
@@ -315,18 +313,16 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    android:layout_height="24dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/clear_music_dir"
+                    android:id="@+id/clearMusicDir"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    android:layout_height="48dp"/>
         </android.support.constraint.ConstraintLayout>
 
         <!-- save lists -->
@@ -341,18 +337,16 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    android:layout_height="24dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/dump_lists_button"
+                    android:id="@+id/dumpLists"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    android:layout_height="48dp"/>
         </android.support.constraint.ConstraintLayout>
 
         <!-- load lists -->
@@ -367,18 +361,16 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="10dp"/>
+                    android:layout_height="24dp"/>
 
             <Button
                     android:text="@string/run_button_setting"
-                    android:id="@+id/load_lists_button"
+                    android:id="@+id/loadLists"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    android:layout_height="48dp"/>
         </android.support.constraint.ConstraintLayout>
     </LinearLayout>
 </vkm.vkm.SwipeCatcher>

@@ -6,21 +6,15 @@ import android.os.Looper
 import android.support.v7.app.AppCompatActivity
 import android.text.InputType
 import android.view.View
-import android.widget.*
+import android.widget.ImageView
+import android.widget.TabHost
+import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_history.*
 import vkm.vkm.utils.CompositionListAdapter
 
 class HistoryActivity : AppCompatActivity() {
 
-    private val tabHost by bind<TabHost>(R.id.tabHost)
-
     // list tabs
-    private val downloadedList by bind<ListView>(R.id.userList)
-    private val queueList by bind<ListView>(R.id.groupList)
-    private val inProgressList by bind<LinearLayout>(R.id.compositionList)
-    private val swipeCatcher by bind<SwipeCatcher>(R.id.swipeCatcher)
-    private val progressBar by bind<ProgressBar>(R.id.downloadProgress)
-    private val button by bind<Button>(R.id.button)
-    private val searchInput by bind<EditText>(R.id.search)
     private var stopLiveUpdating = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +29,7 @@ class HistoryActivity : AppCompatActivity() {
 
         MusicPlayer.context = this
 
-        searchInput.inputType = if (StateManager.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        search.inputType = if (StateManager.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
 
         initializeTabs()
         updateProgress()
@@ -77,11 +71,11 @@ class HistoryActivity : AppCompatActivity() {
 
     private fun initializeButton() {
         button.setOnClickListener {
-            val text = searchInput.text.toString()
+            val text = search.text.toString()
 
             when (tabHost.currentTabTag) {
                 "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded().filter { it.matches(text) })
-                "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue().filter { it.matches(text) }, removeFromQueue)
+                "queue" -> waitingForDownloadList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue().filter { it.matches(text) }, removeFromQueue)
                 "inProgress" -> {}
             }
         }
@@ -93,13 +87,13 @@ class HistoryActivity : AppCompatActivity() {
         if (composition == null) {
             inProgressList.bind<TextView>(R.id.artist).text = null
             inProgressList.bind<TextView>(R.id.name).text = null
-            progressBar.visibility = View.GONE
+            downloadProgress.visibility = View.GONE
         } else {
             inProgressList.bind<TextView>(R.id.artist).text = composition.artist
             inProgressList.bind<TextView>(R.id.name).text = composition.name
-            progressBar.visibility = View.VISIBLE
-            progressBar.progress = DownloadManager.downloadedPercent
-            progressBar.secondaryProgress = DownloadManager.downloadedPercent
+            downloadProgress.visibility = View.VISIBLE
+            downloadProgress.progress = DownloadManager.downloadedPercent
+            downloadProgress.secondaryProgress = DownloadManager.downloadedPercent
         }
     }
 
@@ -122,7 +116,7 @@ class HistoryActivity : AppCompatActivity() {
     private fun handleTabSwitch(tabId: String) {
         when (tabId) {
             "downloaded" -> downloadedList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded(), remove)
-            "queue" -> queueList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue(), removeFromQueue)
+            "queue" -> waitingForDownloadList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue(), removeFromQueue)
             "inProgress" -> {
                 stopLiveUpdating = false
                 setInProgress(DownloadManager.getInProgress().firstOrNull())
