@@ -1,6 +1,9 @@
 package vkm.vkm
 
 import com.beust.klaxon.JsonObject
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 
 interface MusicService {
     companion object {
@@ -87,17 +90,20 @@ open class VkMusicService : MusicService {
         }
     }
 
-    private fun getMock(): MusicServiceMock {
-        return MusicServiceMock()
-    }
-
+    private fun getMock(): MusicServiceMock = MusicServiceMock()
 
     private fun callApi(method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
-        VkApiCallTask(callback).execute(method to params)
+        launch(CommonPool) {
+            val result = VkApi.callVkMethod(params, method)
+            launch(UI) { callback.invoke(result) }
+        }
     }
 
     private fun callApi(addSignature: Boolean = false, method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
-        VkApiCallTask(callback, addSignature).execute(method to params)
+        launch(CommonPool) {
+            val result = VkApi.callVkMethod(params, method, addSignature)
+            launch(UI) { callback.invoke(result) }
+        }
     }
 }
 

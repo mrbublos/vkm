@@ -1,5 +1,6 @@
 package vkm.vkm
 
+import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
 import com.beust.klaxon.JsonArray
@@ -8,6 +9,10 @@ import com.beust.klaxon.int
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPost
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.launch
+import java.net.InetSocketAddress
 import java.net.Proxy
 
 class VkParsers(private val activity: SearchActivity) {
@@ -115,33 +120,48 @@ object VkApi {
                 SecurityService.dumpProperties()
                 resultString = "ok"
             } else {
-                Log.e("vkm", res.component2().toString())
+                res.component2().toString().logE()
             }
         }
 
         return resultString
     }
-}
 
-class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private val addSignature: Boolean = false, private val recursionLevel: Int = 0): AsyncTask<Pair<String, MutableList<Pair<String, String>>>, Int, JsonObject?>() {
-    private val _apiUrl = "https://api.vk.com"
-    private val _userAgent = "VKAndroidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
-    private var _params: MutableList<Pair<String, String>> = mutableListOf()
-    private var _method: String = ""
-    private val proxyAddress = StateManager.proxies[3]
-//    private val proxy: Proxy? = Proxy(Proxy.Type.HTTP, InetSocketAddress(proxyAddress.first, proxyAddress.second.toInt()))
-    private val proxy: Proxy? = null
+    suspend fun callVkMethod(parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
+        val result = callVkApiMethod(parameters, method, addSignature)
+        when (result?.containsKey("error")) {
+            false -> return result
+            else -> {
+                if (result == null) { return null }
 
-    init {
-        proxy?.let { FuelManager.instance.proxy = proxy }
+                return if ((result["error"] as JsonObject)["error_code"] == 25 && method != "auth.refreshToken") {
+                    // token confirmation required, refreshing token
+                    try {
+                        SecurityService.receipt = getReciept()
+                        SecurityService.vkAccessToken = (callVkApiMethod(mutableListOf("v" to "5.68", "receipt" to SecurityService.receipt), "auth.refreshToken")!!["response"] as JsonObject)["token"] as String
+                        callVkApiMethod(parameters, method, addSignature)
+                    } catch (e: Exception) {
+                        "Error in refresh token or secondary call".logE(e)
+                        null
+                    }
+                } else {
+                    "Received an error ${(result["error"] as JsonObject)["error_msg"]}".logE()
+                    null
+                }
+            }
+        }
     }
 
-    override fun doInBackground(vararg input: Pair<String, MutableList<Pair<String, String>>>): JsonObject? {
+    suspend private fun callVkApiMethod(parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
+        val _apiUrl = "https://api.vk.com"
+        val _userAgent = "VKAndroidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
+//        val proxyAddress = StateManager.proxies[3]
+//        val proxy: Proxy? = Proxy(Proxy.Type.HTTP, InetSocketAddress(proxyAddress.first, proxyAddress.second.toInt()))
+        val proxy: Proxy? = null
+        proxy?.let { FuelManager.instance.proxy = proxy }
+
         "Starting VkApiCallTask".log()
-        val parameters = input[0].component2()
-        _params.addAll(parameters)
-        _method = input[0].component1()
-        val path = "/method/$_method"
+        val path = "/method/$method"
 
         parameters.add("access_token" to SecurityService.vkAccessToken!!)
 
@@ -152,32 +172,10 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
         "Sending request ${httpGet.cUrlString()}".log()
         val (_, _, result) = httpGet.responseString()
         "Response received ${result.component1()}".log()
-        return try { result.component1()?.toJson() } catch (e: Exception) { null }
-    }
-
-    override fun onPostExecute(result: JsonObject?) {
-        when (result?.containsKey("error")) {
-            false -> callback.invoke(result)
-            else -> {
-                if (result == null) {
-                    callback.invoke(null)
-                    return
-                }
-
-                if ((result["error"] as JsonObject)["error_code"] == 25 && _method != "auth.refreshToken" && recursionLevel == 0) {
-                    // token confirmation required, refreshing token
-                    VkApiCallTask({ refreshTokenResult ->
-                        SecurityService.vkAccessToken = (refreshTokenResult!!["response"] as JsonObject)["token"] as String
-
-                        // repeating the call
-                        VkApiCallTask(callback, addSignature, 1).execute(_method to _params)
-                    }).execute("auth.refreshToken" to mutableListOf("v" to "5.68",
-                            "receipt" to SecurityService.receipt))
-                } else {
-                    Log.e("vkAPI", "Received an error " + (result["error"] as JsonObject)["error_msg"])
-                    callback.invoke(null)
-                }
-            }
+        return try {
+            result.component1()?.toJson()
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -186,5 +184,20 @@ class VkApiCallTask(private val callback: (data: JsonObject?) -> Unit, private v
         "Signature string $string".log()
         params.add("sig" to string.md5())
         "Signature is ${string.md5()}".log()
+    }
+
+    suspend fun getReciept(): String {
+        val url = "https://android.clients.google.com/c2dm/register3"
+        val params = listOf("X-scope" to "GCM",
+                "app" to "com.vkontakte.android",
+                "sender" to "191410808405",
+                "device" to "3949256210147014230")
+        val headers = listOf("Authorization" to "AidLogin 3949256210147014230:1372471507630590001",
+                "Content-Type" to "application/x-www-form-urlencoded")
+        val post = url.httpPost(params)
+        post.headers.putAll(headers)
+        val (_, _, result) = post.responseString()
+        "Receipt received ${result.component1()}".log()
+        return result.component1()?.split("=")?.get(1) ?: ""
     }
 }

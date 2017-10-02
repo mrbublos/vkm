@@ -48,7 +48,7 @@ object SecurityService {
         if (settingsFile.exists()) { settings.load(FileInputStream(settingsFile)) }
         settings.put("vkAccessToken", vkAccessToken)
         settings.put("enableDownloadAll", StateManager.enableDownloadAll.toString())
-        settings.put("spotifyAccessToken", spotifyAccessToken)
+        settings.put("spotifyAccessToken", spotifyAccessToken ?: "")
         settings.store(FileOutputStream(settingsFile), null)
     }
 
