@@ -117,6 +117,11 @@ fun String?.toast(context: Context?, length: Int = Toast.LENGTH_SHORT): String? 
     return this
 }
 
+fun String?.normalize() : String? {
+    if (this == null) { return null }
+    return this.trim().toLowerCase().replace(" ", "")
+}
+
 fun Composition.serialize(): String {
     return Composition::class.memberProperties.joinToString(separator = "|VKM|") { "${it.name}=VKM=${it.get(this)}" }
 }
@@ -137,7 +142,7 @@ fun Composition.localFile(): File? {
 }
 
 fun Composition?.equalsTo(other: Composition?): Boolean {
-    return this?.name?.trim() == other?.name?.trim() && this?.artist?.trim() == other?.artist?.trim()
+    return this?.name.normalize() == other?.name.normalize() && this?.artist.normalize() == other?.artist.normalize()
 }
 
 suspend fun Request.execute(): Triple<Request, Response, Result<String, FuelError>> {

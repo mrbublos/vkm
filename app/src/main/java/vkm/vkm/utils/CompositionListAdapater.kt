@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import kotlinx.android.synthetic.main.composition_list_element.view.*
 import vkm.vkm.*
 
 class CompositionListAdapter(context: Context, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(context, resource, data) {
@@ -13,16 +14,16 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
         val item = getItem(position)
 
         item?.let {
-            view.bind<TextView>(R.id.name).text = item.name
-            view.bind<TextView>(R.id.artist).text = item.artist
+            view.name.text = item.name
+            view.artist.text = item.artist
 
             // determining icon to display
             var withAction = false
             val trackAvailable = item.hash.isNotEmpty() || item.url.trim().isNotEmpty()
 
-            val actionButton = view?.bind<ImageView>(R.id.imageView)
-            val audioControl = view?.bind<ImageView>(R.id.audioControl)
-            val seekBar = view?.bind<SeekBar>(R.id.seekBar)
+            val actionButton = view?.imageView
+            val audioControl = view?.audioControl
+            val seekBar = view?.seekBar
 
             seekBar?.visibility = View.GONE
 
@@ -90,7 +91,7 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
     private fun onStopPressed(animatedView: View?, item: Composition) {
         MusicPlayer.stop()
         hideSeekBar(animatedView)
-        animatedView?.bind<ImageView>(R.id.audioControl)?.apply {
+        animatedView?.audioControl?.apply {
             setImageDrawable(context.getDrawable(R.drawable.ic_play))
             setOnClickListener { onPlayPressed(this, item) }
         }
@@ -98,13 +99,13 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
 
     private fun onPlayPressed(viewToAnimate: View?, item: Composition) {
         // stopping previously played, if exists
-        MusicPlayer.currentlyAnimatedView?.bind<ImageView>(R.id.audioControl)?.callOnClick()
+        MusicPlayer.currentlyAnimatedView?.audioControl?.callOnClick()
 
-        viewToAnimate?.bind<ImageView>(R.id.audioControl)?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+        viewToAnimate?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
 
         MusicPlayer.play(if (item.hash.isEmpty()) item.url else item.fileName(), viewToAnimate, { onStopPressed(viewToAnimate, item) }, {
             initSeekBar(MusicPlayer.currentlyAnimatedView)
-            viewToAnimate?.bind<ImageView>(R.id.audioControl)?.apply {
+            viewToAnimate?.audioControl?.apply {
                 setImageDrawable(context.getDrawable(R.drawable.ic_stop))
                 setOnClickListener { onStopPressed(viewToAnimate, item) }
             }
@@ -112,14 +113,14 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
     }
 
     private fun hideSeekBar(view: View?) {
-        view?.bind<SeekBar?>(R.id.seekBar)?.apply {
+        view?.seekBar?.apply {
             visibility = View.GONE
             view.invalidate()
         }
     }
 
     private fun initSeekBar(view: View?) {
-        view?.bind<SeekBar>(R.id.seekBar)?.apply {
+        view?.seekBar?.apply {
             visibility = View.VISIBLE
             setOnSeekBarChangeListener(MusicPlayer)
             max = MusicPlayer.trackLength / 1000
