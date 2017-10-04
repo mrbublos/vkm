@@ -171,6 +171,31 @@
                     tools:layout_editor_absoluteX="296dp"/>
         </android.support.constraint.ConstraintLayout>
 
+        <!-- select proxy -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/select_proxy"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    tools:layout_editor_absoluteX="10dp"/>
+
+            <Button
+                    android:text="@string/run_button_setting"
+                    android:id="@+id/selectProxy"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"/>
+        </android.support.constraint.ConstraintLayout>
+
         <!-- show dangerous commands -->
         <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"

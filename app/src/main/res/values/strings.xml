@@ -34,6 +34,10 @@
     <string name="restore_downloaded_list">Restore downloaded list</string>
     <string name="test">test</string>
     <string name="enable_text_suggestions">Enable text suggestions</string>
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="select_proxy">Select proxy</string>
+    <string name="no_proxy">No proxy</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

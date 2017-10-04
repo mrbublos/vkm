@@ -36,6 +36,9 @@
         <activity android:name=".SettingsActivity"
                   android:label="@string/commands_and_settings_label">
         </activity>
+        <activity android:name=".ProxyActivity"
+                  android:label="@string/select_proxy">
+        </activity>
     </application>
 
 </manifest>

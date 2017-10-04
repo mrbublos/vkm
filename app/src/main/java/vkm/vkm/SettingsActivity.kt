@@ -1,5 +1,6 @@
 package vkm.vkm
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -22,6 +23,7 @@ class SettingsActivity : AppCompatActivity() {
     private val enableDownloadAllSwitch by bind<Switch>(R.id.enable_download_all_button)
     private val enableTextSuggestionSwitch by bind<Switch>(R.id.enable_suggestions_button)
     private val showDangerousCommands by bind<Switch>(R.id.show_danger_commands)
+    private val selectProxy by bind<Button>(R.id.selectProxy)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +62,8 @@ class SettingsActivity : AppCompatActivity() {
         rehashDownloaded.setOnClickListener { DownloadManager.rehashAndDump() }
 
         restoreDownloaded.setOnClickListener { DownloadManager.restoreDownloaded() }
+
+        selectProxy.setOnClickListener { startActivity(Intent(applicationContext, ProxyActivity::class.java)) }
     }
 
     private fun dangerousCommandsVisibility(visible: Boolean) {
