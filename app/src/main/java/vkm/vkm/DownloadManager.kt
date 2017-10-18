@@ -55,7 +55,7 @@ object DownloadManager {
 
     fun downloadComposition(composition: Composition?) {
         composition?.vkmId = System.currentTimeMillis()
-        composition?.let { _queue.offer(composition) }
+        composition?.takeIf { it.url.isNotEmpty() }?.let { _queue.offer(composition) }
         downloadNext()
     }
 
@@ -133,16 +133,16 @@ object DownloadManager {
     private var currentDownload: AtomicReference<Composition?> = AtomicReference(null)
 
     private fun downloadNext() {
-        _queue.peek()?.let { itemToDownload ->
+        _queue.poll()?.let { itemToDownload ->
             if (currentDownload.compareAndSet(null, itemToDownload)) {
                 _queue.remove(itemToDownload)
-                _inProgress.offer(itemToDownload)
                 if (itemToDownload.url.isEmpty()) {
                     "Track is not available for download, skipping".log()
                     // TODO search track on alternative sources
                     currentDownload.set(null)
                     downloadNext()
                 } else {
+                    _inProgress.offer(itemToDownload)
                     launch(CommonPool) {
                         val error = downloadTrack(itemToDownload)
                         if (error != null) {
@@ -153,6 +153,8 @@ object DownloadManager {
                         }
                     }
                 }
+            } else {
+                _queue.offer(itemToDownload)
             }
         }
     }
