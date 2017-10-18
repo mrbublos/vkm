@@ -79,6 +79,8 @@ class HistoryActivity : AppCompatActivity() {
                 "inProgress" -> {}
             }
         }
+
+        resumeDownloadButton.setOnClickListener { DownloadManager.downloadComposition(null) }
     }
 
     private fun setInProgress(composition: Composition?) {
