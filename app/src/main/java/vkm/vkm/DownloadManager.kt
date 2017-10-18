@@ -140,7 +140,8 @@ object DownloadManager {
                 if (itemToDownload.url.isEmpty()) {
                     "Track is not available for download, skipping".log()
                     // TODO search track on alternative sources
-                    finishDownload(itemToDownload, false)
+                    currentDownload.set(null)
+                    downloadNext()
                 } else {
                     launch(CommonPool) {
                         val error = downloadTrack(itemToDownload)
