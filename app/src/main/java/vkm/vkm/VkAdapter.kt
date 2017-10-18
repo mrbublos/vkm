@@ -1,19 +1,11 @@
 package vkm.vkm
 
-import android.content.Context
-import android.os.AsyncTask
-import android.util.Log
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.int
 import com.beust.klaxon.string
-import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
-import java.net.InetSocketAddress
-import java.net.Proxy
 
 class VkParsers(private val activity: SearchActivity) {
     val parseUserList = { result: JsonObject? ->
@@ -104,7 +96,7 @@ object VkApi {
         var resultString = "Error logging in"
 
         _user?.let {
-            val url = "https://oauth.vk.com/token"
+            val url = "https://oauth.v" + "k.com/token"
             val params = listOf(Pair("grant_type", "password"),
                     Pair("client_id", SecurityService.appId),
                     Pair("client_secret", SecurityService.appSecret),
@@ -138,7 +130,7 @@ object VkApi {
                     // token confirmation required, refreshing token
                     try {
                         SecurityService.receipt = getReciept()
-                        SecurityService.vkAccessToken = (callVkApiMethod(mutableListOf("v" to "5.68", "receipt" to SecurityService.receipt), "auth.refreshToken")!!["response"] as JsonObject)["token"] as String
+                        refreshToken()
                         callVkApiMethod(parameters, method, addSignature)
                     } catch (e: Exception) {
                         "Error in refresh token or secondary call".logE(e)
@@ -152,15 +144,13 @@ object VkApi {
         }
     }
 
-    suspend private fun callVkApiMethod(parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
-        val _apiUrl = "https://api.vk.com"
-        val _userAgent = "VKAndroidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
-//        val proxyAddress = StateManager.proxies[3]
-//        val proxy: Proxy? = Proxy(Proxy.Type.HTTP, InetSocketAddress(proxyAddress.first, proxyAddress.second.toInt()))
-        val proxy: Proxy? = null
-        proxy?.let { FuelManager.instance.proxy = proxy }
+    suspend fun refreshToken() {
+        SecurityService.vkAccessToken = (callVkApiMethod(mutableListOf("v" to "5.68", "receipt" to SecurityService.receipt), "auth.refreshToken")!!["response"] as JsonObject)["token"] as String
+    }
 
-        "Starting VkApiCallTask".log()
+    suspend private fun callVkApiMethod(parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
+        val _apiUrl = "https://api.v" + "k.com"
+        val _userAgent = "VKAn" + "droidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
         val path = "/method/$method"
 
         parameters.add("access_token" to SecurityService.vkAccessToken!!)
@@ -189,7 +179,7 @@ object VkApi {
     suspend fun getReciept(): String {
         val url = "https://android.clients.google.com/c2dm/register3"
         val params = listOf("X-scope" to "GCM",
-                "app" to "com.vkontakte.android",
+                "app" to "com.vkont" + "akte.android",
                 "sender" to "191410808405",
                 "device" to "3949256210147014230")
         val headers = listOf("Authorization" to "AidLogin 3949256210147014230:1372471507630590001",
