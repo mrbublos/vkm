@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vkm.vkm.SwipeCatcher
+<vkm.vkm.ScreenSwiper
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -94,5 +94,5 @@
         </TabHost>
 
     </LinearLayout>
-</vkm.vkm.SwipeCatcher>
+</vkm.vkm.ScreenSwiper>
 

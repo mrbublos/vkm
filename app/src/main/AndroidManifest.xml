@@ -39,6 +39,12 @@
         <activity android:name=".ProxyActivity"
                   android:label="@string/select_proxy">
         </activity>
+
+        <service android:name=".MusicPlayService"
+                 android:description="@string/vkm_music_service_desc"
+                 android:exported="false"
+                 android:icon="@drawable/ic_service_icon"
+                />
     </application>
 
 </manifest>

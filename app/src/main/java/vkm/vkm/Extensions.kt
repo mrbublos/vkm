@@ -2,6 +2,7 @@ package vkm.vkm
 
 import android.app.Activity
 import android.content.Context
+import android.media.MediaPlayer
 import android.support.annotation.IdRes
 import android.util.Base64
 import android.util.Log
@@ -147,6 +148,10 @@ fun Composition?.equalsTo(other: Composition?): Boolean {
 
 suspend fun Request.execute(): Triple<Request, Response, Result<String, FuelError>> {
     return this.responseString()
+}
+
+suspend fun MediaPlayer.loadAsync() {
+    this.prepare()
 }
 
 private fun <T> unsafeLazy(initializer: () -> T) = lazy(LazyThreadSafetyMode.NONE, initializer)

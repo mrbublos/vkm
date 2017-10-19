@@ -39,6 +39,7 @@
     <string name="select_proxy">Select proxy</string>
     <string name="no_proxy">No proxy</string>
     <string name="resume_download">Resume download</string>
+    <string name="vkm_music_service_desc">Vkm Music Playing service</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

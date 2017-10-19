@@ -9,7 +9,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
-import java.net.URLDecoder
 import java.util.*
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
@@ -67,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         SecurityService.context = applicationContext
         val point = Point()
         windowManager.defaultDisplay.getSize(point)
-        SwipeCatcher.SWIPE_DISTANCE_MIN = Math.max(point.x  / 3, 200)
+        ScreenSwiper.SWIPE_DISTANCE_MIN = Math.max(point.x  / 3, 200)
 
         // importing local properties
         try {
