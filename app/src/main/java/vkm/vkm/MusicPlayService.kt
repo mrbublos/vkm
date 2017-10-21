@@ -8,20 +8,20 @@ import android.os.Binder
 import android.os.IBinder
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.sync.Mutex
 
-class MusicPlayService: Service() {
+class MusicPlayService : Service() {
 
     companion object {
-        lateinit var instance: MusicPlayService
+        private lateinit var instance: MusicPlayService
     }
 
-    val mp = MediaPlayer()
-    var currentComposition: Composition? = null
+    private val mp = MediaPlayer()
+    private var currentComposition: Composition? = null
     var playList: List<Composition> = mutableListOf()
-    val binder = MusicPlayerController()
+    private val binder = MusicPlayerController()
     var trackLength = 0
     var trackProgress = 0
+    var onPlay: () -> Any? = {}
 
 
     override fun onBind(intent: Intent?): IBinder {
@@ -35,36 +35,75 @@ class MusicPlayService: Service() {
         "Service created".log()
     }
 
-    class MusicPlayerController: Binder() {
-        fun getService(): MusicPlayService { return instance }
+    class MusicPlayerController : Binder() {
+        fun getService(): MusicPlayService {
+            return instance
+        }
     }
 
     fun play() {
         launch(CommonPool) {
-            if (currentComposition == null) {
-                currentComposition = playList.firstOrNull()
-                currentComposition?.let { compositionToPlay ->
-                    val resource = if (compositionToPlay.hash.isEmpty()) compositionToPlay.url else DownloadManager.getDownloadDir().resolve(compositionToPlay.fileName()).path
-
-                    if (compositionToPlay.url.startsWith("http")) {
-                        mp.setDataSource(resource)
-                    } else {
-                        mp.setDataSource(applicationContext, Uri.parse(resource))
-                    }
-                    mp.loadAsync()
-                    trackLength = mp.duration
-                }
-            } else {
-                mp.start()
-            }
+            playList.takeIf { currentComposition == null }?.firstOrNull()?.let { currentComposition = fetchComposition(it) }
 
             currentComposition?.let {
-
                 mp.start()
+                mp.setOnCompletionListener { next() }
+                onPlay()
             }
         }
     }
 
+    fun skipTo(time: Int) {
+        mp.seekTo(time)
+    }
+
+    fun stop() {
+        mp.stop()
+        resetTrack()
+        currentComposition = null
+    }
+
+    fun isPlaying() :Boolean {
+        return mp.isPlaying
+    }
+
+    fun next() = getSibling(true)
+    fun previous() = getSibling(false)
+
+    private fun getSibling(next: Boolean) {
+        if (playList.isEmpty()) {
+            stop()
+            return
+        }
+
+        launch(CommonPool) {
+            val index = playList.indexOf(currentComposition)
+            currentComposition = fetchComposition(playList.getOrNull(index + if (next) 1 else -1))
+            onPlay()
+        }
+    }
+
+    suspend private fun fetchComposition(composition: Composition?): Composition? {
+        if (composition == null) { return null }
+
+        val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName()).path
+
+        if (composition.url.startsWith("http")) {
+            mp.setDataSource(resource)
+        } else {
+            mp.setDataSource(applicationContext, Uri.parse(resource))
+        }
+
+        mp.setOnErrorListener { mp, what, extra ->
+            next()
+            return@setOnErrorListener true
+        }
+
+        mp.loadAsync()
+        trackLength = mp.duration
+        trackProgress = 0
+        return composition
+    }
 
 
     private fun resetTrack() {

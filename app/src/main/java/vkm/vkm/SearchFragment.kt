@@ -152,6 +152,7 @@ class SearchFragment : Fragment() {
         selectedUserContainer.visibility = View.GONE
         State.selectedElement = newSelectedElement
 
+        StateManager.compositionElementList.clear()
         musicService.getPlaylist(this, newSelectedElement, filterText)
 
         tabsSwiper.setCurrentString("tracks")

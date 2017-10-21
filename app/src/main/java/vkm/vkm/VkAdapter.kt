@@ -162,11 +162,7 @@ object VkApi {
         "Sending request ${httpGet.cUrlString()}".log()
         val (_, _, result) = httpGet.responseString()
         "Response received ${result.component1()}".log()
-        return try {
-            result.component1()?.toJson()
-        } catch (e: Exception) {
-            null
-        }
+        return try { result.component1()?.toJson() } catch (e: Exception) { null }
     }
 
     private fun addSignature(path: String, params: MutableList<Pair<String, String>>) {
