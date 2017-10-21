@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 
 class MusicPlayService : Service() {
@@ -16,13 +17,19 @@ class MusicPlayService : Service() {
     }
 
     private val mp = MediaPlayer()
-    private var currentComposition: Composition? = null
+    var currentComposition: Composition? = null
     var playList: List<Composition> = mutableListOf()
     private val binder = MusicPlayerController()
     var trackLength = 0
     var trackProgress = 0
     var onPlay: () -> Any? = {}
 
+    private val progressUpdateJob = launch(CommonPool) {
+        while (true) {
+            if (trackLength > 0) { trackProgress = (mp.currentPosition / 1000) / trackLength }
+            delay(1000)
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder {
         "Service bound".log()
@@ -53,6 +60,10 @@ class MusicPlayService : Service() {
         }
     }
 
+    fun pause() {
+        mp.takeIf { mp.isPlaying }?.pause()
+    }
+
     fun skipTo(time: Int) {
         mp.seekTo(time)
     }
@@ -70,7 +81,12 @@ class MusicPlayService : Service() {
     fun next() = getSibling(true)
     fun previous() = getSibling(false)
 
+    fun isCurrentTrack(item: Composition) = item.url == currentComposition?.url || item.fileName() == currentComposition?.fileName()
+
     private fun getSibling(next: Boolean) {
+        mp.stop()
+        resetTrack()
+
         if (playList.isEmpty()) {
             stop()
             return
