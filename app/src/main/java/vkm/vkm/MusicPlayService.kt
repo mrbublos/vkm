@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 
@@ -23,13 +24,9 @@ class MusicPlayService : Service() {
     var trackLength = 0
     var trackProgress = 0
     var onPlay: () -> Any? = {}
+    var onProgressUpdate: () -> Any? = {}
 
-    private val progressUpdateJob = launch(CommonPool) {
-        while (true) {
-            if (trackLength > 0) { trackProgress = (mp.currentPosition / 1000) / trackLength }
-            delay(1000)
-        }
-    }
+    private var progressUpdateJob: Job? = null
 
     override fun onBind(intent: Intent?): IBinder {
         "Service bound".log()
@@ -42,19 +39,39 @@ class MusicPlayService : Service() {
         "Service created".log()
     }
 
+    fun startTrackProgressTrack(onUpdate: () -> Any? = {}) {
+        progressUpdateJob?.cancel()
+        onProgressUpdate = onUpdate
+
+        progressUpdateJob = launch(CommonPool) {
+            while (true) {
+                if (trackLength > 0) { trackProgress = (mp.currentPosition / 1000) / trackLength }
+                delay(1000)
+                onProgressUpdate()
+            }
+        }
+    }
+
+    fun stopProgressUpdate() {
+        progressUpdateJob?.cancel()
+        progressUpdateJob = null
+        onProgressUpdate = {}
+    }
+
     class MusicPlayerController : Binder() {
         fun getService(): MusicPlayService {
             return instance
         }
     }
 
-    fun play() {
+    fun play(onUpdate: () -> Any? = {}) {
         launch(CommonPool) {
             playList.takeIf { currentComposition == null }?.firstOrNull()?.let { currentComposition = fetchComposition(it) }
 
             currentComposition?.let {
                 mp.start()
                 mp.setOnCompletionListener { next() }
+                startTrackProgressTrack(onUpdate)
                 onPlay()
             }
         }
@@ -72,6 +89,7 @@ class MusicPlayService : Service() {
         mp.stop()
         resetTrack()
         currentComposition = null
+        stopProgressUpdate()
     }
 
     fun isPlaying() :Boolean {
