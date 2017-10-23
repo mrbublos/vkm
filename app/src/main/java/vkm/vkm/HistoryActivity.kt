@@ -11,6 +11,7 @@ import android.widget.TabHost
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_history.*
 import vkm.vkm.utils.CompositionListAdapter
+import java.lang.ref.WeakReference
 
 class HistoryActivity : AppCompatActivity() {
 
@@ -23,7 +24,7 @@ class HistoryActivity : AppCompatActivity() {
 
         swipeCatcher.left = SearchActivity::class.java
         swipeCatcher.right = SettingsActivity::class.java
-        swipeCatcher.activity = this
+        swipeCatcher.activity = WeakReference(this)
 
         stopLiveUpdating = false
 
@@ -51,17 +52,17 @@ class HistoryActivity : AppCompatActivity() {
 
         var tabSpec = tabHost.newTabSpec("downloaded")
         tabSpec.setIndicator(getString(R.string.tab_downloaded))
-        tabSpec.setContent(R.id.userList)
+        tabSpec.setContent(R.id.downloadedList)
         tabHost.addTab(tabSpec)
 
         tabSpec = tabHost.newTabSpec("queue")
         tabSpec.setIndicator(getString(R.string.tab_queue))
-        tabSpec.setContent(R.id.groupList)
+        tabSpec.setContent(R.id.waitingForDownloadList)
         tabHost.addTab(tabSpec)
 
         tabSpec = tabHost.newTabSpec("inProgress")
         tabSpec.setIndicator(getString(R.string.tab_in_progress))
-        tabSpec.setContent(R.id.compositionList)
+        tabSpec.setContent(R.id.inProgressList)
         tabHost.addTab(tabSpec)
 
         setInProgress(DownloadManager.getInProgress().firstOrNull())

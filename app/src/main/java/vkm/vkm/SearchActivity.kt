@@ -10,6 +10,7 @@ import android.widget.ImageView
 import kotlinx.android.synthetic.main.activity_search.*
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.UserListAdapter
+import java.lang.ref.WeakReference
 
 class SearchActivity : AppCompatActivity() {
 
@@ -23,6 +24,7 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Log.e(MainActivity.TAG, "Setting content view")
         setContentView(R.layout.activity_search)
+
         initializeElements()
         initializeTabs()
         initializeButton()
@@ -32,7 +34,7 @@ class SearchActivity : AppCompatActivity() {
     private fun initializeElements() {
         swipeCatcher.left = SettingsActivity::class.java
         swipeCatcher.right = HistoryActivity::class.java
-        swipeCatcher.activity = this
+        swipeCatcher.activity = WeakReference(this)
 
         selectUserOrGroup(StateManager.selectedElement)
         spinner(false)
@@ -43,26 +45,16 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initializeTabs() {
-        // TODO consider switching to tabLayout
-        tabHost.setup()
-
-        var tabSpec = tabHost.newTabSpec("user")
-        tabSpec.setIndicator(getString(R.string.tab_user))
-        tabSpec.setContent(R.id.userList)
-        tabHost.addTab(tabSpec)
-
-        tabSpec = tabHost.newTabSpec("group")
-        tabSpec.setIndicator(getString(R.string.tab_group))
-        tabSpec.setContent(R.id.groupList)
-        tabHost.addTab(tabSpec)
-
-        tabSpec = tabHost.newTabSpec("tracks")
-        tabSpec.setIndicator(getString(R.string.tab_composition))
-        tabSpec.setContent(R.id.compositionList)
-        tabHost.addTab(tabSpec)
-
-        tabHost.setCurrentTabByTag(StateManager.currentSearchTab)
-        tabHost.setOnTabChangedListener { tabId -> StateManager.currentSearchTab = tabId }
+        tabsSwiper.value = mutableListOf("user", "group", "tracks")
+        tabsSwiper.setCurrentString(StateManager.currentSearchTab)
+        tabsSwiper.onSwiped = { _, tabName ->
+            StateManager.currentSearchTab = tabName
+            when (StateManager.currentSearchTab) {
+                "user" -> setUserList(StateManager.userElementList)
+                "group" -> setGroupList(StateManager.groupElementList)
+                "tracks" -> setCompositionsList(StateManager.compositionElementList)
+            }
+        }
     }
 
     private fun initializeButton() {
@@ -76,7 +68,7 @@ class SearchActivity : AppCompatActivity() {
             spinner(true)
             screen(true)
 
-            when (tabHost.currentTabTag) {
+            when (StateManager.currentSearchTab) {
                 "user" -> {
                     if (StateManager.selectedElement != null) {
                         musicService.getPlaylist(this, StateManager.selectedElement, filterText)
@@ -99,6 +91,7 @@ class SearchActivity : AppCompatActivity() {
                     StateManager.compositionElementList.clear()
                     StateManager.currentOffset = 0
                     musicService.getCompositions(this, filterText)
+                    resultList.adapter = null
                 }
             }
 
@@ -123,14 +116,14 @@ class SearchActivity : AppCompatActivity() {
         screen(false)
         spinner(false)
         StateManager.userElementList = data.toMutableList()
-        userList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
+        resultList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setGroupList(data: List<User>) {
         screen(false)
         spinner(false)
         StateManager.groupElementList = data.toMutableList()
-        groupList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
+        resultList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setCompositionsList(data: List<Composition>) {
@@ -141,10 +134,10 @@ class SearchActivity : AppCompatActivity() {
             StateManager.compositionElementList.addAll(data)
         }
 
-        if (compositionList.adapter == null) {
-            compositionList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, StateManager.compositionElementList, compositionTouchListener)
+        if (resultList.adapter == null) {
+            resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, StateManager.compositionElementList, compositionTouchListener)
         } else {
-            (compositionList.adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
+            (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
         }
 
         StateManager.currentOffset += data.size
@@ -171,8 +164,7 @@ class SearchActivity : AppCompatActivity() {
 
         musicService.getPlaylist(this, newSelectedElement, filterText)
 
-        // TODO hide User and Group tabs
-        tabHost.currentTab = 2
+        tabsSwiper.setCurrentString("tracks")
 
         newSelectedElement?.let {
             selectedUserContainer.visibility = View.VISIBLE
@@ -192,7 +184,7 @@ class SearchActivity : AppCompatActivity() {
                 screen(true)
                 selectedUserDownloadAllButton.visibility = View.GONE
                 StateManager.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
-                (compositionList.adapter as ArrayAdapter<Composition>).notifyDataSetChanged()
+                (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
                 screen(false)
                 spinner(false)
             }

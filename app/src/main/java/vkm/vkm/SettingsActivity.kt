@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import kotlinx.android.synthetic.main.activity_settings.*
+import java.lang.ref.WeakReference
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -12,7 +13,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        swipeCatcher.activity = this
+        swipeCatcher.activity = WeakReference(this)
         swipeCatcher.left = HistoryActivity::class.java
         swipeCatcher.right = SearchActivity::class.java
 

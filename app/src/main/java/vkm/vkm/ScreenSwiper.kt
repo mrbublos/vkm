@@ -3,22 +3,24 @@ package vkm.vkm
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.support.constraint.ConstraintLayout
 import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
 import android.view.GestureDetector
+import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.widget.FrameLayout
 import android.widget.TextView
+import kotlinx.android.synthetic.main.text_swiper_view.view.*
+import java.lang.ref.WeakReference
 
 // TODO consider redo to a fragments, not activities
 open class Swiper @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
     companion object {
         var SWIPE_DISTANCE_MIN = 300
     }
 
-    lateinit var activity: Activity
     open val swipeLeft: () -> Any? = {}
     open val swipeRight: () -> Any? = {}
     private val sw: SwipeManager by lazy { SwipeManager() }
@@ -36,7 +38,7 @@ open class Swiper @JvmOverloads constructor(
 
     inner class SwipeManager: GestureDetector.SimpleOnGestureListener() {
 
-        val mDetector = GestureDetectorCompat(activity, this)
+        val mDetector = GestureDetectorCompat(context, this)
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
             if (e1 == null || e2 == null || Math.abs(e1.x - e2.x) < SWIPE_DISTANCE_MIN) { return false }
@@ -48,40 +50,78 @@ open class Swiper @JvmOverloads constructor(
     }
 }
 
-class ScreenSwiper(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : Swiper(context, attrs, defStyleAttr) {
+class ScreenSwiper @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : Swiper(context, attrs, defStyleAttr) {
     lateinit var left: Class<out Activity>
     lateinit var right: Class<out Activity>
+    lateinit var activity: WeakReference<Activity>
 
     override val swipeLeft = {
-        activity.apply {
+        activity.get()?.apply {
             startActivity(Intent(applicationContext, left))
             finish()
         }
     }
 
     override val swipeRight = {
-        activity.apply {
+        activity.get()?.apply {
             startActivity(Intent(applicationContext, right))
             finish()
         }
     }
 }
 
-class StringSwiper(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : Swiper(context, attrs, defStyleAttr) {
-    var currentString = 0
-    lateinit var list: List<String>
+class StringSwiper @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : Swiper(context, attrs, defStyleAttr) {
     lateinit var view: TextView
-    lateinit var onSwiped: (index: Int, value: String) -> Any?
+    var onSwiped: (index: Int, value: String) -> Unit = { _, _ -> }
+    var currentElementIndex = 0
 
-    override val swipeLeft = {
-        currentString = currentString++ % list.size
-        view.text = list[currentString]
-        onSwiped(currentString, list[currentString])
+    var value: MutableList<String> = mutableListOf()
+    set(value) {
+        field.clear()
+        field.addAll(value)
+        currentElementIndex = 0
+        changeText()
+        invalidate()
+        requestLayout()
+    }
+
+    init {
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        inflater.inflate(R.layout.text_swiper_view, this)
+        next.setOnClickListener { swipeRight() }
+        previous.setOnClickListener { swipeLeft() }
+    }
+
+    fun setCurrentString(string: String) {
+        currentElementIndex = value.indexOf(string)
+        changeText()
+    }
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        changeText()
     }
 
     override val swipeRight = {
-        currentString = currentString-- % list.size
-        view.text = list[currentString]
-        onSwiped(currentString, list[currentString])
+        currentElementIndex = next()
+        changeText()
+        onSwiped(currentElementIndex, value[currentElementIndex])
     }
+
+    override val swipeLeft = {
+        currentElementIndex = previous()
+        changeText()
+        onSwiped(currentElementIndex, value[currentElementIndex])
+    }
+
+    private fun changeText() {
+        if (value.isEmpty()) { return }
+
+        current.text = value.getOrNull(currentElementIndex) ?: ""
+        next.text = value.getOrNull(next()) ?: ""
+        previous.text = value.getOrNull(previous()) ?: ""
+    }
+
+    private fun next(): Int = (currentElementIndex + 1) % value.size
+    private fun previous(): Int = (currentElementIndex - 1 + value.size) % value.size
 }

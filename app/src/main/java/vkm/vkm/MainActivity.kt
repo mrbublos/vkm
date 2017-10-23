@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         SecurityService.context = applicationContext
         val point = Point()
         windowManager.defaultDisplay.getSize(point)
-        ScreenSwiper.SWIPE_DISTANCE_MIN = Math.max(point.x  / 3, 200)
+        Swiper.SWIPE_DISTANCE_MIN = Math.max(point.x  / 3, 200)
 
         // importing local properties
         try {
