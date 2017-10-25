@@ -26,7 +26,7 @@ class SpotifyParsers(private val activity: SearchActivity) {
                 compositionObject
             }
             activity.setCompositionsList(compositions)
-            StateManager.totalCompositions = (result["tracks"] as JsonObject).int("total") ?: 0
+            State.totalCompositions = (result["tracks"] as JsonObject).int("total") ?: 0
         }
     }
 }

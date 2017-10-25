@@ -19,11 +19,11 @@ class SettingsActivity : AppCompatActivity() {
 
         dangerousCommandsVisibility(false)
 
-        enableDownloadAll.isChecked = StateManager.enableDownloadAll
-        enableDownloadAll.setOnCheckedChangeListener { _, value -> StateManager.enableDownloadAll = value }
+        enableDownloadAll.isChecked = State.enableDownloadAll
+        enableDownloadAll.setOnCheckedChangeListener { _, value -> State.enableDownloadAll = value }
 
-        enableSuggestions.isChecked = StateManager.enableTextSuggestions
-        enableSuggestions.setOnCheckedChangeListener { _, value -> StateManager.enableTextSuggestions = value }
+        enableSuggestions.isChecked = State.enableTextSuggestions
+        enableSuggestions.setOnCheckedChangeListener { _, value -> State.enableTextSuggestions = value }
 
         showDangerousCommands.setOnCheckedChangeListener { _, value -> dangerousCommandsVisibility(value) }
 

@@ -36,23 +36,23 @@ class SearchActivity : AppCompatActivity() {
         swipeCatcher.right = HistoryActivity::class.java
         swipeCatcher.activity = WeakReference(this)
 
-        selectUserOrGroup(StateManager.selectedElement)
+        selectUserOrGroup(State.selectedElement)
         spinner(false)
 
         MusicPlayer.context = this
 
-        search.inputType = if (StateManager.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        search.inputType = if (State.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
     }
 
     private fun initializeTabs() {
         tabsSwiper.value = mutableListOf("user", "group", "tracks")
-        tabsSwiper.setCurrentString(StateManager.currentSearchTab)
+        tabsSwiper.setCurrentString(State.currentSearchTab)
         tabsSwiper.onSwiped = { _, tabName ->
-            StateManager.currentSearchTab = tabName
-            when (StateManager.currentSearchTab) {
-                "user" -> setUserList(StateManager.userElementList)
-                "group" -> setGroupList(StateManager.groupElementList)
-                "tracks" -> setCompositionsList(StateManager.compositionElementList)
+            State.currentSearchTab = tabName
+            when (State.currentSearchTab) {
+                "user" -> setUserList(State.userElementList)
+                "group" -> setGroupList(State.groupElementList)
+                "tracks" -> setCompositionsList(State.compositionElementList)
             }
         }
     }
@@ -61,35 +61,33 @@ class SearchActivity : AppCompatActivity() {
         screen(false)
         button.setOnClickListener { _ ->
             filterText = search.text.toString()
-            if (filterText.isEmpty()) {
-                return@setOnClickListener
-            }
+            if (filterText.isEmpty()) { return@setOnClickListener }
 
             spinner(true)
             screen(true)
 
-            when (StateManager.currentSearchTab) {
+            when (State.currentSearchTab) {
                 "user" -> {
-                    if (StateManager.selectedElement != null) {
-                        musicService.getPlaylist(this, StateManager.selectedElement, filterText)
-                        StateManager.compositionElementList.clear()
-                        StateManager.currentOffset = 0
+                    if (State.selectedElement != null) {
+                        musicService.getPlaylist(this, State.selectedElement, filterText)
+                        State.compositionElementList.clear()
+                        State.currentOffset = 0
                     } else {
                         musicService.getUsers(this, filterText)
                     }
                 }
                 "group" -> {
-                    if (StateManager.selectedElement != null) {
-                        musicService.getPlaylist(this, StateManager.selectedElement, filterText)
-                        StateManager.compositionElementList.clear()
-                        StateManager.currentOffset = 0
+                    if (State.selectedElement != null) {
+                        musicService.getPlaylist(this, State.selectedElement, filterText)
+                        State.compositionElementList.clear()
+                        State.currentOffset = 0
                     } else {
                         musicService.getGroups(this, filterText)
                     }
                 }
                 "tracks" -> {
-                    StateManager.compositionElementList.clear()
-                    StateManager.currentOffset = 0
+                    State.compositionElementList.clear()
+                    State.currentOffset = 0
                     musicService.getCompositions(this, filterText)
                     resultList.adapter = null
                 }
@@ -100,14 +98,14 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initializeLists() {
-        if (StateManager.userElementList.isNotEmpty()) {
-            setUserList(StateManager.userElementList)
+        if (State.userElementList.isNotEmpty()) {
+            setUserList(State.userElementList)
         }
-        if (StateManager.groupElementList.isNotEmpty()) {
-            setGroupList(StateManager.groupElementList)
+        if (State.groupElementList.isNotEmpty()) {
+            setGroupList(State.groupElementList)
         }
-        if (StateManager.compositionElementList.isNotEmpty()) {
-            setCompositionsList(StateManager.compositionElementList)
+        if (State.compositionElementList.isNotEmpty()) {
+            setCompositionsList(State.compositionElementList)
         }
     }
 
@@ -115,14 +113,14 @@ class SearchActivity : AppCompatActivity() {
     fun setUserList(data: List<User>) {
         screen(false)
         spinner(false)
-        StateManager.userElementList = data.toMutableList()
+        State.userElementList = data.toMutableList()
         resultList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setGroupList(data: List<User>) {
         screen(false)
         spinner(false)
-        StateManager.groupElementList = data.toMutableList()
+        State.groupElementList = data.toMutableList()
         resultList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
@@ -130,19 +128,19 @@ class SearchActivity : AppCompatActivity() {
         screen(false)
         spinner(false)
 
-        if (StateManager.compositionElementList != data) {
-            StateManager.compositionElementList.addAll(data)
+        if (State.compositionElementList != data) {
+            State.compositionElementList.addAll(data)
         }
 
         if (resultList.adapter == null) {
-            resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, StateManager.compositionElementList, compositionTouchListener)
+            resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionTouchListener)
         } else {
             (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
         }
 
-        StateManager.currentOffset += data.size
-        if (StateManager.compositionElementList.size < StateManager.totalCompositions && data.isNotEmpty()) {
-            musicService.getPlaylist(this, StateManager.selectedElement, "", StateManager.currentOffset)
+        State.currentOffset += data.size
+        if (State.compositionElementList.size < State.totalCompositions && data.isNotEmpty()) {
+            musicService.getPlaylist(this, State.selectedElement, "", State.currentOffset)
         } else {
             showDownloadAllButton()
         }
@@ -160,7 +158,7 @@ class SearchActivity : AppCompatActivity() {
 
     fun selectUserOrGroup(newSelectedElement: User?) {
         selectedUserContainer.visibility = View.GONE
-        StateManager.selectedElement = newSelectedElement
+        State.selectedElement = newSelectedElement
 
         musicService.getPlaylist(this, newSelectedElement, filterText)
 
@@ -183,7 +181,7 @@ class SearchActivity : AppCompatActivity() {
                 spinner(true)
                 screen(true)
                 selectedUserDownloadAllButton.visibility = View.GONE
-                StateManager.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
+                State.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
                 (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
                 screen(false)
                 spinner(false)
@@ -191,13 +189,13 @@ class SearchActivity : AppCompatActivity() {
 
             deselectUserButton.setOnClickListener {
                 selectedUserContainer.visibility = View.GONE
-                StateManager.selectedElement = null
+                State.selectedElement = null
             }
         }
     }
 
     private fun showDownloadAllButton() {
-        selectedUserDownloadAllButton.visibility = if (StateManager.enableDownloadAll) View.VISIBLE else View.GONE
+        selectedUserDownloadAllButton.visibility = if (State.enableDownloadAll) View.VISIBLE else View.GONE
     }
 
     override fun onStop() {

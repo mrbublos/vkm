@@ -1,6 +1,6 @@
 package vkm.vkm
 
-object StateManager {
+object State {
     var useMock = false
     var enableDownloadAll = true
     var enableTextSuggestions = true
@@ -12,6 +12,7 @@ object StateManager {
     var totalCompositions = 0
     var currentOffset = 0
     var currentSearchTab = "tracks"
+    var currentHistoryTab = "inProgress"
     var selectedElement: User? = null
     val proxies = listOf(
             Proxy("", 0, "", ""),

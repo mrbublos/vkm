@@ -16,7 +16,7 @@ class ProxyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_proxy)
 
-        proxies.adapter = ProxyAdapter(applicationContext, R.layout.proxy_element, StateManager.proxies, this::setProxy)
+        proxies.adapter = ProxyAdapter(applicationContext, R.layout.proxy_element, State.proxies, this::setProxy)
     }
 
     private fun setProxy(proxy: Proxy?) {

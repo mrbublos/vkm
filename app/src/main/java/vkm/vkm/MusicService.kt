@@ -8,10 +8,10 @@ import kotlinx.coroutines.experimental.launch
 interface MusicService {
     companion object {
         fun getInstance(): MusicService {
-            if (StateManager.useVk) {
+            if (State.useVk) {
                 return VkMusicService()
             }
-            if (StateManager.useSpotify) {
+            if (State.useSpotify) {
                 return SpotifyMusicService()
             }
             return VkMusicService()
@@ -41,7 +41,7 @@ open class VkMusicService : MusicService {
                 "offset" to offset.toString(),
                 "shuffle" to "0")
 
-        if (!StateManager.useMock) {
+        if (!State.useMock) {
             callApi(true, "audio.get", params, VkParsers(activity).parsePlaylist)
         } else {
             getMock().getPlaylist(activity, userOrGroup, "", 0)
@@ -54,7 +54,7 @@ open class VkMusicService : MusicService {
                 "count" to "20",
                 "offset" to offset.toString())
 
-        if (!StateManager.useMock) {
+        if (!State.useMock) {
             callApi("groups.search", params, VkParsers(activity).parseGroupList)
         } else {
             getMock().getGroups(activity, "", 0)
@@ -67,7 +67,7 @@ open class VkMusicService : MusicService {
                 "count" to "200",
                 "offset" to offset.toString())
 
-        if (!StateManager.useMock) {
+        if (!State.useMock) {
             callApi("users.search", params, VkParsers(activity).parseUserList)
         } else {
             getMock().getUsers(activity, "", 0)
@@ -83,7 +83,7 @@ open class VkMusicService : MusicService {
                 "search_own" to "0",
                 "performer_only" to "0")
 
-        if (!StateManager.useMock) {
+        if (!State.useMock) {
             callApi(true, "audio.search", params, VkParsers(activity).parseCompositionList)
         } else {
             getMock().getCompositions(activity, filter, 0)
@@ -115,7 +115,7 @@ open class SpotifyMusicService : MusicService {
         }
         val params = mutableListOf("shuffle" to "0")
 
-        if (!StateManager.useMock) {
+        if (!State.useMock) {
             callApi("audio.get", params, SpotifyParsers(activity).parsePlaylist)
         } else {
             getMock().getPlaylist(activity, userOrGroup, "", 0)
@@ -128,7 +128,7 @@ open class SpotifyMusicService : MusicService {
         val params = mutableListOf("q" to filter,
                 "offset" to offset.toString())
 
-        if (!StateManager.useMock) {
+        if (!State.useMock) {
             callApi("users.search", params, SpotifyParsers(activity).parseUserList)
         } else {
             getMock().getUsers(activity, "", 0)
@@ -141,7 +141,7 @@ open class SpotifyMusicService : MusicService {
                 "limit" to "50",
                 "offset" to "$offset")
 
-        if (!StateManager.useMock) {
+        if (!State.useMock) {
             callApi("/v1/search", params, SpotifyParsers(activity).parseCompositionList)
         } else {
             getMock().getCompositions(activity, filter, 0)

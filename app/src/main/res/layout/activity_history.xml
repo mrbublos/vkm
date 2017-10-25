@@ -3,6 +3,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/swipeCatcher"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -34,64 +35,51 @@
                     android:layout_weight="1"/>
         </LinearLayout>
 
-        <TabHost
-                android:id="@+id/tabHost"
+        <vkm.vkm.StringSwiper
+                android:id="@+id/tabsSwiper"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
+        </vkm.vkm.StringSwiper>
 
-            <LinearLayout
+        <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <ListView
+                    android:id="@+id/resultList"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:layout_height="match_parent"/>
 
-                <TabWidget
-                        android:id="@android:id/tabs"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+            <include
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    layout="@layout/composition_list_element"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:id="@+id/compositionInProgress"/>
 
-                <FrameLayout
-                        android:id="@android:id/tabcontent"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+            <ProgressBar
+                    app:layout_constraintTop_toBottomOf="@id/compositionInProgress"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:id="@+id/downloadProgress"
+                    style="@android:style/Widget.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
 
-                    <ListView
-                            android:id="@+id/downloadedList"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+            <Button
+                    app:layout_constraintTop_toBottomOf="@id/downloadProgress"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:id="@+id/resumeDownloadButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/resume_download"/>
+        </android.support.constraint.ConstraintLayout>
 
-                    <ListView
-                            android:id="@+id/waitingForDownloadList"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
-
-                    <LinearLayout
-                            android:id="@+id/inProgressList"
-                            android:orientation="vertical"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-
-                        <include layout="@layout/composition_list_element"
-                                 android:layout_width="match_parent"
-                                 android:layout_height="60dp"
-                                 android:id="@+id/compositionInProgress"/>
-                        <ProgressBar
-                                android:layout_marginStart="10dp"
-                                android:layout_marginEnd="10dp"
-                                android:id="@+id/downloadProgress"
-                                style="@android:style/Widget.ProgressBar.Horizontal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"/>
-                        <Button
-                                android:id="@+id/resumeDownloadButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/resume_download"/>
-
-                    </LinearLayout>
-
-                </FrameLayout>
-            </LinearLayout>
-        </TabHost>
 
     </LinearLayout>
 </vkm.vkm.ScreenSwiper>
