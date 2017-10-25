@@ -90,6 +90,10 @@ class StringSwiper @JvmOverloads constructor(context: Context, attrs: AttributeS
         inflater.inflate(R.layout.text_swiper_view, this)
         next.setOnClickListener { swipeRight() }
         previous.setOnClickListener { swipeLeft() }
+        setOnTouchListener { _, event ->
+            if (event?.action == MotionEvent.ACTION_DOWN) { parent.requestDisallowInterceptTouchEvent(true) }
+            return@setOnTouchListener true
+        }
     }
 
     fun setCurrentString(string: String) {
