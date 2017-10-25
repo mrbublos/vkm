@@ -1,14 +1,15 @@
 package vkm.vkm.utils
 
 import android.content.Context
+import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.composition_list_element.view.*
 import vkm.vkm.*
 
-class CompositionListAdapter(context: Context, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(context, resource, data) {
+class CompositionListAdapter(private val fragment: Fragment, context: Context, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(context, resource, data) {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.composition_list_element, null)
         val item = getItem(position)
@@ -53,7 +54,7 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
                 audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
             }
 
-            if (context is SearchActivity) {
+            if (fragment is SearchFragment) {
                 if (trackAvailable) {
                     withAction = true
                     actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_add))
@@ -74,7 +75,7 @@ class CompositionListAdapter(context: Context, resource: Int, data: List<Composi
                     withAction = false
                     actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_unavailable))
                 }
-            } else if (context is HistoryActivity) {
+            } else if (fragment is HistoryFragment) {
                 actionButton?.setImageDrawable(context.getDrawable(android.R.drawable.ic_delete))
                 withAction = true
             }

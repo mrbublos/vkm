@@ -5,14 +5,14 @@ import com.beust.klaxon.*
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 
-class SpotifyParsers(private val activity: SearchActivity) {
+class SpotifyParsers(private val fragment: SearchFragment) {
     val parseUserList = { result: JsonObject? -> }
 
     val parsePlaylist = { result: JsonObject? -> }
 
     val parseCompositionList = { result: JsonObject? ->
         if (result == null) {
-            activity.setCompositionsList(listOf())
+            fragment.setCompositionsList(listOf())
         } else {
             val items = (result["tracks"] as JsonObject)["items"] as JsonArray<*>
             val compositions = items.map {
@@ -25,7 +25,7 @@ class SpotifyParsers(private val activity: SearchActivity) {
                         url = composition.string("uri") ?: "")
                 compositionObject
             }
-            activity.setCompositionsList(compositions)
+            fragment.setCompositionsList(compositions)
             State.totalCompositions = (result["tracks"] as JsonObject).int("total") ?: 0
         }
     }

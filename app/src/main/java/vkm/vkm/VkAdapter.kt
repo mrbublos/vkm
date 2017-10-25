@@ -7,10 +7,10 @@ import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 
-class VkParsers(private val activity: SearchActivity) {
+class VkParsers(private val fragment: SearchFragment) {
     val parseUserList = { result: JsonObject? ->
         if (result == null) {
-            activity.setUserList(listOf())
+            fragment.setUserList(listOf())
         } else {
             val items = result["response"] as JsonArray<*>
             val users = items.filter {
@@ -24,13 +24,13 @@ class VkParsers(private val activity: SearchActivity) {
                 }
                 newUser
             }
-            activity.setUserList(users)
+            fragment.setUserList(users)
         }
     }
 
     val parseGroupList = { result: JsonObject? ->
         if (result == null) {
-            activity.setGroupList(listOf())
+            fragment.setGroupList(listOf())
         } else {
             val items = result["response"] as JsonArray<*>
             val groups = items.filter {
@@ -43,13 +43,13 @@ class VkParsers(private val activity: SearchActivity) {
                         photoUrl = group.string("photo")!!)
                 newGroup
             }
-            activity.setGroupList(groups)
+            fragment.setGroupList(groups)
         }
     }
 
     val parsePlaylist = { result: JsonObject? ->
         if (result == null) {
-            activity.setCompositionsList(listOf())
+            fragment.setCompositionsList(listOf())
         } else {
             val items = (result["response"] as JsonObject)["items"] as JsonArray<*>
             val compositions = items.filter {
@@ -64,13 +64,13 @@ class VkParsers(private val activity: SearchActivity) {
                 compositionObject
             }
             State.totalCompositions = (result["response"] as JsonObject).int("count")!!
-            activity.setCompositionsList(compositions)
+            fragment.setCompositionsList(compositions)
         }
     }
 
     val parseCompositionList = { result: JsonObject? ->
         if (result == null) {
-            activity.setCompositionsList(listOf())
+            fragment.setCompositionsList(listOf())
         } else {
             val items = (result["response"] as JsonObject)["items"] as JsonArray<*>
             val compositions = items.filter {
@@ -84,7 +84,7 @@ class VkParsers(private val activity: SearchActivity) {
                         url = composition.string("url")!!)
                 compositionObject
             }
-            activity.setCompositionsList(compositions)
+            fragment.setCompositionsList(compositions)
             State.totalCompositions = (result["response"] as JsonObject).int("count")!!
         }
     }

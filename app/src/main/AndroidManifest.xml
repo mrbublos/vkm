@@ -26,15 +26,8 @@
                 android:label="@string/title_activity_main">
         </activity>
         <activity
-                android:name=".SearchActivity"
-                android:label="@string/search_activity_title">
-        </activity>
-        <activity
-                android:name=".HistoryActivity"
-                android:label="@string/history_activity_title">
-        </activity>
-        <activity android:name=".SettingsActivity"
-                  android:label="@string/commands_and_settings_label">
+                android:name=".PagerActivity"
+                android:label="@string/title_activity_main">
         </activity>
         <activity android:name=".ProxyActivity"
                   android:label="@string/select_proxy">

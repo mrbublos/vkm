@@ -18,15 +18,15 @@ interface MusicService {
         }
     }
 
-    fun getPlaylist(activity: SearchActivity, userOrGroup: User?, filter: String = "", offset: Int = 0)
-    fun getGroups(activity: SearchActivity, filter: String = "", offset: Int = 0)
-    fun getUsers(activity: SearchActivity, filter: String = "", offset: Int = 0)
-    fun getCompositions(activity: SearchActivity, filter: String = "", offset: Int = 0)
+    fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String = "", offset: Int = 0)
+    fun getGroups(fragment: SearchFragment, filter: String = "", offset: Int = 0)
+    fun getUsers(fragment: SearchFragment, filter: String = "", offset: Int = 0)
+    fun getCompositions(fragment: SearchFragment, filter: String = "", offset: Int = 0)
 }
 
 open class VkMusicService : MusicService {
 
-    override fun getPlaylist(activity: SearchActivity, userOrGroup: User?, filter: String, offset: Int) {
+    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int) {
         if (userOrGroup == null) {
             return
         }
@@ -42,39 +42,39 @@ open class VkMusicService : MusicService {
                 "shuffle" to "0")
 
         if (!State.useMock) {
-            callApi(true, "audio.get", params, VkParsers(activity).parsePlaylist)
+            callApi(true, "audio.get", params, VkParsers(fragment).parsePlaylist)
         } else {
-            getMock().getPlaylist(activity, userOrGroup, "", 0)
+            getMock().getPlaylist(fragment, userOrGroup, "", 0)
         }
     }
 
-    override fun getGroups(activity: SearchActivity, filter: String, offset: Int) {
+    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int) {
         val params = mutableListOf("q" to filter,
                 "fields" to "has_photo",
                 "count" to "20",
                 "offset" to offset.toString())
 
         if (!State.useMock) {
-            callApi("groups.search", params, VkParsers(activity).parseGroupList)
+            callApi("groups.search", params, VkParsers(fragment).parseGroupList)
         } else {
-            getMock().getGroups(activity, "", 0)
+            getMock().getGroups(fragment, "", 0)
         }
     }
 
-    override fun getUsers(activity: SearchActivity, filter: String, offset: Int) {
+    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int) {
         val params = mutableListOf("q" to filter,
                 "fields" to "photo_50, has_photo",
                 "count" to "200",
                 "offset" to offset.toString())
 
         if (!State.useMock) {
-            callApi("users.search", params, VkParsers(activity).parseUserList)
+            callApi("users.search", params, VkParsers(fragment).parseUserList)
         } else {
-            getMock().getUsers(activity, "", 0)
+            getMock().getUsers(fragment, "", 0)
         }
     }
 
-    override fun getCompositions(activity: SearchActivity, filter: String, offset: Int) {
+    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int) {
         val params = mutableListOf("q" to filter,
                 "count" to "100",
                 "v" to "5.68",
@@ -84,9 +84,9 @@ open class VkMusicService : MusicService {
                 "performer_only" to "0")
 
         if (!State.useMock) {
-            callApi(true, "audio.search", params, VkParsers(activity).parseCompositionList)
+            callApi(true, "audio.search", params, VkParsers(fragment).parseCompositionList)
         } else {
-            getMock().getCompositions(activity, filter, 0)
+            getMock().getCompositions(fragment, filter, 0)
         }
     }
 
@@ -109,42 +109,42 @@ open class VkMusicService : MusicService {
 
 open class SpotifyMusicService : MusicService {
 
-    override fun getPlaylist(activity: SearchActivity, userOrGroup: User?, filter: String, offset: Int) {
+    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int) {
         if (userOrGroup == null) {
             return
         }
         val params = mutableListOf("shuffle" to "0")
 
         if (!State.useMock) {
-            callApi("audio.get", params, SpotifyParsers(activity).parsePlaylist)
+            callApi("audio.get", params, SpotifyParsers(fragment).parsePlaylist)
         } else {
-            getMock().getPlaylist(activity, userOrGroup, "", 0)
+            getMock().getPlaylist(fragment, userOrGroup, "", 0)
         }
     }
 
-    override fun getGroups(activity: SearchActivity, filter: String, offset: Int) {}
+    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int) {}
 
-    override fun getUsers(activity: SearchActivity, filter: String, offset: Int) {
+    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int) {
         val params = mutableListOf("q" to filter,
                 "offset" to offset.toString())
 
         if (!State.useMock) {
-            callApi("users.search", params, SpotifyParsers(activity).parseUserList)
+            callApi("users.search", params, SpotifyParsers(fragment).parseUserList)
         } else {
-            getMock().getUsers(activity, "", 0)
+            getMock().getUsers(fragment, "", 0)
         }
     }
 
-    override fun getCompositions(activity: SearchActivity, filter: String, offset: Int) {
+    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int) {
         val params = mutableListOf("q" to filter.replace(" ", "+"),
                 "type" to "track,artist",
                 "limit" to "50",
                 "offset" to "$offset")
 
         if (!State.useMock) {
-            callApi("/v1/search", params, SpotifyParsers(activity).parseCompositionList)
+            callApi("/v1/search", params, SpotifyParsers(fragment).parseCompositionList)
         } else {
-            getMock().getCompositions(activity, filter, 0)
+            getMock().getCompositions(fragment, filter, 0)
         }
     }
 
@@ -160,27 +160,27 @@ open class SpotifyMusicService : MusicService {
 
 
 class MusicServiceMock : MusicService {
-    override fun getPlaylist(activity: SearchActivity, userOrGroup: User?, filter: String, offset: Int) {
+    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int) {
         "Running getUserPlaylistMock".log()
-        val mock = activity.assets.open("getUserPlayList.json").readAll()
-        VkParsers(activity).parsePlaylist.invoke(mock.toJson())
+        val mock = fragment.context.assets.open("getUserPlayList.json").readAll()
+        VkParsers(fragment).parsePlaylist.invoke(mock.toJson())
     }
 
-    override fun getGroups(activity: SearchActivity, filter: String, offset: Int) {
+    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int) {
         "Running getGroups".log()
-        val mock = activity.assets.open("getGroups.json").readAll()
-        VkParsers(activity).parseGroupList.invoke(mock.toJson())
+        val mock = fragment.context.assets.open("getGroups.json").readAll()
+        VkParsers(fragment).parseGroupList.invoke(mock.toJson())
     }
 
-    override fun getUsers(activity: SearchActivity, filter: String, offset: Int) {
+    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int) {
         "Running getUsers".log()
-        val mock = activity.assets.open("getUsers.json").readAll()
-        VkParsers(activity).parseUserList.invoke(mock.toJson())
+        val mock = fragment.context.assets.open("getUsers.json").readAll()
+        VkParsers(fragment).parseUserList.invoke(mock.toJson())
     }
 
-    override fun getCompositions(activity: SearchActivity, filter: String, offset: Int) {
+    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int) {
         "Running getCompositions".log()
-        val mock = activity.assets.open("getCompositionList.json").readAll()
-        VkParsers(activity).parseCompositionList.invoke(mock.toJson())
+        val mock = fragment.context.assets.open("getCompositionList.json").readAll()
+        VkParsers(fragment).parseCompositionList.invoke(mock.toJson())
     }
 }

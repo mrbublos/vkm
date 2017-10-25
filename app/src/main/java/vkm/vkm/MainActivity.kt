@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         DownloadManager.initialize(applicationContext)
 
         if (SecurityService.isLoggedIn()) {
-            startActivity(Intent(applicationContext, SearchActivity::class.java))
+            startActivity(Intent(applicationContext, PagerActivity::class.java))
         } else {
             startActivity(Intent(applicationContext, LoginActivity::class.java))
         }

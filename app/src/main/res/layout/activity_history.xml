@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vkm.vkm.ScreenSwiper
+<LinearLayout
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -10,8 +10,10 @@
     <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_width="368dp"
+            android:layout_height="495dp"
+            tools:layout_editor_absoluteY="8dp"
+            tools:layout_editor_absoluteX="8dp">
 
         <LinearLayout
                 android:orientation="horizontal"
@@ -47,40 +49,43 @@
 
             <ListView
                     android:id="@+id/resultList"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_width="0dp"
+                    android:layout_height="417dp"
+                    tools:layout_editor_absoluteY="8dp"
+                    tools:layout_editor_absoluteX="8dp"/>
 
             <include
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     layout="@layout/composition_list_element"
-                    android:layout_width="match_parent"
+                    android:layout_width="368dp"
                     android:layout_height="60dp"
-                    android:id="@+id/compositionInProgress"/>
+                    android:id="@+id/compositionInProgress"
+                    tools:layout_editor_absoluteX="8dp"/>
 
             <ProgressBar
-                    app:layout_constraintTop_toBottomOf="@id/compositionInProgress"
+                    app:layout_constraintTop_toBottomOf="@+id/compositionInProgress"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
                     android:id="@+id/downloadProgress"
                     style="@android:style/Widget.ProgressBar.Horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="368dp"
+                    android:layout_height="wrap_content"
+                    tools:layout_editor_absoluteX="8dp"/>
 
             <Button
-                    app:layout_constraintTop_toBottomOf="@id/downloadProgress"
+                    app:layout_constraintTop_toBottomOf="@+id/downloadProgress"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:id="@+id/resumeDownloadButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/resume_download"/>
+                    android:text="@string/resume_download"
+                    tools:layout_editor_absoluteX="113dp"/>
         </android.support.constraint.ConstraintLayout>
 
 
     </LinearLayout>
-</vkm.vkm.ScreenSwiper>
+</LinearLayout>
 

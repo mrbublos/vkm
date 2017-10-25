@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vkm.vkm.ScreenSwiper
+<LinearLayout
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -121,5 +121,5 @@
                 android:layout_height="match_parent"/>
 
     </LinearLayout>
-</vkm.vkm.ScreenSwiper>
+</LinearLayout>
 

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.MotionEvent
 import android.widget.Button
 import android.widget.EditText
@@ -47,7 +46,7 @@ class LoginActivity : AppCompatActivity() {
     fun loginCallback(result: String) {
         when(result) {
             "ok" -> {
-                startActivity(Intent(applicationContext, SearchActivity::class.java))
+                startActivity(Intent(applicationContext, SearchFragment::class.java))
                 finish()
                 return
             }

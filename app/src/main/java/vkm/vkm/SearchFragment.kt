@@ -1,30 +1,33 @@
 package vkm.vkm
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import android.support.v4.app.Fragment
 import android.text.InputType
-import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
-import kotlinx.android.synthetic.main.activity_search.*
+import kotlinx.android.synthetic.main.activity_search.view.*
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.UserListAdapter
-import java.lang.ref.WeakReference
 
-class SearchActivity : AppCompatActivity() {
+class SearchFragment : Fragment() {
 
     // services
     private var musicService: MusicService = VkMusicService()
 
     // private vars
     private var filterText: String = ""
+    lateinit private var me: View
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.e(MainActivity.TAG, "Setting content view")
-        setContentView(R.layout.activity_search)
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        me = inflater?.inflate(R.layout.activity_search, container, false) as View
+        init()
+        return me
+    }
 
+    private fun init() {
         initializeElements()
         initializeTabs()
         initializeButton()
@@ -32,22 +35,15 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initializeElements() {
-        swipeCatcher.left = SettingsActivity::class.java
-        swipeCatcher.right = HistoryActivity::class.java
-        swipeCatcher.activity = WeakReference(this)
-
         selectUserOrGroup(State.selectedElement)
         spinner(false)
-
-        MusicPlayer.context = this
-
-        search.inputType = if (State.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        me.search.inputType = if (State.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
     }
 
     private fun initializeTabs() {
-        tabsSwiper.value = mutableListOf("user", "group", "tracks")
-        tabsSwiper.setCurrentString(State.currentSearchTab)
-        tabsSwiper.onSwiped = { _, tabName ->
+        me.tabsSwiper.value = mutableListOf("user", "group", "tracks")
+        me.tabsSwiper.setCurrentString(State.currentSearchTab)
+        me.tabsSwiper.onSwiped = { _, tabName ->
             State.currentSearchTab = tabName
             when (State.currentSearchTab) {
                 "user" -> setUserList(State.userElementList)
@@ -59,8 +55,8 @@ class SearchActivity : AppCompatActivity() {
 
     private fun initializeButton() {
         screen(false)
-        button.setOnClickListener { _ ->
-            filterText = search.text.toString()
+        me.button.setOnClickListener { _ ->
+            filterText = me.search.text.toString()
             if (filterText.isEmpty()) { return@setOnClickListener }
 
             spinner(true)
@@ -89,7 +85,7 @@ class SearchActivity : AppCompatActivity() {
                     State.compositionElementList.clear()
                     State.currentOffset = 0
                     musicService.getCompositions(this, filterText)
-                    resultList.adapter = null
+                    me.resultList.adapter = null
                 }
             }
 
@@ -114,14 +110,14 @@ class SearchActivity : AppCompatActivity() {
         screen(false)
         spinner(false)
         State.userElementList = data.toMutableList()
-        resultList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
+        me.resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setGroupList(data: List<User>) {
         screen(false)
         spinner(false)
         State.groupElementList = data.toMutableList()
-        resultList.adapter = UserListAdapter(this, R.layout.composition_list_element, data, this::selectUserOrGroup)
+        me.resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setCompositionsList(data: List<Composition>) {
@@ -132,10 +128,10 @@ class SearchActivity : AppCompatActivity() {
             State.compositionElementList.addAll(data)
         }
 
-        if (resultList.adapter == null) {
-            resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionTouchListener)
+        if (me.resultList.adapter == null) {
+            me.resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, State.compositionElementList, compositionTouchListener)
         } else {
-            (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+            (me.resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
         }
 
         State.currentOffset += data.size
@@ -151,51 +147,51 @@ class SearchActivity : AppCompatActivity() {
         if (!DownloadManager.getDownloaded().contains(composition)) {
             DownloadManager.downloadComposition(composition)
             val actionButton = view.bind<ImageView>(R.id.imageView)
-            actionButton.setImageDrawable(getDrawable(R.drawable.ic_downloading))
+            actionButton.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
             actionButton.setOnClickListener {}
         }
     }
 
-    fun selectUserOrGroup(newSelectedElement: User?) {
-        selectedUserContainer.visibility = View.GONE
+    private fun selectUserOrGroup(newSelectedElement: User?) {
+        me.selectedUserContainer.visibility = View.GONE
         State.selectedElement = newSelectedElement
 
         musicService.getPlaylist(this, newSelectedElement, filterText)
 
-        tabsSwiper.setCurrentString("tracks")
+        me.tabsSwiper.setCurrentString("tracks")
 
         newSelectedElement?.let {
-            selectedUserContainer.visibility = View.VISIBLE
-            selectedUserName.text = it.fullname
-            selectedUserId.text = it.userId
+            me.selectedUserContainer.visibility = View.VISIBLE
+            me.selectedUserName.text = it.fullname
+            me.selectedUserId.text = it.userId
 
             if (it.photo == null) {
-                UserListAdapter.schedulePhotoDownload(selectedUserPhoto, it)
+                UserListAdapter.schedulePhotoDownload(me.selectedUserPhoto, it)
             } else {
-                selectedUserPhoto.setImageBitmap(it.photo)
+                me.selectedUserPhoto.setImageBitmap(it.photo)
             }
 
             // hiding download all until we have all tracks downloaded
-            selectedUserDownloadAllButton.visibility = View.GONE
-            selectedUserDownloadAllButton.setOnClickListener {
+            me.selectedUserDownloadAllButton.visibility = View.GONE
+            me.selectedUserDownloadAllButton.setOnClickListener {
                 spinner(true)
                 screen(true)
-                selectedUserDownloadAllButton.visibility = View.GONE
+                me.selectedUserDownloadAllButton.visibility = View.GONE
                 State.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
-                (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+                (me.resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
                 screen(false)
                 spinner(false)
             }
 
-            deselectUserButton.setOnClickListener {
-                selectedUserContainer.visibility = View.GONE
+            me.deselectUserButton.setOnClickListener {
+                me.selectedUserContainer.visibility = View.GONE
                 State.selectedElement = null
             }
         }
     }
 
     private fun showDownloadAllButton() {
-        selectedUserDownloadAllButton.visibility = if (State.enableDownloadAll) View.VISIBLE else View.GONE
+        me.selectedUserDownloadAllButton.visibility = if (State.enableDownloadAll) View.VISIBLE else View.GONE
     }
 
     override fun onStop() {
@@ -204,11 +200,11 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun screen(locked: Boolean) {
-        button.isFocusable = !locked
-        button.isClickable = !locked
+        me.button.isFocusable = !locked
+        me.button.isClickable = !locked
     }
 
     private fun spinner(show: Boolean) {
-        loadingSpinner.visibility = if (show) View.VISIBLE else View.GONE
+        me.loadingSpinner.visibility = if (show) View.VISIBLE else View.GONE
     }
 }
