@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
-import kotlinx.android.synthetic.main.activity_search.view.*
+import kotlinx.android.synthetic.main.activity_search.*
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.UserListAdapter
 
@@ -19,15 +19,11 @@ class SearchFragment : Fragment() {
 
     // private vars
     private var filterText: String = ""
-    lateinit private var me: View
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        me = inflater?.inflate(R.layout.activity_search, container, false) as View
-        init()
-        return me
-    }
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater?.inflate(R.layout.activity_search, container, false) as View
 
-    private fun init() {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         initializeElements()
         initializeTabs()
         initializeButton()
@@ -37,13 +33,13 @@ class SearchFragment : Fragment() {
     private fun initializeElements() {
         selectUserOrGroup(State.selectedElement)
         spinner(false)
-        me.search.inputType = if (State.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        search.inputType = if (State.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
     }
 
     private fun initializeTabs() {
-        me.tabsSwiper.value = mutableListOf("user", "group", "tracks")
-        me.tabsSwiper.setCurrentString(State.currentSearchTab)
-        me.tabsSwiper.onSwiped = { _, tabName ->
+        tabsSwiper.value = mutableListOf("user", "group", "tracks")
+        tabsSwiper.setCurrentString(State.currentSearchTab)
+        tabsSwiper.onSwiped = { _, tabName ->
             State.currentSearchTab = tabName
             when (State.currentSearchTab) {
                 "user" -> setUserList(State.userElementList)
@@ -55,8 +51,8 @@ class SearchFragment : Fragment() {
 
     private fun initializeButton() {
         screen(false)
-        me.button.setOnClickListener { _ ->
-            filterText = me.search.text.toString()
+        button.setOnClickListener { _ ->
+            filterText = search.text.toString()
             if (filterText.isEmpty()) { return@setOnClickListener }
 
             spinner(true)
@@ -85,7 +81,7 @@ class SearchFragment : Fragment() {
                     State.compositionElementList.clear()
                     State.currentOffset = 0
                     musicService.getCompositions(this, filterText)
-                    me.resultList.adapter = null
+                    resultList.adapter = null
                 }
             }
 
@@ -110,14 +106,14 @@ class SearchFragment : Fragment() {
         screen(false)
         spinner(false)
         State.userElementList = data.toMutableList()
-        me.resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
+        resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setGroupList(data: List<User>) {
         screen(false)
         spinner(false)
         State.groupElementList = data.toMutableList()
-        me.resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
+        resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setCompositionsList(data: List<Composition>) {
@@ -128,10 +124,10 @@ class SearchFragment : Fragment() {
             State.compositionElementList.addAll(data)
         }
 
-        if (me.resultList.adapter == null) {
-            me.resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, State.compositionElementList, compositionTouchListener)
+        if (resultList.adapter == null) {
+            resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, State.compositionElementList, compositionTouchListener)
         } else {
-            (me.resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+            (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
         }
 
         State.currentOffset += data.size
@@ -153,45 +149,45 @@ class SearchFragment : Fragment() {
     }
 
     private fun selectUserOrGroup(newSelectedElement: User?) {
-        me.selectedUserContainer.visibility = View.GONE
+        selectedUserContainer.visibility = View.GONE
         State.selectedElement = newSelectedElement
 
         musicService.getPlaylist(this, newSelectedElement, filterText)
 
-        me.tabsSwiper.setCurrentString("tracks")
+        tabsSwiper.setCurrentString("tracks")
 
         newSelectedElement?.let {
-            me.selectedUserContainer.visibility = View.VISIBLE
-            me.selectedUserName.text = it.fullname
-            me.selectedUserId.text = it.userId
+            selectedUserContainer.visibility = View.VISIBLE
+            selectedUserName.text = it.fullname
+            selectedUserId.text = it.userId
 
             if (it.photo == null) {
-                UserListAdapter.schedulePhotoDownload(me.selectedUserPhoto, it)
+                UserListAdapter.schedulePhotoDownload(selectedUserPhoto, it)
             } else {
-                me.selectedUserPhoto.setImageBitmap(it.photo)
+                selectedUserPhoto.setImageBitmap(it.photo)
             }
 
             // hiding download all until we have all tracks downloaded
-            me.selectedUserDownloadAllButton.visibility = View.GONE
-            me.selectedUserDownloadAllButton.setOnClickListener {
+            selectedUserDownloadAllButton.visibility = View.GONE
+            selectedUserDownloadAllButton.setOnClickListener {
                 spinner(true)
                 screen(true)
-                me.selectedUserDownloadAllButton.visibility = View.GONE
+                selectedUserDownloadAllButton.visibility = View.GONE
                 State.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
-                (me.resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+                (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
                 screen(false)
                 spinner(false)
             }
 
-            me.deselectUserButton.setOnClickListener {
-                me.selectedUserContainer.visibility = View.GONE
+            deselectUserButton.setOnClickListener {
+                selectedUserContainer.visibility = View.GONE
                 State.selectedElement = null
             }
         }
     }
 
     private fun showDownloadAllButton() {
-        me.selectedUserDownloadAllButton.visibility = if (State.enableDownloadAll) View.VISIBLE else View.GONE
+        selectedUserDownloadAllButton.visibility = if (State.enableDownloadAll) View.VISIBLE else View.GONE
     }
 
     override fun onStop() {
@@ -200,11 +196,11 @@ class SearchFragment : Fragment() {
     }
 
     private fun screen(locked: Boolean) {
-        me.button.isFocusable = !locked
-        me.button.isClickable = !locked
+        button.isFocusable = !locked
+        button.isClickable = !locked
     }
 
     private fun spinner(show: Boolean) {
-        me.loadingSpinner.visibility = if (show) View.VISIBLE else View.GONE
+        loadingSpinner.visibility = if (show) View.VISIBLE else View.GONE
     }
 }

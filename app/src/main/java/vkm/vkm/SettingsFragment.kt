@@ -6,59 +6,54 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.activity_settings.view.*
+import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsFragment : Fragment() {
 
-    lateinit private var me: View
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater?.inflate(R.layout.activity_settings, container, false) as View
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        me = inflater?.inflate(R.layout.activity_settings, container, false) as View
-        init()
-        return me
-    }
-
-    private fun init() {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         dangerousCommandsVisibility(false)
 
-        me.enableDownloadAll.isChecked = State.enableDownloadAll
-        me.enableDownloadAll.setOnCheckedChangeListener { _, value -> State.enableDownloadAll = value }
+        enableDownloadAll.isChecked = State.enableDownloadAll
+        enableDownloadAll.setOnCheckedChangeListener { _, value -> State.enableDownloadAll = value }
 
-        me.enableSuggestions.isChecked = State.enableTextSuggestions
-        me.enableSuggestions.setOnCheckedChangeListener { _, value -> State.enableTextSuggestions = value }
+        enableSuggestions.isChecked = State.enableTextSuggestions
+        enableSuggestions.setOnCheckedChangeListener { _, value -> State.enableTextSuggestions = value }
 
-        me.showDangerousCommands.setOnCheckedChangeListener { _, value -> dangerousCommandsVisibility(value) }
+        showDangerousCommands.setOnCheckedChangeListener { _, value -> dangerousCommandsVisibility(value) }
 
-        me.clearDownloaded.setOnClickListener { DownloadManager.clearDownloaded() }
+        clearDownloaded.setOnClickListener { DownloadManager.clearDownloaded() }
 
-        me.clearQueue.setOnClickListener { DownloadManager.clearQueue() }
+        clearQueue.setOnClickListener { DownloadManager.clearQueue() }
 
-        me.stopDownload.setOnClickListener { DownloadManager.stopDownload("") }
+        stopDownload.setOnClickListener { DownloadManager.stopDownload("") }
 
-        me.startDownload.setOnClickListener { DownloadManager.downloadComposition(null) }
+        startDownload.setOnClickListener { DownloadManager.downloadComposition(null) }
 
-        me.loadLists.setOnClickListener { DownloadManager.loadAll() }
+        loadLists.setOnClickListener { DownloadManager.loadAll() }
 
-        me.dumpLists.setOnClickListener { DownloadManager.dumpAll() }
+        dumpLists.setOnClickListener { DownloadManager.dumpAll() }
 
-        me.clearMusicDir.setOnClickListener { DownloadManager.removeAllMusic() }
+        clearMusicDir.setOnClickListener { DownloadManager.removeAllMusic() }
 
-        me.removeAllSettings.setOnClickListener { SecurityService.clearAll() }
+        removeAllSettings.setOnClickListener { SecurityService.clearAll() }
 
-        me.rehashDownloaded.setOnClickListener { DownloadManager.rehashAndDump() }
+        rehashDownloaded.setOnClickListener { DownloadManager.rehashAndDump() }
 
-        me.restoreDownloaded.setOnClickListener { DownloadManager.restoreDownloaded() }
+        restoreDownloaded.setOnClickListener { DownloadManager.restoreDownloaded() }
 
-        me.selectProxy.setOnClickListener { startActivity(Intent(context, ProxyActivity::class.java)) }
+        selectProxy.setOnClickListener { startActivity(Intent(context, ProxyActivity::class.java)) }
     }
 
     private fun dangerousCommandsVisibility(visible: Boolean) {
         val visibility = if (visible) View.VISIBLE else View.GONE
-        (me.clearMusicDir.parent as View).visibility = visibility
-        (me.removeAllSettings.parent as View).visibility = visibility
-        (me.rehashDownloaded.parent as View).visibility = visibility
-        (me.restoreDownloaded.parent as View).visibility = visibility
-        (me.loadLists.parent as View).visibility = visibility
-        (me.dumpLists.parent as View).visibility = visibility
+        (clearMusicDir.parent as View).visibility = visibility
+        (removeAllSettings.parent as View).visibility = visibility
+        (rehashDownloaded.parent as View).visibility = visibility
+        (restoreDownloaded.parent as View).visibility = visibility
+        (loadLists.parent as View).visibility = visibility
+        (dumpLists.parent as View).visibility = visibility
     }
 }
