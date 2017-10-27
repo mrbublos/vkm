@@ -6,7 +6,9 @@ import com.github.kittinunf.fuel.core.FuelManager
 import kotlinx.android.synthetic.main.activity_proxy.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
+import vkm.vkm.utils.Proxy
 import vkm.vkm.utils.ProxyAdapter
+import vkm.vkm.utils.VkApi
 import java.net.InetSocketAddress
 import java.net.Proxy as JProxy
 

@@ -1,4 +1,4 @@
-package vkm.vkm
+package vkm.vkm.utils
 
 import android.graphics.Bitmap
 

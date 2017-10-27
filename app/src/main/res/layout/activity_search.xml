@@ -103,11 +103,11 @@
 
         </android.support.constraint.ConstraintLayout>
 
-        <vkm.vkm.StringSwiper
+        <vkm.vkm.utils.StringSwiper
                 android:id="@+id/tabsSwiper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-        </vkm.vkm.StringSwiper>
+        </vkm.vkm.utils.StringSwiper>
 
         <ListView
                 android:id="@+id/resultList"

@@ -1,4 +1,4 @@
-package vkm.vkm
+package vkm.vkm.utils
 
 import android.app.Activity
 import android.content.Context
@@ -14,6 +14,8 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.result.Result
+import vkm.vkm.DownloadManager
+import vkm.vkm.MainActivity
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset

@@ -1,4 +1,4 @@
-package vkm.vkm
+package vkm.vkm.utils
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
@@ -6,6 +6,9 @@ import com.beust.klaxon.int
 import com.beust.klaxon.string
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import vkm.vkm.SearchFragment
+import vkm.vkm.SecurityService
+import vkm.vkm.State
 
 class VkParsers(private val fragment: SearchFragment) {
     val parseUserList = { result: JsonObject? ->
@@ -156,7 +159,9 @@ object VkApi {
         parameters.add("access_token" to SecurityService.vkAccessToken!!)
 
         // should be the last computed parameter
-        if (addSignature) { addSignature(path, parameters) }
+        if (addSignature) {
+            addSignature(path, parameters)
+        }
         val httpGet = "$_apiUrl$path".httpGet(parameters)
         httpGet.headers.put("User-Agent", _userAgent)
         "Sending request ${httpGet.cUrlString()}".log()

@@ -9,6 +9,7 @@ import android.widget.SeekBar
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import vkm.vkm.utils.*
 
 object MusicPlayer: SeekBar.OnSeekBarChangeListener {
     private var mp: MediaPlayer? = null

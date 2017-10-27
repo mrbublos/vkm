@@ -1,4 +1,4 @@
-package vkm.vkm
+package vkm.vkm.utils
 
 import android.app.Activity
 import android.content.Context
@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.widget.TextView
 import kotlinx.android.synthetic.main.text_swiper_view.view.*
+import vkm.vkm.R
 import java.lang.ref.WeakReference
 
 // TODO consider redo to a fragments, not activities

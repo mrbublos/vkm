@@ -1,6 +1,8 @@
 package vkm.vkm
 
 import android.content.Context
+import vkm.vkm.utils.User
+import vkm.vkm.utils.VkApi
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream

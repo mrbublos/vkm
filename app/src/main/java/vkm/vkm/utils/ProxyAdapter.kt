@@ -6,9 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import vkm.vkm.Proxy
 import vkm.vkm.R
-import vkm.vkm.bind
 
 class ProxyAdapter(context: Context, resource: Int, data: List<Proxy?>, private var elementClickListener: (user: Proxy?) -> Unit? = {}) : ArrayAdapter<Proxy>(context, resource, data) {
 

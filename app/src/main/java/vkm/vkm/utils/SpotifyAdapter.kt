@@ -1,9 +1,12 @@
-package vkm.vkm
+package vkm.vkm.utils
 
 import android.util.Log
 import com.beust.klaxon.*
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import vkm.vkm.SearchFragment
+import vkm.vkm.SecurityService
+import vkm.vkm.State
 
 class SpotifyParsers(private val fragment: SearchFragment) {
     val parseUserList = { result: JsonObject? -> }

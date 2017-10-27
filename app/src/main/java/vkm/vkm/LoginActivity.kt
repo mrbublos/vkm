@@ -8,6 +8,9 @@ import android.view.MotionEvent
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import vkm.vkm.utils.User
+import vkm.vkm.utils.bind
+import vkm.vkm.utils.log
 
 class LoginActivity : AppCompatActivity() {
 

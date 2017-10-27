@@ -37,11 +37,11 @@
                     android:layout_weight="1"/>
         </LinearLayout>
 
-        <vkm.vkm.StringSwiper
+        <vkm.vkm.utils.StringSwiper
                 android:id="@+id/tabsSwiper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-        </vkm.vkm.StringSwiper>
+        </vkm.vkm.utils.StringSwiper>
 
         <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"

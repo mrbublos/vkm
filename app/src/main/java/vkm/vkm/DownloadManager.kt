@@ -1,12 +1,12 @@
 package vkm.vkm
 
 import android.content.Context
-import android.os.AsyncTask
 import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.ListType.*
+import vkm.vkm.utils.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URL

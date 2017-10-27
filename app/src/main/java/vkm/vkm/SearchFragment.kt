@@ -10,7 +10,9 @@ import android.widget.ArrayAdapter
 import android.widget.BaseAdapter
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
+import vkm.vkm.utils.Composition
 import vkm.vkm.utils.CompositionListAdapter
+import vkm.vkm.utils.User
 import vkm.vkm.utils.UserListAdapter
 
 class SearchFragment : Fragment() {
@@ -182,10 +184,6 @@ class SearchFragment : Fragment() {
 
     private fun showDownloadAllButton() {
         selectedUserDownloadAllButton.visibility = if (State.enableDownloadAll) View.VISIBLE else View.GONE
-    }
-
-    override fun onStop() {
-        super.onStop()
     }
 
     private fun screen(locked: Boolean) {

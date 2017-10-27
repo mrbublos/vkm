@@ -1,5 +1,9 @@
 package vkm.vkm
 
+import vkm.vkm.utils.Composition
+import vkm.vkm.utils.Proxy
+import vkm.vkm.utils.User
+
 object State {
     var useMock = false
     var enableDownloadAll = true
