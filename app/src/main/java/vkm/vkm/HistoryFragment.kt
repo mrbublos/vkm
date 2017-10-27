@@ -70,7 +70,7 @@ class HistoryFragment : Fragment() {
     }
 
     private fun initializeButton() {
-        button.setOnClickListener {
+        searchButton.setOnClickListener {
             val text = search.text.toString()
 
             when (State.currentHistoryTab) {

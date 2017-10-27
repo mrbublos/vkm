@@ -7,8 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.ImageView
+import android.widget.BaseAdapter
 import kotlinx.android.synthetic.main.activity_search.*
+import kotlinx.android.synthetic.main.composition_list_element.view.*
 import vkm.vkm.utils.CompositionListAdapter
 import vkm.vkm.utils.UserListAdapter
 
@@ -51,7 +52,7 @@ class SearchFragment : Fragment() {
 
     private fun initializeButton() {
         screen(false)
-        button.setOnClickListener { _ ->
+        searchButton.setOnClickListener { _ ->
             filterText = search.text.toString()
             if (filterText.isEmpty()) { return@setOnClickListener }
 
@@ -90,15 +91,9 @@ class SearchFragment : Fragment() {
     }
 
     private fun initializeLists() {
-        if (State.userElementList.isNotEmpty()) {
-            setUserList(State.userElementList)
-        }
-        if (State.groupElementList.isNotEmpty()) {
-            setGroupList(State.groupElementList)
-        }
-        if (State.compositionElementList.isNotEmpty()) {
-            setCompositionsList(State.compositionElementList)
-        }
+        if (State.userElementList.isNotEmpty()) { setUserList(State.userElementList) }
+        if (State.groupElementList.isNotEmpty()) { setGroupList(State.groupElementList) }
+        if (State.compositionElementList.isNotEmpty()) { setCompositionsList(State.compositionElementList) }
     }
 
     // callback functions
@@ -120,12 +115,10 @@ class SearchFragment : Fragment() {
         screen(false)
         spinner(false)
 
-        if (State.compositionElementList != data) {
-            State.compositionElementList.addAll(data)
-        }
+        if (State.compositionElementList != data) { State.compositionElementList.addAll(data) }
 
         if (resultList.adapter == null) {
-            resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, State.compositionElementList, compositionTouchListener)
+            resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, State.compositionElementList, compositionAction)
         } else {
             (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
         }
@@ -139,10 +132,10 @@ class SearchFragment : Fragment() {
     }
 
     // actions
-    private val compositionTouchListener = { composition: Composition, view: View ->
+    private val compositionAction = { composition: Composition, view: View ->
         if (!DownloadManager.getDownloaded().contains(composition)) {
             DownloadManager.downloadComposition(composition)
-            val actionButton = view.bind<ImageView>(R.id.imageView)
+            val actionButton = view.imageView
             actionButton.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
             actionButton.setOnClickListener {}
         }
@@ -152,7 +145,7 @@ class SearchFragment : Fragment() {
         selectedUserContainer.visibility = View.GONE
         State.selectedElement = newSelectedElement
 
-        StateManager.compositionElementList.clear()
+        State.compositionElementList.clear()
         musicService.getPlaylist(this, newSelectedElement, filterText)
 
         tabsSwiper.setCurrentString("tracks")
@@ -175,7 +168,7 @@ class SearchFragment : Fragment() {
                 screen(true)
                 selectedUserDownloadAllButton.visibility = View.GONE
                 State.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
-                (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+                (resultList.adapter as BaseAdapter).notifyDataSetChanged()
                 screen(false)
                 spinner(false)
             }
@@ -193,12 +186,11 @@ class SearchFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        MusicPlayer.stop()
     }
 
     private fun screen(locked: Boolean) {
-        button.isFocusable = !locked
-        button.isClickable = !locked
+        searchButton.isFocusable = !locked
+        searchButton.isClickable = !locked
     }
 
     private fun spinner(show: Boolean) {
