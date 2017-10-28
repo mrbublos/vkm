@@ -49,7 +49,10 @@ class HistoryFragment : VkmFragment() {
     private fun startProgressUpdate() {
         progressUpdateJob = launch(CommonPool) {
             while (true) {
-                launch(UI) { setInProgress(DownloadManager.getInProgress().firstOrNull()) }
+                launch(UI) {
+                    downloadProgress.progress = DownloadManager.downloadedPercent
+                    downloadProgress.secondaryProgress = DownloadManager.downloadedPercent
+                }
                 delay(1000)
             }
         }
@@ -57,11 +60,11 @@ class HistoryFragment : VkmFragment() {
 
     private fun initInProgressTab(show: Boolean) {
         resultList.visibility = if (!show) View.VISIBLE else View.GONE
-        downloadProgress.visibility = if (show && !DownloadManager._inProgress.isEmpty()) View.VISIBLE else View.GONE
-        compositionInProgress.visibility = if (show) View.VISIBLE else View.GONE
         resumeDownloadButton.visibility = if (show) View.VISIBLE else View.GONE
-        audioControl.visibility = if (!show) View.VISIBLE else View.GONE
-        imageView.visibility = if (!show) View.VISIBLE else View.GONE
+
+        val showInProgress = show && DownloadManager.getInProgress().isNotEmpty()
+        downloadProgress.visibility = if (showInProgress) View.VISIBLE else View.GONE
+        compositionInProgress.visibility = if (showInProgress) View.VISIBLE else View.GONE
     }
 
     private fun initializeButton() {
@@ -75,16 +78,6 @@ class HistoryFragment : VkmFragment() {
         }
 
         resumeDownloadButton.setOnClickListener { DownloadManager.downloadComposition(null) }
-    }
-
-    private fun setInProgress(composition: Composition?) {
-        if (composition == null) {
-            downloadProgress.visibility = View.GONE
-        } else {
-            downloadProgress.visibility = View.VISIBLE
-            downloadProgress.progress = DownloadManager.downloadedPercent
-            downloadProgress.secondaryProgress = DownloadManager.downloadedPercent
-        }
     }
 
     override fun onPause() {
