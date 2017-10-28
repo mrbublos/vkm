@@ -11,6 +11,7 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.*
+import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 class MusicPlayService : Service() {
@@ -115,7 +116,6 @@ class MusicPlayService : Service() {
 
     fun stop() {
         mp.stop()
-        mp.reset()
         resetTrack()
         currentComposition = null
         stopProgressUpdate()
@@ -131,8 +131,6 @@ class MusicPlayService : Service() {
 
     private fun getSibling(next: Boolean) {
         mp.stop()
-        mp.reset()
-        resetTrack()
 
         if (playList.isEmpty()) {
             stop()
@@ -140,13 +138,16 @@ class MusicPlayService : Service() {
         }
 
         launch(CommonPool) {
+
             var index = playList.indexOf(currentComposition)
             var steps = 0
             do {
                 index = (playList.size + index + if (next) 1 else -1) % playList.size
                 steps++
                 currentComposition = try { fetchComposition(playList.getOrNull(index)) } catch (e: Exception) { null }
-            } while (currentComposition != null && steps < 20)
+                "Next sibling is ${currentComposition?.fileName()}".log()
+            } while (currentComposition == null && steps < 20)
+
             if (currentComposition != null) {
                 play(currentComposition)
                 onPlay()
@@ -158,12 +159,13 @@ class MusicPlayService : Service() {
         "Fetching composition ${composition?.fileName()}".log()
         if (composition == null) { return null }
 
-        val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName()).path
+        val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName())
 
+        resetTrack()
         if (composition.url.startsWith("http")) {
-            mp.setDataSource(resource)
+            mp.setDataSource(resource as String)
         } else {
-            mp.setDataSource(applicationContext, Uri.parse(resource))
+            mp.setDataSource(applicationContext, Uri.fromFile(resource as File))
         }
 
         mp.setOnErrorListener { _, _, _ ->
@@ -179,6 +181,7 @@ class MusicPlayService : Service() {
 
 
     private fun resetTrack() {
+        mp.reset()
         trackLength = 0
         trackProgress = 0
     }
