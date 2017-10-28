@@ -54,7 +54,7 @@ class MusicPlayService : Service() {
         progressUpdateJob = launch(CommonPool) {
             while (true) {
                 if (trackLength > 0) {
-                    trackProgress = mp.currentPosition / trackLength * 100
+                    trackProgress = mp.currentPosition * 100 / trackLength
                 }
                 delay(1000)
                 onProgressUpdate()

@@ -107,7 +107,6 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
                 }
             }
         } else {
-            // it is downloaded so will be played instantly
             view?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
             view?.audioControl?.setOnClickListener { onStopPressed(view, item) }
         }

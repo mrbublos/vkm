@@ -60,8 +60,10 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
 
         trackPlayingProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) { return }
+
                 val duration = musicPlayer?.trackLength ?: 0
-                musicPlayer?.skipTo(progress / 100 * duration)
+                musicPlayer?.skipTo(progress * duration / 100)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
