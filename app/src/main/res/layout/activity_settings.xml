@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
         xmlns:tools="http://schemas.android.com/tools"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/swipeCatcher"
@@ -9,8 +9,9 @@
 
     <LinearLayout
             android:orientation="vertical"
-            android:layout_width="368dp"
-            android:layout_height="495dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
            >
 
         <!-- enable download all button -->
@@ -381,4 +382,4 @@
                     android:layout_height="48dp"/>
         </android.support.constraint.ConstraintLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

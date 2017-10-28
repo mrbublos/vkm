@@ -2,6 +2,7 @@ package vkm.vkm
 
 import android.text.InputType
 import android.view.View
+import android.widget.BaseAdapter
 import kotlinx.android.synthetic.main.activity_history.*
 import kotlinx.android.synthetic.main.composition_list_element.*
 import kotlinx.coroutines.experimental.CommonPool
