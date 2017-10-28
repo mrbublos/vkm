@@ -20,7 +20,7 @@
             android:inputType="textNoSuggestions|textVisiblePassword"
             android:hint="@string/login_hint"
             android:ems="10"
-            android:id="@+id/login"/>
+            android:id="@+id/loginName"/>
 
     <EditText
             android:layout_width="match_parent"
@@ -34,5 +34,5 @@
             android:text="@string/login_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/login_button"/>
+            android:id="@+id/submit"/>
 </LinearLayout>

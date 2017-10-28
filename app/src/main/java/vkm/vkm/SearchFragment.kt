@@ -1,21 +1,14 @@
 package vkm.vkm
 
-import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.text.InputType
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.BaseAdapter
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
-import vkm.vkm.utils.Composition
-import vkm.vkm.utils.CompositionListAdapter
-import vkm.vkm.utils.User
-import vkm.vkm.utils.UserListAdapter
+import vkm.vkm.utils.*
 
-class SearchFragment : Fragment() {
+class SearchFragment : VkmFragment() {
 
     // services
     private var musicService: MusicService = VkMusicService()
@@ -23,10 +16,9 @@ class SearchFragment : Fragment() {
     // private vars
     private var filterText: String = ""
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater?.inflate(R.layout.activity_search, container, false) as View
+    init { layout = R.layout.activity_search }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun init() {
         initializeElements()
         initializeTabs()
         initializeButton()
@@ -40,9 +32,9 @@ class SearchFragment : Fragment() {
     }
 
     private fun initializeTabs() {
-        tabsSwiper.value = mutableListOf("user", "group", "tracks")
-        tabsSwiper.setCurrentString(State.currentSearchTab)
-        tabsSwiper.onSwiped = { _, tabName ->
+        searchTabsSwiper.value = mutableListOf("user", "group", "tracks")
+        searchTabsSwiper.setCurrentString(State.currentSearchTab)
+        searchTabsSwiper.onSwiped = { _, tabName ->
             State.currentSearchTab = tabName
             when (State.currentSearchTab) {
                 "user" -> setUserList(State.userElementList)
@@ -120,7 +112,7 @@ class SearchFragment : Fragment() {
         if (State.compositionElementList != data) { State.compositionElementList.addAll(data) }
 
         if (resultList.adapter == null) {
-            resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, State.compositionElementList, compositionAction)
+            resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionAction)
         } else {
             (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
         }
@@ -150,7 +142,7 @@ class SearchFragment : Fragment() {
         State.compositionElementList.clear()
         musicService.getPlaylist(this, newSelectedElement, filterText)
 
-        tabsSwiper.setCurrentString("tracks")
+        searchTabsSwiper.setCurrentString("tracks")
 
         newSelectedElement?.let {
             selectedUserContainer.visibility = View.VISIBLE

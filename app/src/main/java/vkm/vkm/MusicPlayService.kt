@@ -27,8 +27,13 @@ class MusicPlayService : Service() {
     private val binder = MusicPlayerController()
     var trackLength = 0
     var trackProgress = 0
-    var onPlay: () -> Any? = {}
-    var onProgressUpdate: () -> Any? = {}
+    var onPlay: () -> Unit = {}
+    var onStop: () -> Unit = {}
+    var onPause: () -> Unit = {}
+    var onLoaded: () -> Unit = {}
+    var onProgressUpdate: () -> Unit = {}
+
+    var isLoading = false
 
     private var progressUpdateJob: Job? = null
 
@@ -43,13 +48,15 @@ class MusicPlayService : Service() {
         "Service created".log()
     }
 
-    fun startTrackProgressTrack(onUpdate: () -> Any? = {}) {
+    fun startTrackProgressTrack(onUpdate: () -> Unit = {}) {
         progressUpdateJob?.cancel()
         onProgressUpdate = onUpdate
 
         progressUpdateJob = launch(CommonPool) {
             while (true) {
-                if (trackLength > 0) { trackProgress = (mp.currentPosition / 1000) / trackLength }
+                if (trackLength > 0) {
+                    trackProgress = mp.currentPosition / trackLength * 100
+                }
                 delay(1000)
                 onProgressUpdate()
             }
@@ -68,14 +75,19 @@ class MusicPlayService : Service() {
         }
     }
 
-    fun play(onUpdate: () -> Any? = {}) {
+    fun play(onProgressUpdate: () -> Unit = {}) {
         launch(CommonPool) {
-            playList.takeIf { currentComposition == null }?.firstOrNull()?.let { currentComposition = fetchComposition(it) }
+            playList.takeIf { currentComposition == null }?.firstOrNull()?.let {
+                isLoading = true
+                currentComposition = fetchComposition(it)
+                isLoading = false
+                onLoaded()
+            }
 
             currentComposition?.let {
                 mp.start()
                 mp.setOnCompletionListener { next() }
-                startTrackProgressTrack(onUpdate)
+                startTrackProgressTrack(onProgressUpdate)
                 onPlay()
             }
         }
@@ -83,22 +95,19 @@ class MusicPlayService : Service() {
 
     fun pause() {
         mp.takeIf { mp.isPlaying }?.pause()
+        onPause()
     }
-
-    fun skipTo(time: Int) {
-        mp.seekTo(time)
-    }
+    fun skipTo(time: Int) = mp.seekTo(time)
 
     fun stop() {
         mp.stop()
         resetTrack()
         currentComposition = null
         stopProgressUpdate()
+        onStop()
     }
 
-    fun isPlaying() :Boolean {
-        return mp.isPlaying
-    }
+    fun isPlaying() = mp.isPlaying
 
     fun next() = getSibling(true)
     fun previous() = getSibling(false)
@@ -122,7 +131,9 @@ class MusicPlayService : Service() {
     }
 
     suspend private fun fetchComposition(composition: Composition?): Composition? {
-        if (composition == null) { return null }
+        if (composition == null) {
+            return null
+        }
 
         val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName()).path
 

@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.TextView
+import kotlinx.android.synthetic.main.proxy_element.view.*
 import vkm.vkm.R
 
 class ProxyAdapter(context: Context, resource: Int, data: List<Proxy?>, private var elementClickListener: (user: Proxy?) -> Unit? = {}) : ArrayAdapter<Proxy>(context, resource, data) {
@@ -16,12 +16,12 @@ class ProxyAdapter(context: Context, resource: Int, data: List<Proxy?>, private 
 
         item?.let {
             if (item.host.isNotEmpty()) {
-                view?.bind<TextView>(R.id.address)?.text = "${item.host}:${item.port}"
-                view?.bind<TextView>(R.id.country)?.text = "${item.country} (${item.type})"
+                view?.address?.text = "${item.host}:${item.port}"
+                view?.country?.text = "${item.country} (${item.type})"
                 view?.setOnClickListener { elementClickListener.invoke(item) }
             } else {
-                view?.bind<TextView>(R.id.address)?.text = context.getString(R.string.no_proxy)
-                view?.bind<TextView>(R.id.country)?.text = ""
+                view?.address?.text = context.getString(R.string.no_proxy)
+                view?.country?.text = ""
                 view?.setOnClickListener { elementClickListener.invoke(null) }
             }
         }

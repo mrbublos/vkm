@@ -1,6 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.view.ViewPager
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_height="match_parent"
+              android:layout_width="match_parent"
+              android:orientation="vertical"
+              android:id="@+id/pagerContainer"
+              xmlns:app="http://schemas.android.com/apk/res-auto">
+    <android.support.v4.view.ViewPager
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+
+    />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/currentTrackPlaying"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="5dp"
+    >
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:id="@+id/controlsAndNamesContainer"
+                      android:orientation="horizontal">
+
+            <LinearLayout android:orientation="vertical"
+                          android:id="@+id/names"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="start">
+                <TextView
+                        android:text="@string/test"
+                        android:layout_marginStart="5dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:id="@+id/artist"/>
+                <TextView
+                        android:text="@string/test"
+                        android:layout_marginStart="5dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:id="@+id/name"/>
+            </LinearLayout>
+
+            <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="5dp"
+                    app:srcCompat="@drawable/ic_previous_player"
+                    android:contentDescription="@string/skip_to_previous_track"
+                    android:layout_gravity="end"
+                    android:id="@+id/previousTrack"/>
+
+            <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="5dp"
+                    app:srcCompat="@drawable/ic_stop_player"
+                    android:contentDescription="@string/play_stop_pause_current_track"
+                    android:layout_gravity="end"
+                    android:id="@+id/stop"/>
+
+            <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="5dp"
+                    app:srcCompat="@drawable/ic_pause_player"
+                    android:contentDescription="@string/play_stop_pause_current_track"
+                    android:layout_gravity="end"
+                    android:id="@+id/pause"/>
+
+            <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="5dp"
+                    app:srcCompat="@drawable/ic_next_player"
+                    android:contentDescription="@string/skip_to_next_track"
+                    android:layout_gravity="end"
+                    android:id="@+id/nextTrack"/>
+        </LinearLayout>
+
+        <SeekBar android:layout_width="match_parent"
+                 android:layout_height="10dp"
+                 android:max="100"
+                 android:id="@+id/trackPlayingProgress"/>
+
+    </LinearLayout>
+</LinearLayout>
+

@@ -1,15 +1,18 @@
 package vkm.vkm.utils
 
-import android.content.Context
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.composition_list_element.view.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import vkm.vkm.*
 
-class CompositionListAdapter(private val fragment: Fragment, context: Context, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(context, resource, data) {
+class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(fragment.context, resource, data) {
+
+    private val activity = fragment.activity as PagerActivity
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.composition_list_element, null)
         val item = getItem(position)
@@ -24,23 +27,15 @@ class CompositionListAdapter(private val fragment: Fragment, context: Context, r
 
             val actionButton = view?.imageView
             val audioControl = view?.audioControl
-            val seekBar = view?.seekBar
 
-            seekBar?.visibility = View.GONE
 
             if (trackAvailable) {
-                if (MusicPlayer.isCurrentTrack(item)) {
-                    initSeekBar(view)
+                if (activity.musicPlayer?.isCurrentTrack(item) == true) {
                     audioControl?.apply {
-                        if (MusicPlayer.isLoading) {
+                        if (activity.musicPlayer?.isLoading == true) {
                             setImageDrawable(context.getDrawable(R.drawable.ic_loading))
                         } else {
                             setImageDrawable(context.getDrawable(R.drawable.ic_stop))
-                            MusicPlayer.takeIf { it.currentlyAnimatedView != view }?.apply {
-                                "Restarting slider updater".log()
-                                currentlyAnimatedView = view
-                                runSeekBarUpdate(view)
-                            }
                         }
                         setOnClickListener { onStopPressed(view, item) }
                     }
@@ -90,8 +85,7 @@ class CompositionListAdapter(private val fragment: Fragment, context: Context, r
     }
 
     private fun onStopPressed(animatedView: View?, item: Composition) {
-        MusicPlayer.stop()
-        hideSeekBar(animatedView)
+        activity.musicPlayer?.stop()
         animatedView?.audioControl?.apply {
             setImageDrawable(context.getDrawable(R.drawable.ic_play))
             setOnClickListener { onPlayPressed(this, item) }
@@ -100,31 +94,16 @@ class CompositionListAdapter(private val fragment: Fragment, context: Context, r
 
     private fun onPlayPressed(viewToAnimate: View?, item: Composition) {
         // stopping previously played, if exists
-        MusicPlayer.currentlyAnimatedView?.audioControl?.callOnClick()
-
-        viewToAnimate?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
-
-        MusicPlayer.play(if (item.hash.isEmpty()) item.url else item.fileName(), viewToAnimate, { onStopPressed(viewToAnimate, item) }, {
-            initSeekBar(MusicPlayer.currentlyAnimatedView)
-            viewToAnimate?.audioControl?.apply {
-                setImageDrawable(context.getDrawable(R.drawable.ic_stop))
-                setOnClickListener { onStopPressed(viewToAnimate, item) }
-            }
-        })
-    }
-
-    private fun hideSeekBar(view: View?) {
-        view?.seekBar?.apply {
-            visibility = View.GONE
-            view.invalidate()
+        activity.musicPlayer?.stop()
+        val _context = context
+        if (item.hash.isEmpty())  {
+            viewToAnimate?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+        } else {
+            // it is downloaded so will be played instantly
+            viewToAnimate?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
         }
+        activity.musicPlayer?.onLoaded = { launch(UI) { viewToAnimate?.audioControl?.setImageDrawable(_context.getDrawable(R.drawable.ic_stop)) }}
+        activity.playNewTrack(listOf(0 until count).flatten().map { getItem(it) }, item)
     }
 
-    private fun initSeekBar(view: View?) {
-        view?.seekBar?.apply {
-            visibility = View.VISIBLE
-            setOnSeekBarChangeListener(MusicPlayer)
-            max = MusicPlayer.trackLength / 1000
-        }
-    }
 }

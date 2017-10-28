@@ -1,11 +1,7 @@
 package vkm.vkm
 
-import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.text.InputType
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import kotlinx.android.synthetic.main.activity_history.*
 import kotlinx.android.synthetic.main.composition_list_element.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -15,14 +11,13 @@ import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.*
 
-class HistoryFragment : Fragment() {
+class HistoryFragment : VkmFragment() {
 
     private var progressUpdateJob: Job? = null
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater?.inflate(R.layout.activity_history, container, false) as View
+    init { layout = R.layout.activity_history }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun init() {
         search.inputType = if (State.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
 
         initializeTabs()
@@ -41,8 +36,8 @@ class HistoryFragment : Fragment() {
             progressUpdateJob?.cancel()
 
             when (State.currentHistoryTab) {
-                "downloaded" -> resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, DownloadManager.getDownloaded().filter { it.matches(text) }, remove)
-                "queue" -> resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, DownloadManager.getQueue().filter { it.matches(text) }, removeFromQueue)
+                "downloaded" -> resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded().filter { it.matches(text) }, remove)
+                "queue" -> resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue().filter { it.matches(text) }, removeFromQueue)
                 "inProgress" -> {
                     initInProgressTab(true)
                     startProgressUpdate()
@@ -74,8 +69,8 @@ class HistoryFragment : Fragment() {
             val text = search.text.toString()
 
             when (State.currentHistoryTab) {
-                "downloaded" -> resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, DownloadManager.getDownloaded().filter { it.matches(text) }, remove)
-                "queue" -> resultList.adapter = CompositionListAdapter(this, context, R.layout.composition_list_element, DownloadManager.getQueue().filter { it.matches(text) }, removeFromQueue)
+                "downloaded" -> resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getDownloaded().filter { it.matches(text) }, remove)
+                "queue" -> resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, DownloadManager.getQueue().filter { it.matches(text) }, removeFromQueue)
             }
         }
 
@@ -104,7 +99,6 @@ class HistoryFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        MusicPlayer.stop()
         progressUpdateJob?.cancel()
     }
 

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import kotlinx.android.synthetic.main.user_list_element.view.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
@@ -54,11 +55,11 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>, private
         val item = getItem(position)
 
         item?.let {
-            view?.bind<TextView>(R.id.user_name)?.text = item.fullname
-            view?.bind<TextView>(R.id.user_id)?.text = item.userId
+            view?.user_name?.text = item.fullname
+            view?.user_id?.text = item.userId
             view?.setOnClickListener { elementClickListener.invoke(item) }
 
-            schedulePhotoDownload( view?.bind<ImageView>(R.id.user_photo), item)
+            schedulePhotoDownload( view?.user_photo, item)
         }
 
         return view

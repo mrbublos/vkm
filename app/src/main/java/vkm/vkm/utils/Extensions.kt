@@ -1,12 +1,9 @@
 package vkm.vkm.utils
 
-import android.app.Activity
 import android.content.Context
 import android.media.MediaPlayer
-import android.support.annotation.IdRes
 import android.util.Base64
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
@@ -15,7 +12,6 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.result.Result
 import vkm.vkm.DownloadManager
-import vkm.vkm.MainActivity
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -24,19 +20,6 @@ import java.security.MessageDigest
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaType
-
-fun <T : View> Activity.bind(@IdRes idRes: Int): Lazy<T> {
-    @Suppress("UNCHECKED_CAST")
-    return unsafeLazy {
-        Log.d(MainActivity.TAG, "Lazy Binding $idRes")
-        findViewById(idRes) as T
-    }
-}
-
-fun <T : View?> View.bind(@IdRes idRes: Int): T {
-    @Suppress("UNCHECKED_CAST")
-    return findViewById(idRes) as T
-}
 
 fun ByteArray?.toHexString(): String {
     if (this == null || isEmpty()) { return "" }

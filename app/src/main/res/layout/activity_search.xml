@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:id="@+id/swipeCatcher"
@@ -9,12 +8,9 @@
     <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
             android:orientation="vertical"
-            android:layout_width="368dp"
-            android:layout_height="495dp"
-            tools:layout_editor_absoluteY="8dp"
-            tools:layout_editor_absoluteX="8dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <LinearLayout
                 android:orientation="horizontal"
@@ -25,17 +21,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:inputType="textNoSuggestions|textVisiblePassword"
+                    android:layout_gravity="start"
                     android:hint="@string/search_hint"
                     android:ems="10"
-                    android:id="@+id/search"
-                    android:layout_weight="8.68"/>
+                    android:id="@+id/search"/>
 
             <Button
                     android:text="@string/search_button"
+                    android:layout_gravity="end"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/searchButton"
-                    android:layout_weight="1"/>
+                    android:id="@+id/searchButton"/>
 
         </LinearLayout>
 
@@ -53,7 +49,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintStart_toStartOf="parent"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
 
             <ImageView
@@ -64,8 +60,7 @@
                     app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:layout_editor_absoluteX="334dp"/>
+                    app:layout_constraintEnd_toEndOf="parent"/>
 
             <ImageView
                     android:layout_width="0dp"
@@ -75,8 +70,7 @@
                     app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/deselectUserButton"
-                    tools:layout_editor_absoluteX="284dp"/>
+                    app:layout_constraintEnd_toStartOf="@id/deselectUserButton"/>
 
             <TextView
                     android:layout_width="0dp"
@@ -86,8 +80,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_weight="1"
                     android:minWidth="100dp"
-                    android:id="@+id/selectedUserName"
-                    tools:layout_editor_absoluteX="60dp"/>
+                    android:id="@+id/selectedUserName"/>
 
             <TextView
                     android:layout_width="0dp"
@@ -98,13 +91,12 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/selectedUserName"
                     app:layout_constraintVertical_weight="1"
-                    android:id="@+id/selectedUserId"
-                    tools:layout_editor_absoluteX="60dp"/>
+                    android:id="@+id/selectedUserId"/>
 
         </android.support.constraint.ConstraintLayout>
 
         <vkm.vkm.utils.StringSwiper
-                android:id="@+id/tabsSwiper"
+                android:id="@+id/searchTabsSwiper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
         </vkm.vkm.utils.StringSwiper>

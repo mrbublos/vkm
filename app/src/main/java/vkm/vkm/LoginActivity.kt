@@ -5,19 +5,11 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.MotionEvent
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_login.*
 import vkm.vkm.utils.User
-import vkm.vkm.utils.bind
 import vkm.vkm.utils.log
 
 class LoginActivity : AppCompatActivity() {
-
-    val loginName by bind<EditText>(R.id.login)
-    val password by bind<EditText>(R.id.password)
-    val button by bind<Button>(R.id.login_button)
-    val error by bind<TextView>(R.id.error)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +22,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun initializeButtons() {
 
-        button.setOnTouchListener { _, event ->
+        submit.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 lockUnlockScreen(true)
 
@@ -74,8 +66,8 @@ class LoginActivity : AppCompatActivity() {
         loginName.isClickable = !lock
         password.isFocusable = !lock
         password.isClickable = !lock
-        button.isFocusable = !lock
-        button.isClickable = !lock
+        submit.isFocusable = !lock
+        submit.isClickable = !lock
     }
 }
 

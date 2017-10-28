@@ -11,8 +11,7 @@
             android:orientation="vertical"
             android:layout_width="368dp"
             android:layout_height="495dp"
-            tools:layout_editor_absoluteY="8dp"
-            tools:layout_editor_absoluteX="8dp">
+           >
 
         <!-- enable download all button -->
         <android.support.constraint.ConstraintLayout
@@ -27,7 +26,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Switch
                     android:id="@+id/enableDownloadAll"
@@ -54,7 +53,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Switch
                     android:id="@+id/enableSuggestions"
@@ -81,7 +80,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -107,7 +106,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -133,7 +132,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -159,7 +158,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -185,7 +184,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -211,7 +210,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Switch
                     android:id="@+id/showDangerousCommands"
@@ -239,7 +238,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -266,7 +265,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -292,7 +291,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -318,7 +317,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -344,7 +343,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -370,7 +369,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    tools:layout_editor_absoluteX="5dp"/>
+                    />
 
             <Button
                     android:text="@string/run_button_setting"
@@ -379,8 +378,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    tools:layout_editor_absoluteX="296dp"/>
+                    android:layout_height="48dp"/>
         </android.support.constraint.ConstraintLayout>
     </LinearLayout>
 </LinearLayout>

@@ -1,19 +1,15 @@
 package vkm.vkm
 
 import android.content.Intent
-import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import kotlinx.android.synthetic.main.activity_settings.*
+import vkm.vkm.utils.VkmFragment
 
-class SettingsFragment : Fragment() {
+class SettingsFragment : VkmFragment() {
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater?.inflate(R.layout.activity_settings, container, false) as View
+    init { layout = R.layout.activity_settings }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun init() {
         dangerousCommandsVisibility(false)
 
         enableDownloadAll.isChecked = State.enableDownloadAll

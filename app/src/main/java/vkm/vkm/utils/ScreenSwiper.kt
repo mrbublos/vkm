@@ -74,7 +74,7 @@ class ScreenSwiper @JvmOverloads constructor(context: Context, attrs: AttributeS
 class StringSwiper @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : Swiper(context, attrs, defStyleAttr) {
     lateinit var view: TextView
     var onSwiped: (index: Int, value: String) -> Unit = { _, _ -> }
-    var currentElementIndex = 0
+    private var currentElementIndex = 0
 
     var value: MutableList<String> = mutableListOf()
     set(value) {
