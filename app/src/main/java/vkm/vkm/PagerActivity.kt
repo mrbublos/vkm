@@ -11,9 +11,9 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.view.Window
 import android.widget.SeekBar
 import kotlinx.android.synthetic.main.pager_activity.*
+import kotlinx.android.synthetic.main.pager_activity.view.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.Composition
@@ -44,50 +44,66 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
     private fun setupMusicService() {
         previousTrack.setOnClickListener { musicPlayer?.previous() }
         nextTrack.setOnClickListener { musicPlayer?.next() }
-        stop.setOnClickListener {
-            musicPlayer?.stop()
-            pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
-        }
+        stop.setOnClickListener { musicPlayer?.stop() }
         pause.setOnClickListener {
             if (musicPlayer?.isPlaying() == true) {
                 musicPlayer?.pause()
-                pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
             } else {
-                musicPlayer?.play(this::onPlayingProgressUpdated)
-                pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_pause_player))
+                musicPlayer?.play(musicPlayer?.currentComposition, this::onPlayingProgressUpdated)
             }
         }
-        musicPlayer?.onPlay = {
-            launch(UI) {
-                currentTrackPlaying.visibility = View.VISIBLE
-                pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_pause_player) )
-            }
-        }
-        trackPlayingProgress.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+
+        musicPlayer?.onPlay = onPlayerPlay
+        musicPlayer?.onStop = onPlayerStop
+        musicPlayer?.onPause = onPlayerPause
+
+
+        trackPlayingProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val duration = musicPlayer?.trackLength ?: 0
                 musicPlayer?.skipTo(progress / 100 * duration)
             }
+
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
     }
 
+    private val onPlayerPlay: () -> Unit = {
+        launch(UI) {
+            currentTrackPlaying.visibility = View.VISIBLE
+            pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_pause_player))
+        }
+    }
+
+    private val onPlayerStop: () -> Unit = {
+        launch(UI) {
+            currentTrackPlaying.visibility = View.VISIBLE
+            pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
+        }
+    }
+
+    private val onPlayerPause: () -> Unit = {
+        launch(UI) {
+            currentTrackPlaying.visibility = View.VISIBLE
+            pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
+        }
+    }
+
     fun playNewTrack(list: List<Composition>, track: Composition) {
         musicPlayer?.stop()
-        musicPlayer?.currentComposition = track
         val newPlayList = mutableListOf<Composition>()
         newPlayList.addAll(list)
         musicPlayer?.playList = newPlayList
-        musicPlayer?.play(this::onPlayingProgressUpdated)
+        musicPlayer?.play(track, this::onPlayingProgressUpdated)
     }
 
     private fun onPlayingProgressUpdated() {
-        trackPlayingProgress.progress = musicPlayer?.trackProgress ?: 0
+        currentTrackPlaying.trackPlayingProgress.progress = musicPlayer?.trackProgress ?: 0
         val composition = musicPlayer?.currentComposition
         launch(UI) {
-            name.text = composition?.name ?: ""
-            artist.text = composition?.artist ?: ""
+            currentTrackPlaying.name.text = composition?.name ?: ""
+            currentTrackPlaying.artist.text = composition?.artist ?: ""
         }
     }
 

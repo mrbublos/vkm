@@ -12,6 +12,7 @@ import vkm.vkm.*
 class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(fragment.context, resource, data) {
 
     private val activity = fragment.activity as PagerActivity
+    var lastItemPlayedView: View? = null
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.composition_list_element, null)
@@ -32,7 +33,7 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
             if (trackAvailable) {
                 if (activity.musicPlayer?.isCurrentTrack(item) == true) {
                     audioControl?.apply {
-                        if (activity.musicPlayer?.isLoading == true) {
+                        if (activity.musicPlayer?.isLoading?.get() == true) {
                             setImageDrawable(context.getDrawable(R.drawable.ic_loading))
                         } else {
                             setImageDrawable(context.getDrawable(R.drawable.ic_stop))
@@ -84,25 +85,33 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
         return view
     }
 
-    private fun onStopPressed(animatedView: View?, item: Composition) {
+    private fun onStopPressed(view: View?, item: Composition) {
         activity.musicPlayer?.stop()
-        animatedView?.audioControl?.apply {
+        view?.audioControl?.apply {
             setImageDrawable(context.getDrawable(R.drawable.ic_play))
-            setOnClickListener { onPlayPressed(this, item) }
+            setOnClickListener { onPlayPressed(view, item) }
         }
     }
 
-    private fun onPlayPressed(viewToAnimate: View?, item: Composition) {
-        // stopping previously played, if exists
+    private fun onPlayPressed(view: View?, item: Composition) {
         activity.musicPlayer?.stop()
+        lastItemPlayedView?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_play))
+
         val _context = context
-        if (item.hash.isEmpty())  {
-            viewToAnimate?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+        if (item.hash.isEmpty()) {
+            view?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+            activity.musicPlayer?.onLoaded = {
+                launch(UI) {
+                    view?.audioControl?.setImageDrawable(_context.getDrawable(R.drawable.ic_stop))
+                    view?.audioControl?.setOnClickListener { onStopPressed(view, item) }
+                }
+            }
         } else {
             // it is downloaded so will be played instantly
-            viewToAnimate?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
+            view?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
+            view?.audioControl?.setOnClickListener { onStopPressed(view, item) }
         }
-        activity.musicPlayer?.onLoaded = { launch(UI) { viewToAnimate?.audioControl?.setImageDrawable(_context.getDrawable(R.drawable.ic_stop)) }}
+        lastItemPlayedView = view
         activity.playNewTrack(listOf(0 until count).flatten().map { getItem(it) }, item)
     }
 

@@ -10,10 +10,8 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import vkm.vkm.utils.Composition
-import vkm.vkm.utils.fileName
-import vkm.vkm.utils.loadAsync
-import vkm.vkm.utils.log
+import vkm.vkm.utils.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 class MusicPlayService : Service() {
 
@@ -33,7 +31,8 @@ class MusicPlayService : Service() {
     var onLoaded: () -> Unit = {}
     var onProgressUpdate: () -> Unit = {}
 
-    var isLoading = false
+    var isLoading = AtomicBoolean(false)
+    var isPaused = AtomicBoolean(false)
 
     private var progressUpdateJob: Job? = null
 
@@ -48,7 +47,7 @@ class MusicPlayService : Service() {
         "Service created".log()
     }
 
-    fun startTrackProgressTrack(onUpdate: () -> Unit = {}) {
+    private fun startTrackProgressTrack(onUpdate: () -> Unit = {}) {
         progressUpdateJob?.cancel()
         onProgressUpdate = onUpdate
 
@@ -63,7 +62,7 @@ class MusicPlayService : Service() {
         }
     }
 
-    fun stopProgressUpdate() {
+    private fun stopProgressUpdate() {
         progressUpdateJob?.cancel()
         progressUpdateJob = null
         onProgressUpdate = {}
@@ -75,16 +74,29 @@ class MusicPlayService : Service() {
         }
     }
 
-    fun play(onProgressUpdate: () -> Unit = {}) {
+    fun play(composition: Composition? = null, onProgressUpdate: () -> Unit = this.onProgressUpdate) {
         launch(CommonPool) {
-            playList.takeIf { currentComposition == null }?.firstOrNull()?.let {
-                isLoading = true
-                currentComposition = fetchComposition(it)
-                isLoading = false
+            val compositionToPlay = composition ?: (currentComposition ?: playList.firstOrNull())
+            isPaused.compareAndSet(true, compositionToPlay.equalsTo(currentComposition))
+
+            "Starting to play ${compositionToPlay?.fileName()}".log()
+
+
+            playList.takeIf { !isPaused.get() && compositionToPlay != null }?.let {
+                isLoading.compareAndSet(false, true)
+                currentComposition = try {
+                    fetchComposition(compositionToPlay)
+                } catch (e: Exception) {
+                    "Failed to load track ${compositionToPlay?.fileName()}".logE(e)
+                    null
+                }
+                isLoading.compareAndSet(true, false)
+                "Composition fetched ${currentComposition?.fileName()}".log()
                 onLoaded()
             }
 
             currentComposition?.let {
+                "Starting media player for ${currentComposition?.fileName()}".log()
                 mp.start()
                 mp.setOnCompletionListener { next() }
                 startTrackProgressTrack(onProgressUpdate)
@@ -95,12 +107,15 @@ class MusicPlayService : Service() {
 
     fun pause() {
         mp.takeIf { mp.isPlaying }?.pause()
+        isPaused.compareAndSet(false, true)
         onPause()
     }
+
     fun skipTo(time: Int) = mp.seekTo(time)
 
     fun stop() {
         mp.stop()
+        mp.reset()
         resetTrack()
         currentComposition = null
         stopProgressUpdate()
@@ -112,10 +127,11 @@ class MusicPlayService : Service() {
     fun next() = getSibling(true)
     fun previous() = getSibling(false)
 
-    fun isCurrentTrack(item: Composition) = item.url == currentComposition?.url || item.fileName() == currentComposition?.fileName()
+    fun isCurrentTrack(item: Composition) = (item.url.isNotEmpty() && item.url == currentComposition?.url) || item.fileName() == currentComposition?.fileName()
 
     private fun getSibling(next: Boolean) {
         mp.stop()
+        mp.reset()
         resetTrack()
 
         if (playList.isEmpty()) {
@@ -124,16 +140,23 @@ class MusicPlayService : Service() {
         }
 
         launch(CommonPool) {
-            val index = playList.indexOf(currentComposition)
-            currentComposition = fetchComposition(playList.getOrNull(index + if (next) 1 else -1))
-            onPlay()
+            var index = playList.indexOf(currentComposition)
+            var steps = 0
+            do {
+                index = (playList.size + index + if (next) 1 else -1) % playList.size
+                steps++
+                currentComposition = try { fetchComposition(playList.getOrNull(index)) } catch (e: Exception) { null }
+            } while (currentComposition != null && steps < 20)
+            if (currentComposition != null) {
+                play(currentComposition)
+                onPlay()
+            }
         }
     }
 
     suspend private fun fetchComposition(composition: Composition?): Composition? {
-        if (composition == null) {
-            return null
-        }
+        "Fetching composition ${composition?.fileName()}".log()
+        if (composition == null) { return null }
 
         val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName()).path
 
@@ -143,7 +166,7 @@ class MusicPlayService : Service() {
             mp.setDataSource(applicationContext, Uri.parse(resource))
         }
 
-        mp.setOnErrorListener { mp, what, extra ->
+        mp.setOnErrorListener { _, _, _ ->
             next()
             return@setOnErrorListener true
         }
