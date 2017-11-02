@@ -19,10 +19,13 @@ import kotlinx.android.synthetic.main.pager_activity.view.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.Composition
+import vkm.vkm.utils.equalsTo
 
 class PagerActivity : AppCompatActivity(), ServiceConnection {
 
     var musicPlayer: MusicPlayService? = null
+
+    private var displayedComposition: Composition? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,9 +108,14 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
     private fun onPlayingProgressUpdated() {
         currentTrackPlaying.trackPlayingProgress.progress = musicPlayer?.trackProgress ?: 0
         val composition = musicPlayer?.currentComposition
-        launch(UI) {
-            currentTrackPlaying.name.text = composition?.name ?: ""
-            currentTrackPlaying.artist.text = composition?.artist ?: ""
+        if (!composition.equalsTo(displayedComposition)) {
+            displayedComposition = composition
+            launch(UI) {
+                currentTrackPlaying.name.text = composition?.name ?: ""
+                currentTrackPlaying.name.isSelected = true
+                currentTrackPlaying.artist.text = composition?.artist ?: ""
+                currentTrackPlaying.artist.isSelected = true
+            }
         }
     }
 
