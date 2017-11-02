@@ -148,7 +148,12 @@ object VkApi {
     }
 
     suspend fun refreshToken() {
-        SecurityService.vkAccessToken = (callVkApiMethod(mutableListOf("v" to "5.68", "receipt" to SecurityService.receipt), "auth.refreshToken")!!["response"] as JsonObject)["token"] as String? ?: SecurityService.vkAccessToken
+        val responseString = callVkApiMethod(mutableListOf("v" to "5.68", "receipt" to SecurityService.receipt), "auth.refreshToken")!!["response"]
+        if (responseString == null) {
+            "Unable to connect to proxy".logE()
+            return
+        }
+        SecurityService.vkAccessToken = (responseString as JsonObject)["token"] as String? ?: SecurityService.vkAccessToken
     }
 
     suspend private fun callVkApiMethod(parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
