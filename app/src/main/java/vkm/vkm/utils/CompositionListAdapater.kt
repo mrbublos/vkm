@@ -96,7 +96,6 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
     private fun onPlayPressed(view: View?, item: Composition) {
         activity.musicPlayer?.stop()
         lastItemPlayedView?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_play))
-
         val _context = context
         if (item.hash.isEmpty()) {
             view?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))

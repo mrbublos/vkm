@@ -11,6 +11,8 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.widget.BaseAdapter
+import android.widget.ListView
 import android.widget.SeekBar
 import kotlinx.android.synthetic.main.pager_activity.*
 import kotlinx.android.synthetic.main.pager_activity.view.*
@@ -73,6 +75,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         launch(UI) {
             currentTrackPlaying.visibility = View.VISIBLE
             pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_pause_player))
+            ((findViewById(R.id.resultList) as ListView).adapter as BaseAdapter).notifyDataSetChanged()
         }
     }
 
@@ -80,6 +83,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         launch(UI) {
             currentTrackPlaying.visibility = View.VISIBLE
             pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
+            ((findViewById(R.id.resultList) as ListView).adapter as BaseAdapter).notifyDataSetChanged()
         }
     }
 
