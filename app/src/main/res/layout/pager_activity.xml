@@ -58,37 +58,21 @@
                           app:layout_constraintEnd_toEndOf="parent"
             >
                 <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
-                        android:layout_marginStart="5dp"
-                        app:srcCompat="@drawable/ic_previous_player"
-                        android:contentDescription="@string/skip_to_previous_track"
-                        android:layout_gravity="end"
-                        android:id="@+id/previousTrack"/>
-
-                <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
-                        android:layout_marginStart="5dp"
-                        app:srcCompat="@drawable/ic_stop_player"
-                        android:contentDescription="@string/play_stop_pause_current_track"
-                        android:id="@+id/stop"/>
-
-                <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
                         android:layout_marginStart="5dp"
                         app:srcCompat="@drawable/ic_pause_player"
                         android:contentDescription="@string/play_stop_pause_current_track"
                         android:id="@+id/pause"/>
 
                 <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
                         android:layout_marginStart="5dp"
                         app:srcCompat="@drawable/ic_next_player"
                         android:contentDescription="@string/skip_to_next_track"
-                        android:id="@+id/nextTrack" android:adjustViewBounds="false"/>
+                        android:id="@+id/nextTrack"
+                        android:adjustViewBounds="false"/>
             </LinearLayout>
 
         </android.support.constraint.ConstraintLayout>

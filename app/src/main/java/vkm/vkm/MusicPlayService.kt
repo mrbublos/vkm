@@ -20,12 +20,11 @@ class MusicPlayService : Service() {
         private lateinit var instance: MusicPlayService
     }
 
-    private val mp = MediaPlayer()
     var currentComposition: Composition? = null
     var playList: List<Composition> = mutableListOf()
-    private val binder = MusicPlayerController()
     var trackLength = 0
     var trackProgress = 0
+
     var onPlay: () -> Unit = {}
     var onStop: () -> Unit = {}
     var onPause: () -> Unit = {}
@@ -33,8 +32,10 @@ class MusicPlayService : Service() {
     var onProgressUpdate: () -> Unit = {}
 
     var isLoading = AtomicBoolean(false)
-    var isPaused = AtomicBoolean(false)
+    private var isPaused = AtomicBoolean(false)
 
+    private val mp = MediaPlayer()
+    private val binder = MusicPlayerController()
     private var progressUpdateJob: Job? = null
 
     override fun onBind(intent: Intent?): IBinder {
@@ -70,9 +71,7 @@ class MusicPlayService : Service() {
     }
 
     class MusicPlayerController : Binder() {
-        fun getService(): MusicPlayService {
-            return instance
-        }
+        fun getService(): MusicPlayService = instance
     }
 
     fun play(composition: Composition? = null, onProgressUpdate: () -> Unit = this.onProgressUpdate) {
@@ -131,6 +130,7 @@ class MusicPlayService : Service() {
 
     private fun getSibling(next: Boolean) {
         mp.stop()
+        resetTrack()
 
         if (playList.isEmpty()) {
             stop()
@@ -161,7 +161,7 @@ class MusicPlayService : Service() {
 
         val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName())
 
-        resetTrack()
+        mp.reset()
         if (composition.url.startsWith("http")) {
             mp.setDataSource(resource as String)
         } else {
@@ -181,7 +181,6 @@ class MusicPlayService : Service() {
 
 
     private fun resetTrack() {
-        mp.reset()
         trackLength = 0
         trackProgress = 0
     }

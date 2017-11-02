@@ -42,9 +42,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun setupMusicService() {
-        previousTrack.setOnClickListener { musicPlayer?.previous() }
         nextTrack.setOnClickListener { musicPlayer?.next() }
-        stop.setOnClickListener { musicPlayer?.stop() }
         pause.setOnClickListener {
             if (musicPlayer?.isPlaying() == true) {
                 musicPlayer?.pause()
@@ -119,7 +117,6 @@ class PagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(frag
     // Order: Search, History, Settings
     override fun getItem(position: Int): Fragment {
         return when (position % 3) {
-            0 -> SearchFragment()
             1 -> HistoryFragment()
             2 -> SettingsFragment()
             else -> SearchFragment()
