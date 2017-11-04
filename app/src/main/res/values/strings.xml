@@ -43,6 +43,7 @@
     <string name="skip_to_previous_track">Skip to previous track</string>
     <string name="play_stop_pause_current_track">Play, stop, pause current track</string>
     <string name="skip_to_next_track">Skip to next track</string>
+    <string name="currently_playing_title">Currently playing</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal"
+              android:padding="10dp">
+
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_vkm_main"
+            android:contentDescription="@string/play_stop_pause_current_track"
+            android:id="@+id/icon"/>
+
+    <LinearLayout android:orientation="vertical"
+                  android:id="@+id/names"
+                  android:layout_width="0dp"
+                  android:layout_weight="1"
+                  android:layout_height="match_parent"
+                  android:layout_marginStart="5dp">
+        <TextView
+                android:text="test1"
+                android:layout_marginStart="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:scrollHorizontally="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/artist">
+            <requestFocus/>
+        </TextView>
+
+        <TextView
+                android:text="test1"
+                android:layout_marginStart="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:scrollHorizontally="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/name">
+
+        </TextView>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_vertical"
+                  android:gravity="end"
+                  android:orientation="horizontal">
+        <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/ic_pause_player"
+                android:contentDescription="@string/play_stop_pause_current_track"
+                android:id="@+id/pause"/>
+
+        <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/ic_next_player"
+                android:contentDescription="@string/skip_to_next_track"
+                android:id="@+id/nextTrack"
+                android:adjustViewBounds="false"/>
+    </LinearLayout>
+</LinearLayout>

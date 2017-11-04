@@ -28,6 +28,9 @@
         <activity android:name=".ProxyActivity"
                   android:label="@string/select_proxy">
         </activity>
+        <activity android:name=".MusicPlayerControl"
+                  android:label="@string/select_proxy">
+        </activity>
 
         <service android:name=".MusicPlayService"
                  android:description="@string/vkm_music_service_desc"
