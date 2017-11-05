@@ -18,10 +18,6 @@ import kotlin.coroutines.experimental.suspendCoroutine
 
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        val TAG: String = "vkm.vkm"
-    }
-
     private val EXTERNAL_STORAGE_WRITE_PERMISSION = 1
     var initialized = false
     var permissionContinuation: Continuation<IntArray>? = null

@@ -1,6 +1,5 @@
 package vkm.vkm
 
-import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
@@ -11,7 +10,6 @@ import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat.*
-import android.support.v4.app.TaskStackBuilder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -51,7 +49,7 @@ class MusicPlayService : Service() {
     private val playbackStateBuilder = PlaybackStateCompat.Builder()
     private val mediaMetadataBuilder = MediaMetadataCompat.Builder()
     lateinit private var mediaSession: MediaSessionCompat
-    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    lateinit var notificationManager: NotificationManager
 
     private val playerControlsCallback = object : MediaSessionCompat.Callback() {
         override fun onPlay() { play() }
@@ -66,6 +64,13 @@ class MusicPlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent == null) { return START_NOT_STICKY }
+
+        when (intent.action) {
+            "next" -> next()
+            "previous" -> previous()
+            "pause" -> if (isPlaying()) pause() else play()
+        }
         return START_NOT_STICKY
     }
 
@@ -74,6 +79,7 @@ class MusicPlayService : Service() {
         instance = this
         "Service created".log()
         mediaSession = MediaSessionCompat(baseContext, "vkm")
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         createNotification()
     }
 
@@ -97,9 +103,9 @@ class MusicPlayService : Service() {
     private fun createNotification() {
 //        if (currentComposition == null) { return }
 
-        val nextPendingIntent = PendingIntent.getService(this, 1, Intent("next"), PendingIntent.FLAG_UPDATE_CURRENT)
-        val prevPendingIntent = PendingIntent.getService(this, 2, Intent("previous"), PendingIntent.FLAG_UPDATE_CURRENT)
-        val pausePendingIntent = PendingIntent.getService(this, 3, Intent("pause"), PendingIntent.FLAG_UPDATE_CURRENT)
+        val nextPendingIntent = PendingIntent.getService(this, 1, Intent(this, MusicPlayService::class.java).setAction("next"), PendingIntent.FLAG_UPDATE_CURRENT)
+        val prevPendingIntent = PendingIntent.getService(this, 2, Intent(this, MusicPlayService::class.java).setAction("previous"), PendingIntent.FLAG_UPDATE_CURRENT)
+        val pausePendingIntent = PendingIntent.getService(this, 3, Intent(this, MusicPlayService::class.java).setAction("pause"), PendingIntent.FLAG_UPDATE_CURRENT)
 
 
         val playerView = RemoteViews(packageName, R.layout.notification_player)
@@ -115,9 +121,9 @@ class MusicPlayService : Service() {
                 .setCategory(CATEGORY_SERVICE)
                 .setVisibility(VISIBILITY_PUBLIC)
                 .setContent(playerView)
-//                .addAction(R.drawable.ic_previous_player, "Previous", prevPendingIntent) // #0
-//                .addAction(R.drawable.ic_pause_player, "Pause", pausePendingIntent)  // #1
-//                .addAction(R.drawable.ic_next_player, "Next", nextPendingIntent)
+                .addAction(R.drawable.ic_previous_player, "Previous", prevPendingIntent) // #0
+                .addAction(R.drawable.ic_pause_player, "Pause", pausePendingIntent)  // #1
+                .addAction(R.drawable.ic_next_player, "Next", nextPendingIntent)
 //                .setStyle(NotificationCompat.MediaStyle()
 //                        .setMediaSession(mediaSession.sessionToken))
                 .build()
