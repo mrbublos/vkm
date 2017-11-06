@@ -1,8 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="horizontal"
-              android:padding="10dp">
+              android:orientation="horizontal">
 
     <ImageView
             android:layout_width="wrap_content"
@@ -16,37 +15,36 @@
                   android:layout_width="0dp"
                   android:layout_weight="1"
                   android:layout_height="match_parent"
-                  android:layout_marginStart="5dp">
+                  android:layout_gravity="center_vertical"
+                  android:layout_marginStart="5dp"
+                  android:layout_marginTop="10dp"
+                  android:layout_marginBottom="10dp">
         <TextView
                 android:text="test1"
                 android:layout_marginStart="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:singleLine="true"
+                android:maxLines="1"
                 android:ellipsize="marquee"
-                android:scrollHorizontally="true"
                 android:marqueeRepeatLimit="marquee_forever"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="bottom"
+                android:textSize="13sp"
                 android:id="@+id/artist">
-            <requestFocus/>
         </TextView>
 
         <TextView
                 android:text="test1"
+                android:textSize="13sp"
                 android:layout_marginStart="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:singleLine="true"
+                android:maxLines="1"
                 android:ellipsize="marquee"
-                android:scrollHorizontally="true"
                 android:marqueeRepeatLimit="marquee_forever"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="top"
                 android:id="@+id/name">
-
         </TextView>
     </LinearLayout>
 

@@ -100,7 +100,7 @@ class MusicPlayService : Service() {
     }
 
     private fun createNotification() {
-//        if (currentComposition == null) { return }
+        if (currentComposition == null) { return }
 
         val nextPendingIntent = PendingIntent.getService(this, 1, Intent(this, MusicPlayService::class.java).setAction("next"), PendingIntent.FLAG_UPDATE_CURRENT)
         val prevPendingIntent = PendingIntent.getService(this, 2, Intent(this, MusicPlayService::class.java).setAction("previous"), PendingIntent.FLAG_UPDATE_CURRENT)
