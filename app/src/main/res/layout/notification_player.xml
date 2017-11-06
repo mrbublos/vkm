@@ -60,7 +60,7 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_marginStart="5dp"
-                android:src="@drawable/ic_pause_player"
+                android:src="@drawable/ic_stop_player_black"
                 android:contentDescription="@string/play_stop_pause_current_track"
                 android:id="@+id/pause"/>
 
@@ -68,7 +68,7 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_marginStart="5dp"
-                android:src="@drawable/ic_next_player"
+                android:src="@drawable/ic_next_player_black"
                 android:contentDescription="@string/skip_to_next_track"
                 android:id="@+id/nextTrack"
                 android:adjustViewBounds="false"/>
