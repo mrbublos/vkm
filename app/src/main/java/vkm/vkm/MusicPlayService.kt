@@ -48,8 +48,8 @@ class MusicPlayService : Service() {
     private var progressUpdateJob: Job? = null
     private val playbackStateBuilder = PlaybackStateCompat.Builder()
     private val mediaMetadataBuilder = MediaMetadataCompat.Builder()
-    lateinit private var mediaSession: MediaSessionCompat
-    lateinit var notificationManager: NotificationManager
+    private lateinit var mediaSession: MediaSessionCompat
+    private lateinit var notificationManager: NotificationManager
 
     private val playerControlsCallback = object : MediaSessionCompat.Callback() {
         override fun onPlay() { play() }
@@ -66,6 +66,8 @@ class MusicPlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) { return START_NOT_STICKY }
 
+        // TODO audio_becoming_noisy handle
+        // wifi lock
         when (intent.action) {
             "next" -> next()
             "previous" -> previous()
@@ -79,6 +81,7 @@ class MusicPlayService : Service() {
         instance = this
         "Service created".log()
         mediaSession = MediaSessionCompat(baseContext, "vkm")
+        mediaSession.setCallback(playerControlsCallback)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
@@ -97,6 +100,7 @@ class MusicPlayService : Service() {
                 .build()
         mediaSession.setMetadata(mediaMetadata)
         mediaSession.setPlaybackState(playbackState)
+        mediaSession.isActive = true
     }
 
     private fun createNotification() {
@@ -116,9 +120,9 @@ class MusicPlayService : Service() {
 
         val notification = NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_vkm_main)
-                .setAutoCancel(false)
-                .setPriority(PRIORITY_MAX)
-                .setCategory(CATEGORY_SERVICE)
+//                .setAutoCancel(false)
+//                .setPriority(PRIORITY_MAX)
+//                .setCategory(CATEGORY_SERVICE)
                 .setVisibility(VISIBILITY_PUBLIC)
                 .setContent(playerView)
 //                .addAction(R.drawable.ic_previous_player, "Previous", prevPendingIntent) // #0
