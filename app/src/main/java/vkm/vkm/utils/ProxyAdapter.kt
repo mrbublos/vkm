@@ -18,11 +18,11 @@ class ProxyAdapter(context: Context, resource: Int, data: List<Proxy?>, private 
             if (item.host.isNotEmpty()) {
                 view?.address?.text = "${item.host}:${item.port}"
                 view?.country?.text = "${item.country} (${item.type})"
-                view?.setOnClickListener { elementClickListener.invoke(item) }
+                view?.setOnClickListener { elementClickListener(item) }
             } else {
                 view?.address?.text = context.getString(R.string.no_proxy)
                 view?.country?.text = ""
-                view?.setOnClickListener { elementClickListener.invoke(null) }
+                view?.setOnClickListener { elementClickListener(null) }
             }
         }
 

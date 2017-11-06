@@ -77,8 +77,8 @@ object DownloadManager {
 
     @Synchronized
     private fun dumpList(name: ListType, data: List<Composition> = listOf()) {
-        val file = getListFileName(name)
-        if (file.exists()) { file.delete() }
+        val timeStamp = System.currentTimeMillis()
+        val file = getListFileName(name, timeStamp.toString())
 
         file.bufferedWriter().use { writer ->
             data.forEach {
@@ -87,6 +87,9 @@ object DownloadManager {
                 writer.newLine()
             }
         }
+
+        file.copyTo(getListFileName(name), true)
+        file.delete()
         "Dumping $name finished".log()
     }
 
@@ -94,25 +97,23 @@ object DownloadManager {
         val file = getListFileName(name)
         data.clear()
 
-        if (file.exists()) {
-            file.bufferedReader().use { reader ->
-                reader.readLines().forEach { line ->
-                    try {
-                        data.offer(line.toComposition())
-                    } catch(e: Exception) {
-                        Log.e("vkm", "Unable to parse composition, skipping")
-                    }
+        file.takeIf { it.exists() && it.canRead() }?.bufferedReader()?.use { reader ->
+            reader.readLines().forEach { line ->
+                try {
+                    data.offer(line.toComposition())
+                } catch(e: Exception) {
+                    Log.e("vkm", "Unable to parse composition, skipping")
                 }
             }
             data.sortedByDescending { it.vkmId }
         }
     }
 
-    private fun getListFileName(name: ListType): File {
+    private fun getListFileName(name: ListType, suffix: String = ""): File {
         return when (name) {
-            downloaded -> File(getPropertiesDir(), "downloadedList.json")
-            queue -> File(getPropertiesDir(), "queue.json")
-            inProgress -> File(getPropertiesDir(), "inProgress.json")
+            downloaded -> File(getPropertiesDir(), "downloadedList.json$suffix")
+            queue -> File(getPropertiesDir(), "queue.json$suffix")
+            inProgress -> File(getPropertiesDir(), "inProgress.json$suffix")
         }
     }
 

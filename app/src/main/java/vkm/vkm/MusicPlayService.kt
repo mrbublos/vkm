@@ -80,12 +80,11 @@ class MusicPlayService : Service() {
         "Service created".log()
         mediaSession = MediaSessionCompat(baseContext, "vkm")
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        createNotification()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
+        notificationManager.cancelAll()
     }
 
     private fun updateMediaSession() {
@@ -111,6 +110,7 @@ class MusicPlayService : Service() {
         val playerView = RemoteViews(packageName, R.layout.notification_player)
         playerView.setTextViewText(R.id.name, currentComposition?.name ?: "test")
         playerView.setTextViewText(R.id.artist, currentComposition?.artist ?: "test")
+        playerView.setImageViewResource(R.id.pause, if (isPlaying()) R.drawable.ic_pause_player_black else R.drawable.ic_play_player_black )
         playerView.setOnClickPendingIntent(R.id.pause, pausePendingIntent)
         playerView.setOnClickPendingIntent(R.id.nextTrack, nextPendingIntent)
 
@@ -121,9 +121,9 @@ class MusicPlayService : Service() {
                 .setCategory(CATEGORY_SERVICE)
                 .setVisibility(VISIBILITY_PUBLIC)
                 .setContent(playerView)
-                .addAction(R.drawable.ic_previous_player, "Previous", prevPendingIntent) // #0
-                .addAction(R.drawable.ic_pause_player, "Pause", pausePendingIntent)  // #1
-                .addAction(R.drawable.ic_next_player, "Next", nextPendingIntent)
+//                .addAction(R.drawable.ic_previous_player, "Previous", prevPendingIntent) // #0
+//                .addAction(R.drawable.ic_pause_player, "Pause", pausePendingIntent)  // #1
+//                .addAction(R.drawable.ic_next_player, "Next", nextPendingIntent)
 //                .setStyle(NotificationCompat.MediaStyle()
 //                        .setMediaSession(mediaSession.sessionToken))
                 .build()
@@ -192,6 +192,7 @@ class MusicPlayService : Service() {
         mp.takeIf { mp.isPlaying }?.pause()
         isPaused.compareAndSet(false, true)
         onPause()
+        createNotification()
     }
 
     fun skipTo(time: Int) = mp.seekTo(time)
@@ -221,7 +222,6 @@ class MusicPlayService : Service() {
         }
 
         launch(CommonPool) {
-
             var index = playList.indexOf(currentComposition)
             var steps = 0
             do {
@@ -238,6 +238,7 @@ class MusicPlayService : Service() {
             if (currentComposition != null) {
                 play(currentComposition)
                 onPlay()
+                createNotification()
             }
         }
     }
