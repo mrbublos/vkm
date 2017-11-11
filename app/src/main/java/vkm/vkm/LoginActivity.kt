@@ -41,7 +41,7 @@ class LoginActivity : AppCompatActivity() {
     fun loginCallback(result: String) {
         when(result) {
             "ok" -> {
-                startActivity(Intent(applicationContext, SearchFragment::class.java))
+                startActivity(Intent(applicationContext, PagerActivity::class.java))
                 finish()
                 return
             }

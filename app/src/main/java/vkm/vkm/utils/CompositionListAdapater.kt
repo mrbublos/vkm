@@ -33,7 +33,7 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
             if (trackAvailable) {
                 if (activity.musicPlayer?.isCurrentTrack(item) == true) {
                     audioControl?.apply {
-                        if (activity.musicPlayer?.isLoading?.get() == true) {
+                        if (activity.musicPlayer?.loading() == true) {
                             setImageDrawable(context.getDrawable(R.drawable.ic_loading))
                         } else {
                             setImageDrawable(context.getDrawable(R.drawable.ic_stop))
