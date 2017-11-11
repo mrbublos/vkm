@@ -103,7 +103,13 @@ open class VkMusicService : MusicService {
     private fun callApi(addSignature: Boolean = false, method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
         launch(CommonPool) {
             val result = VkApi.callVkMethod(params, method, addSignature)
-            launch(UI) { callback.invoke(result) }
+            launch(UI) {
+                if (result != null) {
+                    callback.invoke(result)
+                } else {
+                    "Error connecting to server".logE()
+                }
+            }
         }
     }
 }
