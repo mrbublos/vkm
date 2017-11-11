@@ -108,7 +108,7 @@ open class VkMusicService : MusicService {
             } else {
                 "Error connecting to server".logE()
             }
-    }
+        }
     }
 }
 
