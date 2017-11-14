@@ -133,8 +133,7 @@ object VkApi {
                     // token confirmation required, refreshing token
                     try {
                         SecurityService.receipt = getReciept()
-                        refreshToken()
-                        callVkApiMethod(parameters, method, addSignature)
+                        if (refreshToken()) { callVkApiMethod(parameters, method, addSignature) } else null
                     } catch (e: Exception) {
                         "Error in refresh token or secondary call".logE(e)
                         null
@@ -147,13 +146,22 @@ object VkApi {
         }
     }
 
-    suspend fun refreshToken() {
+    suspend fun refreshToken(): Boolean {
         val responseString = callVkApiMethod(mutableListOf("v" to "5.68", "receipt" to SecurityService.receipt), "auth.refreshToken")!!["response"]
         if (responseString == null) {
             "Unable to connect to proxy".logE()
-            return
+            return false
         }
-        SecurityService.vkAccessToken = (responseString as JsonObject)["token"] as String? ?: SecurityService.vkAccessToken
+
+        ((responseString as JsonObject)["token"] as String?)?.let { newToken ->
+            if (newToken != SecurityService.vkAccessToken) {
+                SecurityService.vkAccessToken = newToken
+                return true
+            } else {
+                "Token refresh failed (same token returned)".logE()
+            }
+        }
+        return false
     }
 
     suspend private fun callVkApiMethod(parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {

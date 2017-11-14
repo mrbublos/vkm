@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
             permissionContinuation = null
             "permissions received".log()
             initialize()
+            finish()
         }
     }
 
