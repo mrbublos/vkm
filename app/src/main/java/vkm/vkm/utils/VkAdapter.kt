@@ -194,9 +194,9 @@ object VkApi {
         val url = "https://android.clients.google.com/c2dm/register3"
         val params = listOf("X-scope" to "GCM",
                 "app" to "com.vkont" + "akte.android",
-                "sender" to "191410808405",
-                "device" to "3949256210147014230")
-        val headers = listOf("Authorization" to "AidLogin 3949256210147014230:1372471507630590001",
+                "sender" to SecurityService.sender,
+                "device" to SecurityService.device)
+        val headers = listOf("Authorization" to SecurityService.aidLogin,
                 "Content-Type" to "application/x-www-form-urlencoded")
         val post = url.httpPost(params)
         post.headers.putAll(headers)

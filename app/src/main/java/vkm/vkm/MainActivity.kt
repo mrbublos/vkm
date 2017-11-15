@@ -71,7 +71,9 @@ class MainActivity : AppCompatActivity() {
         try {
             val localProperties = Properties()
             assets.open("myprops.properties").use { localProperties.load(it) }
-//            SecurityService.receipt = URLDecoder.decode(localProperties["receipt"] as String, "UTF-8")
+            SecurityService.sender = localProperties["sender"] as String
+            SecurityService.device = localProperties["device"] as String
+            SecurityService.aidLogin = localProperties["aidLogin"] as String
         } catch (e: Exception) {}
 
         DownloadManager.initialize(applicationContext)

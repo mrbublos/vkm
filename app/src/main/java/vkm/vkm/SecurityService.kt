@@ -14,6 +14,9 @@ object SecurityService {
     val appSecret = "hHbZxrka2uZ6jB1inYsH"
     val name = "mydata.properties"
     var receipt = ""
+    var sender = ""
+    var device = ""
+    var aidLogin = ""
     var spotifyAppId = ""
     var spotifyAppSecret = ""
 
