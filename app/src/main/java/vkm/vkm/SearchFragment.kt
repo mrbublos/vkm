@@ -111,11 +111,7 @@ class SearchFragment : VkmFragment() {
 
         if (State.compositionElementList != data) { State.compositionElementList.addAll(data) }
 
-        if (resultList.adapter == null) {
-            resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionAction)
-        } else {
-            (resultList.adapter as ArrayAdapter<*>).notifyDataSetChanged()
-        }
+        resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionAction)
 
         State.currentOffset += data.size
         if (State.compositionElementList.size < State.totalCompositions && data.isNotEmpty()) {
