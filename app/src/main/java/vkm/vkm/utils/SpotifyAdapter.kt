@@ -38,25 +38,22 @@ object SpotifyApi {
     private val apiUrl = "https://api.spotify.com"
 
     fun performLogin(): String {
-        val _user = SecurityService.user
         var resultString = "Error logging in"
 
-        _user?.let {
-            val url = "https://accounts.spotify.com/api/token"
-            val params = listOf("grant_type" to "client_credentials")
-            val headers = mapOf("Authorization" to "Basic ${"${SecurityService.spotifyAppId}:${SecurityService.spotifyAppSecret}".base64()}")
-            val request = url.httpPost(params)
-            request.headers.putAll(headers)
-            val result = request.responseString()
-            val resp = result.component2()
-            val res = result.component3()
+        val url = "https://accounts.spotify.com/api/token"
+        val params = listOf("grant_type" to "client_credentials")
+        val headers = mapOf("Authorization" to "Basic ${"${SecurityService.spotifyAppId}:${SecurityService.spotifyAppSecret}".base64()}")
+        val request = url.httpPost(params)
+        request.headers.putAll(headers)
+        val result = request.responseString()
+        val resp = result.component2()
+        val res = result.component3()
 
-            if (resp.statusCode == 200) {
-                SecurityService.spotifyAccessToken = res.component1()?.toJson()?.string("access_token")
-                resultString = "ok"
-            } else {
-                Log.e("vkm", res.component2().toString())
-            }
+        if (resp.statusCode == 200) {
+            SecurityService.spotifyAccessToken = res.component1()?.toJson()?.string("access_token")
+            resultString = "ok"
+        } else {
+            Log.e("vkm", res.component2().toString())
         }
 
         return resultString

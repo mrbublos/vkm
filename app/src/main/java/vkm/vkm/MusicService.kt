@@ -95,7 +95,7 @@ open class VkMusicService : MusicService {
 
     private fun callApi(method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
         launch(CommonPool) {
-            val result = VkApi.callVkMethod(params, method)
+            val result = VkApi.callVkMethod(true, params, method)
             if (result != null) {
                 launch(UI) { callback.invoke(result) }
             } else {
@@ -106,7 +106,7 @@ open class VkMusicService : MusicService {
 
     private fun callApi(addSignature: Boolean = false, method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
         launch(CommonPool) {
-            val result = VkApi.callVkMethod(params, method, addSignature)
+            val result = VkApi.callVkMethod(true, params, method, addSignature)
             if (result != null) {
                 launch(UI) { callback.invoke(result) }
             } else {

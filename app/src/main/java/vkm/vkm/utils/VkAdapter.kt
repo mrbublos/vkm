@@ -94,36 +94,35 @@ class VkParsers(private val fragment: SearchFragment) {
 }
 
 object VkApi {
-    fun performVkLogin(): String {
-        val _user = SecurityService.user
+    suspend fun performVkLogin(user: String, password: String): String {
         var resultString = "Error logging in"
 
-        _user?.let {
-            val url = "https://oauth.v" + "k.com/token"
-            val params = listOf(Pair("grant_type", "password"),
-                    Pair("client_id", SecurityService.appId),
-                    Pair("client_secret", SecurityService.appSecret),
-                    Pair("username", _user.userId),
-                    Pair("password", _user.password))
+        val url = "https://oauth.v" + "k.com/token"
+        val params = listOf(Pair("grant_type", "password"),
+                Pair("client_id", SecurityService.appId),
+                Pair("client_secret", SecurityService.appSecret),
+                Pair("username", user),
+                Pair("password", password))
 
-            val result = url.httpGet(params).responseString()
-            val resp = result.component2()
-            val res = result.component3()
+        val result = url.httpGet(params).responseString()
+        val resp = result.component2()
+        val res = result.component3()
 
-            if (resp.statusCode == 200) {
-                SecurityService.vkAccessToken = res.component1()?.toJson()?.string("access_token")
-                SecurityService.dumpProperties()
-                resultString = "ok"
-            } else {
-                res.component2().toString().logE()
-            }
+        if (resp.statusCode == 200) {
+            val responseJson = res.component1()?.toJson()
+            "Received response $responseJson".log()
+            SecurityService.vkAccessToken = responseJson?.string("access_token")
+            SecurityService.dumpProperties()
+            resultString = "ok"
+        } else {
+            res.component2().toString().logE()
         }
 
         return resultString
     }
 
-    suspend fun callVkMethod(parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
-        val result = callVkApiMethod(parameters, method, addSignature)
+    suspend fun callVkMethod(isGet:Boolean = true, parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
+        val result = callVkApiMethod(isGet, parameters, method, addSignature)
         when (result?.containsKey("error")) {
             false -> return result
             else -> {
@@ -133,7 +132,7 @@ object VkApi {
                     // token confirmation required, refreshing token
                     try {
                         SecurityService.receipt = getReciept()
-                        if (refreshToken()) { callVkApiMethod(parameters, method, addSignature) } else null
+                        if (refreshToken()) { callVkApiMethod(isGet, parameters, method, addSignature) } else null
                     } catch (e: Exception) {
                         "Error in refresh token or secondary call".logE(e)
                         null
@@ -147,7 +146,13 @@ object VkApi {
     }
 
     suspend fun refreshToken(): Boolean {
-        val responseString = callVkApiMethod(mutableListOf("v" to "5.68", "receipt" to SecurityService.receipt), "auth.refreshToken")!!["response"]
+        val receipt = getReciept()
+        if (receipt.isEmpty()) {
+            "Unable to retrieve receipt".logE()
+            return false
+        }
+
+        val responseString = callVkApiMethod(true, mutableListOf("v" to "5.68", "receipt" to receipt), "auth.refre" + "shToken")!!["response"]
         if (responseString == null) {
             "Unable to connect to proxy".logE()
             return false
@@ -164,7 +169,45 @@ object VkApi {
         return false
     }
 
-    suspend private fun callVkApiMethod(parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
+    suspend fun unregisterDevice(): Boolean {
+        val parameters = mutableListOf("v" to "5.68", "https" to "1", "device_id" to SecurityService.deviceId)
+        val resp = callVkMethod(false, parameters, "account.unregisterDevice")?.get("response")
+        if (resp != 1) {
+            "Failed to unregister device".logE()
+            return false
+        }
+
+        return true
+    }
+
+    suspend fun registerDevice(): Boolean {
+        SecurityService.sender = "${System.currentTimeMillis()}"
+        SecurityService.receipt = getReciept()
+        val parameters = mutableListOf("v" to "5.68",
+                "https" to "1",
+                "token" to SecurityService.receipt,
+                "system_version" to "6.0",
+                "device_model" to "Unknown Android SDK built for x86",
+                "type" to "4",
+                "gcm" to "1",
+                "settings" to "{\"sdk_open\":\"on\",\"new_post\":\"on\",\"friend_accepted\":\"on\",\"wall_publish\":\"on\",\"group_accepted\":\"on\",\"money_transfer\":\"on\",\"msg\":\"on\",\"chat\":\"on\",\"friend\":\"on\",\"friend_found\":\"on\",\"reply\":\"on\",\"comment\":\"on\",\"mention\":\"on\",\"like\":\"on\",\"repost\":\"on\",\"wall_post\":\"on\",\"group_invite\":\"on\",\"event_soon\":\"on\",\"tag_photo\":\"on\",\"tag_video\":\"on\",\"app_request\":\"on\",\"gift\":\"on\",\"birthday\":\"on\",\"live\":\"on\"}",
+                "app_version" to "1206",
+                "device_id" to SecurityService.deviceId)
+        val resp = callVkMethod(false, parameters, "account.registerDevice")?.get("response")
+        if (resp != 1) {
+            "Failed to register device".logE()
+            return false
+        }
+
+        return true
+    }
+
+    suspend private fun callVkApiMethod(isGet: Boolean = true, parameters: MutableList<Pair<String, String>>, method: String, addSignature: Boolean = true): JsonObject? {
+        if (SecurityService.vkAccessToken == null) {
+            "Token not defined".logE()
+            return null
+        }
+
         val _apiUrl = "https://api.v" + "k.com"
         val _userAgent = "VKAn" + "droidApp/4.13-1183 (Android 7.1.1; SDK 25; x86; unknown Android SDK built for x86_64; en)"
         val path = "/method/$method"
@@ -175,7 +218,7 @@ object VkApi {
         if (addSignature) {
             addSignature(path, parameters)
         }
-        val httpGet = "$_apiUrl$path".httpGet(parameters)
+        val httpGet = if (isGet) "$_apiUrl$path".httpGet(parameters) else "$_apiUrl$path".httpPost(parameters)
         httpGet.headers.put("User-Agent", _userAgent)
         "Sending request ${httpGet.cUrlString()}".log()
         val (_, _, result) = httpGet.responseString()
@@ -195,11 +238,13 @@ object VkApi {
         val params = listOf("X-scope" to "GCM",
                 "app" to "com.vkont" + "akte.android",
                 "sender" to SecurityService.sender,
-                "device" to SecurityService.device)
+                "device" to SecurityService.device,
+                "X-subtype" to SecurityService.sender)
         val headers = listOf("Authorization" to SecurityService.aidLogin,
                 "Content-Type" to "application/x-www-form-urlencoded")
         val post = url.httpPost(params)
         post.headers.putAll(headers)
+        "Getting receipt ${post.cUrlString()}".log()
         val (_, _, result) = post.responseString()
         "Receipt received ${result.component1()}".log()
         return result.component1()?.split("=")?.get(1) ?: ""

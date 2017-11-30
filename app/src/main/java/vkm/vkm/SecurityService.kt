@@ -1,8 +1,6 @@
 package vkm.vkm
 
 import android.content.Context
-import vkm.vkm.utils.User
-import vkm.vkm.utils.VkApi
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -19,6 +17,8 @@ object SecurityService {
     var aidLogin = ""
     var spotifyAppId = ""
     var spotifyAppSecret = ""
+    var login = ""
+    var deviceId = ""
 
     var vkAccessToken: String? = null
         set(value) {
@@ -33,18 +33,11 @@ object SecurityService {
         }
 
     var context: Context? = null
-    var user: User? = null
 
     fun isLoggedIn(defaultToken: String? = null): Boolean {
         loadProperties()
         vkAccessToken = vkAccessToken ?: defaultToken
         return vkAccessToken != null
-    }
-
-    fun logIn(newUser: User): String {
-        // TODO store user in internal storage
-        user = newUser
-        return VkApi.performVkLogin()
     }
 
     fun dumpProperties() {

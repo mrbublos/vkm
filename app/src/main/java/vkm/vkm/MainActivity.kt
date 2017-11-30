@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
             permissionContinuation = null
             "permissions received".log()
             initialize()
+            startActivity(Intent(applicationContext, PagerActivity::class.java))
             finish()
         }
     }
@@ -73,16 +74,12 @@ class MainActivity : AppCompatActivity() {
             assets.open("myprops.properties").use { localProperties.load(it) }
             SecurityService.sender = localProperties["sender"] as String
             SecurityService.device = localProperties["device"] as String
-            SecurityService.aidLogin = localProperties["aidLogin"] as String
+            SecurityService.aidLogin = localProperties["authorization"] as String
+            SecurityService.login = localProperties["login"] as String? ?: ""
+            SecurityService.deviceId = localProperties["deviceId"] as String? ?: ""
         } catch (e: Exception) {}
 
         DownloadManager.initialize(applicationContext)
-
-        if (SecurityService.isLoggedIn()) {
-            startActivity(Intent(applicationContext, PagerActivity::class.java))
-        } else {
-            startActivity(Intent(applicationContext, LoginActivity::class.java))
-        }
         initialized = true
     }
 

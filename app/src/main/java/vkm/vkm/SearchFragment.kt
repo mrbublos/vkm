@@ -139,6 +139,7 @@ class SearchFragment : VkmFragment() {
         musicService.getPlaylist(this, newSelectedElement, filterText)
 
         searchTabsSwiper.setCurrentString("tracks")
+        State.currentSearchTab = "tracks"
 
         newSelectedElement?.let {
             selectedUserContainer.visibility = View.VISIBLE

@@ -1,13 +1,14 @@
 package vkm.vkm
 
-import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.MotionEvent
+import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_login.*
-import vkm.vkm.utils.User
-import vkm.vkm.utils.log
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
+import vkm.vkm.utils.VkApi
 
 class LoginActivity : AppCompatActivity() {
 
@@ -17,6 +18,7 @@ class LoginActivity : AppCompatActivity() {
 
         lockUnlockScreen(false)
 
+        if (!SecurityService.login.isEmpty()) { loginName.setText(SecurityService.login, TextView.BufferType.EDITABLE) }
         initializeButtons()
     }
 
@@ -31,7 +33,14 @@ class LoginActivity : AppCompatActivity() {
                     return@setOnTouchListener false
                 }
 
-                LoginPerformer(this).execute(loginName.text.toString(), password.text.toString())
+                SecurityService.login = loginName.text.toString()
+                launch(CommonPool) {
+                    // TODO what should we do if reg/unreg fails?
+                    VkApi.unregisterDevice()
+                    val result = VkApi.performVkLogin(SecurityService.login, password.text.toString())
+                    VkApi.registerDevice()
+                    launch(UI) { loginCallback(result) }
+                }
             }
 
             return@setOnTouchListener false
@@ -41,7 +50,6 @@ class LoginActivity : AppCompatActivity() {
     fun loginCallback(result: String) {
         when(result) {
             "ok" -> {
-                startActivity(Intent(applicationContext, PagerActivity::class.java))
                 finish()
                 return
             }
@@ -69,17 +77,4 @@ class LoginActivity : AppCompatActivity() {
         submit.isFocusable = !lock
         submit.isClickable = !lock
     }
-}
-
-class LoginPerformer(val activity: LoginActivity): AsyncTask<String, Any, String>() {
-
-    override fun onPostExecute(result: String) {
-        "Login result $result".log()
-        activity.loginCallback(result)
-    }
-
-    override fun doInBackground(vararg p0: String): String {
-        return SecurityService.logIn(User(password = p0[1], userId = p0[0]))
-    }
-
 }
