@@ -181,7 +181,7 @@ object VkApi {
     }
 
     suspend fun registerDevice(): Boolean {
-        SecurityService.sender = "${System.currentTimeMillis()}"
+//        SecurityService.sender = "${System.currentTimeMillis()}"
         SecurityService.receipt = getReciept()
         val parameters = mutableListOf("v" to "5.68",
                 "https" to "1",

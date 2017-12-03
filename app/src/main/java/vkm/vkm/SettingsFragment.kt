@@ -40,7 +40,7 @@ class SettingsFragment : VkmFragment() {
 
         restoreDownloaded.setOnClickListener { DownloadManager.restoreDownloaded() }
 
-        selectProxy.setOnClickListener { startActivity(Intent(context, ProxyActivity::class.java)) }
+//        selectProxy.setOnClickListener { startActivity(Intent(context, ProxyActivity::class.java)) }
     }
 
     private fun dangerousCommandsVisibility(visible: Boolean) {
