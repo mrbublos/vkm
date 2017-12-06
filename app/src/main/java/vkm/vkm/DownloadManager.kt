@@ -138,7 +138,7 @@ object DownloadManager {
             if (currentDownload.compareAndSet(null, itemToDownload)) {
                 _queue.remove(itemToDownload)
                 if (itemToDownload.url.isEmpty()) {
-                    "Track is not available for download, skipping".log()
+                    "Track ${itemToDownload.fileName()} is not available for download, skipping".log()
                     // TODO search track on alternative sources
                     currentDownload.set(null)
                     downloadNext()
@@ -187,13 +187,13 @@ object DownloadManager {
     private suspend fun downloadTrack(vararg params: Composition): String? {
         val dir = getDownloadDir()
         val composition = params[0]
-        if (getDownloaded().find { it.id == composition.id } != null) {
+        if (!State.developerMode && getDownloaded().find { it.id == composition.id } != null) {
             "File already was downloaded, skipping download".log()
             return null
         }
 
         val dest = dir.resolve(composition.fileName())
-        if (dest.exists()) {
+        if (!State.developerMode && dest.exists()) {
             "File already exists, skipping download".log()
             return null
         }
@@ -226,7 +226,7 @@ object DownloadManager {
 
             if (dir.canWrite() && dir.usableSpace > bytes.size) {
                 try {
-                    dest.writeBytes(bytes)
+                    if (!State.developerMode) { dest.writeBytes(bytes) }
                     finishDownload(composition)
                 } catch (e: Exception) {
                     Log.e("vkm", "Error saving track", e)

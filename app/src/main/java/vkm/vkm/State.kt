@@ -5,7 +5,7 @@ import vkm.vkm.utils.Proxy
 import vkm.vkm.utils.User
 
 object State {
-    var useMock = false
+    var developerMode = false
     var enableDownloadAll = true
     var enableTextSuggestions = true
     var useSpotify = false

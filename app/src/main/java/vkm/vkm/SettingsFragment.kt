@@ -1,6 +1,5 @@
 package vkm.vkm
 
-import android.content.Intent
 import android.view.View
 import kotlinx.android.synthetic.main.activity_settings.*
 import vkm.vkm.utils.VkmFragment
@@ -17,6 +16,9 @@ class SettingsFragment : VkmFragment() {
 
         enableSuggestions.isChecked = State.enableTextSuggestions
         enableSuggestions.setOnCheckedChangeListener { _, value -> State.enableTextSuggestions = value }
+
+        enableDeveloperMode.isChecked = State.developerMode
+        enableDeveloperMode.setOnCheckedChangeListener { _, value -> State.developerMode = value }
 
         showDangerousCommands.setOnCheckedChangeListener { _, value -> dangerousCommandsVisibility(value) }
 
@@ -45,11 +47,8 @@ class SettingsFragment : VkmFragment() {
 
     private fun dangerousCommandsVisibility(visible: Boolean) {
         val visibility = if (visible) View.VISIBLE else View.GONE
-        (clearMusicDir.parent as View).visibility = visibility
-        (removeAllSettings.parent as View).visibility = visibility
-        (rehashDownloaded.parent as View).visibility = visibility
-        (restoreDownloaded.parent as View).visibility = visibility
-        (loadLists.parent as View).visibility = visibility
-        (dumpLists.parent as View).visibility = visibility
+        listOf(clearMusicDir, removeAllSettings, rehashDownloaded, restoreDownloaded, loadLists, dumpLists).forEach {
+            (it.parent as View).visibility = visibility
+        }
     }
 }

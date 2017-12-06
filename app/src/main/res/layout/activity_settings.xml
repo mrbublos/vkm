@@ -64,10 +64,35 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    tools:layout_editor_absoluteX="344dp"/>
+                    android:layout_height="0dp"/>
         </android.support.constraint.ConstraintLayout>
 
+        <!-- enable dev mode -->
+        <android.support.constraint.ConstraintLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+            <TextView
+                    android:text="@string/enable_developer_mode"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+            />
+
+            <Switch
+                    android:id="@+id/enableDeveloperMode"
+                    android:textOn="@string/enabled"
+                    android:textOff="@string/disabled"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"/>
+        </android.support.constraint.ConstraintLayout>
+        
         <!-- stop current download -->
         <android.support.constraint.ConstraintLayout
                 android:orientation="horizontal"

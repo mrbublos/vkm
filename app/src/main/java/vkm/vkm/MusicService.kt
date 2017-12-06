@@ -42,7 +42,7 @@ open class VkMusicService : MusicService {
                 "offset" to offset.toString(),
                 "shuffle" to "0")
 
-        if (!State.useMock) {
+        if (!State.developerMode) {
             callApi(true, "audio.get", params, VkParsers(fragment).parsePlaylist)
         } else {
             getMock().getPlaylist(fragment, userOrGroup, "", 0)
@@ -55,7 +55,7 @@ open class VkMusicService : MusicService {
                 "count" to "20",
                 "offset" to offset.toString())
 
-        if (!State.useMock) {
+        if (!State.developerMode) {
             callApi("groups.search", params, VkParsers(fragment).parseGroupList)
         } else {
             getMock().getGroups(fragment, "", 0)
@@ -68,7 +68,7 @@ open class VkMusicService : MusicService {
                 "count" to "200",
                 "offset" to offset.toString())
 
-        if (!State.useMock) {
+        if (!State.developerMode) {
             callApi("users.search", params, VkParsers(fragment).parseUserList)
         } else {
             getMock().getUsers(fragment, "", 0)
@@ -84,7 +84,7 @@ open class VkMusicService : MusicService {
                 "search_own" to "0",
                 "performer_only" to "0")
 
-        if (!State.useMock) {
+        if (!State.developerMode) {
             callApi(true, "audio.search", params, VkParsers(fragment).parseCompositionList)
         } else {
             getMock().getCompositions(fragment, filter, 0)
@@ -124,7 +124,7 @@ open class SpotifyMusicService : MusicService {
         }
         val params = mutableListOf("shuffle" to "0")
 
-        if (!State.useMock) {
+        if (!State.developerMode) {
             callApi("audio.get", params, SpotifyParsers(fragment).parsePlaylist)
         } else {
             getMock().getPlaylist(fragment, userOrGroup, "", 0)
@@ -137,7 +137,7 @@ open class SpotifyMusicService : MusicService {
         val params = mutableListOf("q" to filter,
                 "offset" to offset.toString())
 
-        if (!State.useMock) {
+        if (!State.developerMode) {
             callApi("users.search", params, SpotifyParsers(fragment).parseUserList)
         } else {
             getMock().getUsers(fragment, "", 0)
@@ -150,7 +150,7 @@ open class SpotifyMusicService : MusicService {
                 "limit" to "50",
                 "offset" to "$offset")
 
-        if (!State.useMock) {
+        if (!State.developerMode) {
             callApi("/v1/search", params, SpotifyParsers(fragment).parseCompositionList)
         } else {
             getMock().getCompositions(fragment, filter, 0)

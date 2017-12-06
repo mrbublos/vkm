@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.BaseAdapter
 import kotlinx.android.synthetic.main.activity_history.*
 import kotlinx.android.synthetic.main.composition_list_element.*
+import kotlinx.android.synthetic.main.composition_list_element.view.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -50,7 +51,11 @@ class HistoryFragment : VkmFragment() {
     private fun startProgressUpdate() {
         progressUpdateJob = launch(CommonPool) {
             while (true) {
+                val compositionBeingDownloaded = DownloadManager.getInProgress().firstOrNull()
                 launch(UI) {
+                    compositionInProgress.imageView.visibility = View.GONE
+                    compositionInProgress.name.text = compositionBeingDownloaded?.name
+                    compositionInProgress.artist.text = compositionBeingDownloaded?.artist
                     downloadProgress.progress = DownloadManager.downloadedPercent
                     downloadProgress.secondaryProgress = DownloadManager.downloadedPercent
                 }
