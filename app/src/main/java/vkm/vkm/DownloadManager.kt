@@ -5,6 +5,8 @@ import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.sync.Mutex
+import kotlinx.coroutines.experimental.sync.withLock
 import vkm.vkm.ListType.*
 import vkm.vkm.utils.*
 import java.io.ByteArrayOutputStream
@@ -21,6 +23,7 @@ object DownloadManager {
     val _inProgress = ConcurrentLinkedQueue<Composition>()
     val _queue = ConcurrentLinkedQueue<Composition>()
     var downloadedPercent = 0
+    private val lock = Mutex()
 
     private var context: Context? = null
 
@@ -247,27 +250,33 @@ object DownloadManager {
         "All music removed".toast(context)
     }
 
-    @Synchronized
     fun rehashAndDump() {
-        _downloadedList.filter { it.hash.isEmpty() }.forEach {
-            it.hash = it.localFile()?.readBytes().md5()
-        }
-        dumpList(downloaded, getDownloaded())
-        "Rehashing complete".toast(context)
-    }
-
-    @Synchronized
-    fun restoreDownloaded() {
-        clearDownloaded()
-        getDownloadDir().listFiles().forEach { file ->
-            takeIf { file.isFile }.let {
-                val fileName = file.name.beginning(file.name.length - 4) // cutting .mp3
-                val data = fileName.replace('_', ' ').split('-')
-                _downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
+        launch(CommonPool) {
+            lock.withLock {
+                _downloadedList.filter { it.hash.isEmpty() }.forEach {
+                    it.hash = it.localFile()?.readBytes().md5()
+                }
+                dumpList(downloaded, getDownloaded())
+                "Rehashing complete".toast(this@DownloadManager.context)
             }
         }
-        "Download list restored".toast(context)
-        dumpList(downloaded, getDownloaded())
+    }
+
+    fun restoreDownloaded() {
+        launch(CommonPool) {
+            lock.withLock {
+                clearDownloaded()
+                getDownloadDir().listFiles().forEach { file ->
+                    takeIf { file.isFile }.let {
+                        val fileName = file.name.beginning(file.name.length - 4) // cutting .mp3
+                        val data = fileName.replace('_', ' ').split('-')
+                        _downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
+                    }
+                }
+                "Download list restored".toast(this@DownloadManager.context)
+                dumpList(downloaded, getDownloaded())
+            }
+        }
     }
 }
 
