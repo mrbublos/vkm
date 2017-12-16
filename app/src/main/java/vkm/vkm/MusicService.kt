@@ -5,6 +5,7 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 interface MusicService {
     companion object {
@@ -19,18 +20,18 @@ interface MusicService {
         }
     }
 
-    fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String = "", offset: Int = 0)
-    fun getGroups(fragment: SearchFragment, filter: String = "", offset: Int = 0)
-    fun getUsers(fragment: SearchFragment, filter: String = "", offset: Int = 0)
-    fun getCompositions(fragment: SearchFragment, filter: String = "", offset: Int = 0)
+    fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String = "", offset: Int = 0): Boolean
+    fun getGroups(fragment: SearchFragment, filter: String = "", offset: Int = 0): Boolean
+    fun getUsers(fragment: SearchFragment, filter: String = "", offset: Int = 0): Boolean
+    fun getCompositions(fragment: SearchFragment, filter: String = "", offset: Int = 0): Boolean
 }
 
 open class VkMusicService : MusicService {
 
-    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int) {
-        if (userOrGroup == null) {
-            return
-        }
+    private val isLoading = AtomicBoolean(false)
+
+    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int): Boolean {
+        if (userOrGroup == null || !isLoading.compareAndSet(false, true)) { return false }
         val prefix = if (userOrGroup.isGroup) "-" else ""
         val params = mutableListOf(
                 "v" to "5.68",
@@ -47,9 +48,11 @@ open class VkMusicService : MusicService {
         } else {
             getMock().getPlaylist(fragment, userOrGroup, "", 0)
         }
+        return true
     }
 
-    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int) {
+    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int): Boolean {
+        if (!isLoading.compareAndSet(false, true)) { return false }
         val params = mutableListOf("q" to filter,
                 "fields" to "has_photo",
                 "count" to "20",
@@ -60,9 +63,11 @@ open class VkMusicService : MusicService {
         } else {
             getMock().getGroups(fragment, "", 0)
         }
+        return true
     }
 
-    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int) {
+    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int): Boolean {
+        if (!isLoading.compareAndSet(false, true)) { return false }
         val params = mutableListOf("q" to filter,
                 "fields" to "photo_50, has_photo",
                 "count" to "200",
@@ -73,15 +78,18 @@ open class VkMusicService : MusicService {
         } else {
             getMock().getUsers(fragment, "", 0)
         }
+        return true
     }
 
-    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int) {
+    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int): Boolean {
+        if (!isLoading.compareAndSet(false, true)) { return false }
         val params = mutableListOf("q" to filter,
                 "count" to "100",
                 "v" to "5.68",
                 "https" to "1",
                 "lang" to "en",
                 "search_own" to "0",
+                "offset" to offset.toString(),
                 "performer_only" to "0")
 
         if (!State.developerMode) {
@@ -89,13 +97,18 @@ open class VkMusicService : MusicService {
         } else {
             getMock().getCompositions(fragment, filter, 0)
         }
+        return true
     }
 
-    private fun getMock(): MusicServiceMock = MusicServiceMock()
+    private fun getMock(): MusicServiceMock {
+        isLoading.set(false)
+        return MusicServiceMock()
+    }
 
     private fun callApi(method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
         launch(CommonPool) {
             val result = VkApi.callVkMethod(true, params, method)
+            isLoading.set(false)
             if (result != null) {
                 launch(UI) { callback.invoke(result) }
             } else {
@@ -107,6 +120,7 @@ open class VkMusicService : MusicService {
     private fun callApi(addSignature: Boolean = false, method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
         launch(CommonPool) {
             val result = VkApi.callVkMethod(true, params, method, addSignature)
+            isLoading.set(false)
             if (result != null) {
                 launch(UI) { callback.invoke(result) }
             } else {
@@ -118,10 +132,8 @@ open class VkMusicService : MusicService {
 
 open class SpotifyMusicService : MusicService {
 
-    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int) {
-        if (userOrGroup == null) {
-            return
-        }
+    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int): Boolean {
+        if (userOrGroup == null)  {return false }
         val params = mutableListOf("shuffle" to "0")
 
         if (!State.developerMode) {
@@ -129,11 +141,12 @@ open class SpotifyMusicService : MusicService {
         } else {
             getMock().getPlaylist(fragment, userOrGroup, "", 0)
         }
+        return true
     }
 
-    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int) {}
+    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int): Boolean = false
 
-    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int) {
+    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int): Boolean {
         val params = mutableListOf("q" to filter,
                 "offset" to offset.toString())
 
@@ -142,9 +155,10 @@ open class SpotifyMusicService : MusicService {
         } else {
             getMock().getUsers(fragment, "", 0)
         }
+        return true
     }
 
-    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int) {
+    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int): Boolean {
         val params = mutableListOf("q" to filter.replace(" ", "+"),
                 "type" to "track,artist",
                 "limit" to "50",
@@ -155,6 +169,7 @@ open class SpotifyMusicService : MusicService {
         } else {
             getMock().getCompositions(fragment, filter, 0)
         }
+        return true
     }
 
     private fun getMock(): MusicServiceMock {
@@ -169,27 +184,31 @@ open class SpotifyMusicService : MusicService {
 
 
 class MusicServiceMock : MusicService {
-    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int) {
+    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int): Boolean {
         "Running getUserPlaylistMock".log()
         val mock = fragment.context.assets.open("getUserPlayList.json").readAll()
         VkParsers(fragment).parsePlaylist.invoke(mock.toJson())
+        return true
     }
 
-    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int) {
+    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int): Boolean {
         "Running getGroups".log()
         val mock = fragment.context.assets.open("getGroups.json").readAll()
         VkParsers(fragment).parseGroupList.invoke(mock.toJson())
+        return true
     }
 
-    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int) {
+    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int): Boolean {
         "Running getUsers".log()
         val mock = fragment.context.assets.open("getUsers.json").readAll()
         VkParsers(fragment).parseUserList.invoke(mock.toJson())
+        return true
     }
 
-    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int) {
+    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int): Boolean {
         "Running getCompositions".log()
         val mock = fragment.context.assets.open("getCompositionList.json").readAll()
         VkParsers(fragment).parseCompositionList.invoke(mock.toJson())
+        return true
     }
 }

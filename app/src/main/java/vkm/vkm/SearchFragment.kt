@@ -2,7 +2,9 @@ package vkm.vkm
 
 import android.text.InputType
 import android.view.View
+import android.widget.AbsListView
 import android.widget.BaseAdapter
+import android.widget.ListView
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
 import vkm.vkm.utils.*
@@ -14,6 +16,7 @@ class SearchFragment : VkmFragment() {
 
     // private vars
     private var filterText: String = ""
+    private var currentElement = 0
 
     init { layout = R.layout.activity_search }
 
@@ -28,6 +31,23 @@ class SearchFragment : VkmFragment() {
         selectUserOrGroup(State.selectedElement)
         spinner(false)
         search.inputType = if (State.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+
+        resultList.setOnScrollListener(object : AbsListView.OnScrollListener {
+            private var resultVisibleIndex = 0
+            private var resultVisible = 0
+            override fun onScroll(view: AbsListView?, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
+                resultVisibleIndex = firstVisibleItem
+                resultVisible = visibleItemCount
+            }
+
+            override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
+                if (State.currentSearchTab != "tracks") { return }
+                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && resultVisibleIndex + resultVisible >= State.compositionElementList.size) {
+                    currentElement = resultVisibleIndex + resultVisible
+                    musicService.getCompositions(this@SearchFragment, filterText, State.currentOffset)
+                }
+            }
+        })
     }
 
     private fun initializeTabs() {
@@ -55,27 +75,33 @@ class SearchFragment : VkmFragment() {
             when (State.currentSearchTab) {
                 "user" -> {
                     if (State.selectedElement != null) {
-                        musicService.getPlaylist(this, State.selectedElement, filterText)
-                        State.compositionElementList.clear()
-                        State.currentOffset = 0
+                        if (musicService.getPlaylist(this, State.selectedElement, filterText)) {
+                            currentElement = 0
+                            State.compositionElementList.clear()
+                            State.currentOffset = 0
+                        }
                     } else {
                         musicService.getUsers(this, filterText)
                     }
                 }
                 "group" -> {
                     if (State.selectedElement != null) {
-                        musicService.getPlaylist(this, State.selectedElement, filterText)
-                        State.compositionElementList.clear()
-                        State.currentOffset = 0
+                        if (musicService.getPlaylist(this, State.selectedElement, filterText)) {
+                            currentElement = 0
+                            State.compositionElementList.clear()
+                            State.currentOffset = 0
+                        }
                     } else {
                         musicService.getGroups(this, filterText)
                     }
                 }
                 "tracks" -> {
-                    State.compositionElementList.clear()
-                    State.currentOffset = 0
-                    musicService.getCompositions(this, filterText)
-                    resultList.adapter = null
+                    if (musicService.getCompositions(this, filterText)) {
+                        currentElement = 0
+                        State.compositionElementList.clear()
+                        State.currentOffset = 0
+                        resultList.adapter = null
+                    }
                 }
             }
 
@@ -115,6 +141,7 @@ class SearchFragment : VkmFragment() {
         if (State.compositionElementList != data) { State.compositionElementList.addAll(filteredData) }
 
         resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionAction)
+        resultList.setSelection(currentElement)
 
         if (isPlaylist) {
             // fetching complete playlist, because user can download it all at once
