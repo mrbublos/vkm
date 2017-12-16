@@ -28,7 +28,7 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
 
             val actionButton = view?.imageView
             val audioControl = view?.audioControl
-
+            audioControl?.visibility = View.VISIBLE
 
             if (trackAvailable) {
                 if (activity.musicPlayer?.isCurrentTrack(item) == true) {
@@ -65,7 +65,7 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
                     DownloadManager.getInProgress().find { it.equalsTo(item) }?.let {
                         actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
                         withAction = false
-                        audioControl?.visibility = View.GONE
+                        audioControl?.visibility = View.INVISIBLE
                     }
                 } else {
                     withAction = false
