@@ -67,7 +67,7 @@ class VkParsers(private val fragment: SearchFragment) {
                 compositionObject
             }
             State.totalCompositions = (result["response"] as JsonObject).int("count")!!
-            fragment.setCompositionsList(compositions)
+            fragment.setCompositionsList(compositions, true)
         }
     }
 
@@ -77,7 +77,7 @@ class VkParsers(private val fragment: SearchFragment) {
         } else {
             val items = (result["response"] as JsonObject)["items"] as JsonArray<*>
             val compositions = items.filter {
-                it is JsonObject && !it.string("url")!!.isEmpty()
+                it is JsonObject
             }.map {
                 val composition = it as JsonObject
                 val compositionObject = Composition(id = "" + composition.int("id")!!,
@@ -87,8 +87,8 @@ class VkParsers(private val fragment: SearchFragment) {
                         url = composition.string("url")!!)
                 compositionObject
             }
-            fragment.setCompositionsList(compositions)
             State.totalCompositions = (result["response"] as JsonObject).int("count")!!
+            fragment.setCompositionsList(compositions)
         }
     }
 }

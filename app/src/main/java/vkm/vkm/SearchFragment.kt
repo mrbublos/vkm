@@ -2,7 +2,6 @@ package vkm.vkm
 
 import android.text.InputType
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.BaseAdapter
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
@@ -105,19 +104,25 @@ class SearchFragment : VkmFragment() {
         resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
-    fun setCompositionsList(data: List<Composition>) {
+    fun setCompositionsList(data: List<Composition>, isPlaylist: Boolean = false) {
         screen(false)
         spinner(false)
 
-        if (State.compositionElementList != data) { State.compositionElementList.addAll(data) }
+        State.currentOffset += data.size
+        val filteredData = data.filter { it.url.isNotEmpty() }
+
+        // to prevent duplications when restoring list
+        if (State.compositionElementList != data) { State.compositionElementList.addAll(filteredData) }
 
         resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionAction)
 
-        State.currentOffset += data.size
-        if (State.compositionElementList.size < State.totalCompositions && data.isNotEmpty()) {
-            musicService.getPlaylist(this, State.selectedElement, "", State.currentOffset)
-        } else {
-            showDownloadAllButton()
+        if (isPlaylist) {
+            // fetching complete playlist, because user can download it all at once
+            if (State.compositionElementList.size < State.totalCompositions && filteredData.isNotEmpty()) {
+                musicService.getPlaylist(this, State.selectedElement, "", State.currentOffset)
+            } else {
+                showDownloadAllButton()
+            }
         }
     }
 
@@ -181,6 +186,7 @@ class SearchFragment : VkmFragment() {
     }
 
     private fun spinner(show: Boolean) {
+        resultList.visibility = if (!show) View.VISIBLE else View.GONE
         loadingSpinner.visibility = if (show) View.VISIBLE else View.GONE
     }
 }
