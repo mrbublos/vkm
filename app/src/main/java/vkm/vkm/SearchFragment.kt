@@ -42,7 +42,8 @@ class SearchFragment : VkmFragment() {
 
             override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
                 if (State.currentSearchTab != "tracks") { return }
-                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && resultVisibleIndex + resultVisible >= State.compositionElementList.size) {
+                val size = State.compositionElementList.size
+                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && resultVisibleIndex + resultVisible >= size && State.currentOffset < State.totalCompositions) {
                     currentElement = resultVisibleIndex + resultVisible
                     musicService.getCompositions(this@SearchFragment, filterText, State.currentOffset)
                 }
@@ -142,6 +143,9 @@ class SearchFragment : VkmFragment() {
 
         resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionAction)
         resultList.setSelection(currentElement)
+
+        // if no data returned, so whether we have not found anything or whether no more elements available in the search
+        if (data.isEmpty()) { State.currentOffset = State.totalCompositions }
 
         if (isPlaylist) {
             // fetching complete playlist, because user can download it all at once
