@@ -109,11 +109,8 @@ open class VkMusicService : MusicService {
         launch(CommonPool) {
             val result = VkApi.callVkMethod(true, params, method)
             isLoading.set(false)
-            if (result != null) {
-                launch(UI) { callback.invoke(result) }
-            } else {
-                "Error connecting to server".logE()
-            }
+            if (result == null) { "Error connecting to server".logE() }
+            launch(UI) { callback.invoke(result) }
         }
     }
 
@@ -121,11 +118,8 @@ open class VkMusicService : MusicService {
         launch(CommonPool) {
             val result = VkApi.callVkMethod(true, params, method, addSignature)
             isLoading.set(false)
-            if (result != null) {
-                launch(UI) { callback.invoke(result) }
-            } else {
-                "Error connecting to server".logE()
-            }
+            if (result == null) { "Error connecting to server".logE() }
+            launch(UI) { callback.invoke(result) }
         }
     }
 }

@@ -45,6 +45,7 @@
     <string name="skip_to_next_track">Skip to next track</string>
     <string name="currently_playing_title">Currently playing</string>
     <string name="enable_developer_mode">Enable developer mode</string>
+    <string name="logout">Logout</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

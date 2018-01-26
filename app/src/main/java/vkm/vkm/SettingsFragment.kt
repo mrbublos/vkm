@@ -1,5 +1,6 @@
 package vkm.vkm
 
+import android.content.Intent
 import android.view.View
 import kotlinx.android.synthetic.main.activity_settings.*
 import vkm.vkm.utils.VkmFragment
@@ -41,6 +42,8 @@ class SettingsFragment : VkmFragment() {
         rehashDownloaded.setOnClickListener { DownloadManager.rehashAndDump() }
 
         restoreDownloaded.setOnClickListener { DownloadManager.restoreDownloaded() }
+
+        logout.setOnClickListener { startActivity(Intent(context, LoginActivity::class.java)) }
 
 //        selectProxy.setOnClickListener { startActivity(Intent(context, ProxyActivity::class.java)) }
     }

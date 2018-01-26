@@ -36,9 +36,9 @@ class LoginActivity : AppCompatActivity() {
                 SecurityService.login = loginName.text.toString()
                 launch(CommonPool) {
                     // TODO what should we do if reg/unreg fails?
-                    VkApi.unregisterDevice()
+//                    VkApi.unregisterDevice()
                     val result = VkApi.performVkLogin(SecurityService.login, password.text.toString())
-                    VkApi.registerDevice()
+//                    VkApi.registerDevice()
                     launch(UI) { loginCallback(result) }
                 }
             }
