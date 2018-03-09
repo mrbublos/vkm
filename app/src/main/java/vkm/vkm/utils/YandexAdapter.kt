@@ -4,6 +4,7 @@ import com.beust.klaxon.*
 import com.github.kittinunf.fuel.httpGet
 import vkm.vkm.ProxyActivity
 import vkm.vkm.SearchFragment
+import vkm.vkm.State
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import kotlin.coroutines.experimental.suspendCoroutine
@@ -11,27 +12,29 @@ import kotlin.coroutines.experimental.suspendCoroutine
 class YMusicParsers(private val fragment: SearchFragment) {
 
     val parseCompositionList = { result: JsonObject? ->
-        val compositions = mutableListOf<Composition>()
+        val compositionsFound = mutableListOf<Composition>()
         if (result != null && result.string("text") != null) {
             try {
-                result.obj("tracks")
-                        ?.array<JsonObject>("items")
-                        ?.takeIf { it.isNotEmpty() }
-                        .let {
-                    val tracks = it!!.map { track ->
-                        Composition(id = track.long("id")?.toString() ?: "",
-                                artist = track.array<JsonObject>("artists")?.joinToString(",") { artist ->artist.string("name") ?: ""}!!,
-                                name = track.string("title") ?: "",
-                                url = track.string("storageDir") ?: "",
-                                length = track.long("durationMs")?.toString() ?: "")
+                result.obj("tracks").let { tracks ->
+                    tracks?.array<JsonObject>("items")?.takeIf { it.isNotEmpty() }?.let {
+                        val compositions = it.map { track ->
+                            Composition(id = track.long("id")?.toString() ?: "",
+                                    artist = track.array<JsonObject>("artists")?.joinToString(",") { artist ->
+                                        artist.string("name") ?: ""
+                                    }!!,
+                                    name = track.string("title") ?: "",
+                                    url = track.string("storageDir") ?: "",
+                                    length = track.long("durationMs")?.toString() ?: "")
+                        }
+                        compositionsFound.addAll(compositions)
                     }
-                    compositions.addAll(tracks)
+                    State.totalCompositions = tracks?.int("total") ?: 0
                 }
             } catch (e: Exception) {
                 "Error parsing YM response".logE(e)
             }
         }
-        fragment.setCompositionsList(compositions, false)
+        fragment.setCompositionsList(compositionsFound, false)
     }
 }
 
