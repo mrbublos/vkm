@@ -9,14 +9,18 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 interface MusicService {
     companion object {
-        fun getInstance(): MusicService {
-            if (State.useVk) {
-                return VkMusicService()
+        val isLoading = AtomicBoolean(false)
+        val trackMusicService: MusicService = getInstance(State.trackProvider)
+        val groupMusicService: MusicService = getInstance(State.groupProvider)
+        val userMusicService: MusicService = getInstance(State.userProvider)
+
+        private fun getInstance(provider: String): MusicService {
+            return when (provider) {
+                "vk" -> VkMusicService()
+                "ym" -> YMusicService()
+                "sp" -> SpotifyMusicService()
+                else -> VkMusicService()
             }
-            if (State.useSpotify) {
-                return SpotifyMusicService()
-            }
-            return VkMusicService()
         }
     }
 
@@ -24,14 +28,13 @@ interface MusicService {
     fun getGroups(fragment: SearchFragment, filter: String = "", offset: Int = 0): Boolean
     fun getUsers(fragment: SearchFragment, filter: String = "", offset: Int = 0): Boolean
     fun getCompositions(fragment: SearchFragment, filter: String = "", offset: Int = 0): Boolean
+    suspend fun preprocess(composition: Composition) {}
 }
 
 open class VkMusicService : MusicService {
 
-    private val isLoading = AtomicBoolean(false)
-
     override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int): Boolean {
-        if (userOrGroup == null || !isLoading.compareAndSet(false, true)) { return false }
+        if (userOrGroup == null || !MusicService.isLoading.compareAndSet(false, true)) { return false }
         val prefix = if (userOrGroup.isGroup) "-" else ""
         val params = mutableListOf(
                 "v" to "5.68",
@@ -52,7 +55,7 @@ open class VkMusicService : MusicService {
     }
 
     override fun getGroups(fragment: SearchFragment, filter: String, offset: Int): Boolean {
-        if (!isLoading.compareAndSet(false, true)) { return false }
+        if (!MusicService.isLoading.compareAndSet(false, true)) { return false }
         val params = mutableListOf("q" to filter,
                 "fields" to "has_photo",
                 "count" to "20",
@@ -67,7 +70,7 @@ open class VkMusicService : MusicService {
     }
 
     override fun getUsers(fragment: SearchFragment, filter: String, offset: Int): Boolean {
-        if (!isLoading.compareAndSet(false, true)) { return false }
+        if (!MusicService.isLoading.compareAndSet(false, true)) { return false }
         val params = mutableListOf("q" to filter,
                 "fields" to "photo_50, has_photo",
                 "count" to "200",
@@ -82,7 +85,7 @@ open class VkMusicService : MusicService {
     }
 
     override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int): Boolean {
-        if (!isLoading.compareAndSet(false, true)) { return false }
+        if (!MusicService.isLoading.compareAndSet(false, true)) { return false }
         val params = mutableListOf("q" to filter,
                 "count" to "100",
                 "v" to "5.68",
@@ -101,14 +104,14 @@ open class VkMusicService : MusicService {
     }
 
     private fun getMock(): MusicServiceMock {
-        isLoading.set(false)
+        MusicService.isLoading.set(false)
         return MusicServiceMock()
     }
 
     private fun callApi(method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
         launch(CommonPool) {
             val result = VkApi.callVkMethod(true, params, method)
-            isLoading.set(false)
+            MusicService.isLoading.set(false)
             if (result == null) { "Error connecting to server".logE() }
             launch(UI) { callback.invoke(result) }
         }
@@ -117,10 +120,43 @@ open class VkMusicService : MusicService {
     private fun callApi(addSignature: Boolean = false, method: String, params: MutableList<Pair<String, String>>, callback: (result: JsonObject?) -> Unit) {
         launch(CommonPool) {
             val result = VkApi.callVkMethod(true, params, method, addSignature)
-            isLoading.set(false)
+            MusicService.isLoading.set(false)
             if (result == null) { "Error connecting to server".logE() }
             launch(UI) { callback.invoke(result) }
         }
+    }
+}
+
+open class YMusicService : MusicService {
+
+    // TODO implement
+    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int): Boolean { return false }
+
+    // TODO implement
+    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int): Boolean { return false }
+
+    // TODO implement
+    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int): Boolean { return false }
+
+    override suspend fun preprocess(composition: Composition) = YMusicApi.preprocessUrl(composition)
+
+    override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int): Boolean {
+        if (!MusicService.isLoading.compareAndSet(false, true)) { return false }
+        if (!State.developerMode) {
+            launch(CommonPool) {
+                val result = YMusicApi.search(filter, offset)
+                MusicService.isLoading.set(false)
+                launch(UI) { YMusicParsers(fragment).parseCompositionList(result) }
+            }
+        } else {
+            getMock().getCompositions(fragment, filter, 0)
+        }
+        return true
+    }
+
+    private fun getMock(): MusicServiceMock {
+        MusicService.isLoading.set(false)
+        return MusicServiceMock()
     }
 }
 

@@ -17,11 +17,11 @@ import java.util.concurrent.atomic.AtomicReference
 
 object DownloadManager {
 
-    // TODO this should be a background service
+    // TODO this should be a background service, but i do not care now 8)
 
-    val _downloadedList = ConcurrentLinkedQueue<Composition>()
-    val _inProgress = ConcurrentLinkedQueue<Composition>()
-    val _queue = ConcurrentLinkedQueue<Composition>()
+    val downloadedList = ConcurrentLinkedQueue<Composition>()
+    private val _inProgress = ConcurrentLinkedQueue<Composition>()
+    private val _queue = ConcurrentLinkedQueue<Composition>()
     var downloadedPercent = 0
     private val lock = Mutex()
 
@@ -34,7 +34,7 @@ object DownloadManager {
     }
 
     fun loadAll() {
-        loadList(downloaded, _downloadedList)
+        loadList(downloaded, downloadedList)
         loadList(queue, _queue)
         loadList(inProgress, _inProgress)
     }
@@ -47,7 +47,7 @@ object DownloadManager {
     }
 
     fun clearDownloaded() {
-        _downloadedList.clear()
+        downloadedList.clear()
         "Cleared downloaded list".log()
     }
 
@@ -67,7 +67,7 @@ object DownloadManager {
     }
 
     fun getDownloaded(): List<Composition> {
-        return _downloadedList.mapNotNull { it }.reversed()
+        return downloadedList.mapNotNull { it }.reversed()
     }
 
     fun getInProgress(): List<Composition> {
@@ -148,6 +148,7 @@ object DownloadManager {
                 } else {
                     _inProgress.offer(itemToDownload)
                     launch(CommonPool) {
+                        MusicService.trackMusicService.preprocess(itemToDownload)
                         val error = downloadTrack(itemToDownload)
                         if (error != null) {
                             "Error downloading file $error".logE()
@@ -179,15 +180,15 @@ object DownloadManager {
             _inProgress.remove(downloaded)
             dumpAll()
             if (wasDownloaded) {
-                _downloadedList.offer(downloaded)
+                downloadedList.offer(downloaded)
                 downloadNext()
             }
         } else {
-            Log.e("vkm", "Parallel download of two tracks, Should not be like this!!!")
+            "Parallel download of two tracks, Should not be like this!!!".logE()
         }
     }
 
-    private suspend fun downloadTrack(vararg params: Composition): String? {
+    private fun downloadTrack(vararg params: Composition): String? {
         val dir = getDownloadDir()
         val composition = params[0]
         if (!State.developerMode && getDownloaded().find { it.id == composition.id } != null) {
@@ -253,7 +254,7 @@ object DownloadManager {
     fun rehashAndDump() {
         launch(CommonPool) {
             lock.withLock {
-                _downloadedList.filter { it.hash.isEmpty() }.forEach {
+                downloadedList.filter { it.hash.isEmpty() }.forEach {
                     it.hash = it.localFile()?.readBytes().md5()
                 }
                 dumpList(downloaded, getDownloaded())
@@ -270,7 +271,7 @@ object DownloadManager {
                     takeIf { file.isFile }.let {
                         val fileName = file.name.beginning(file.name.length - 4) // cutting .mp3
                         val data = fileName.replace('_', ' ').split('-')
-                        _downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
+                        downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
                     }
                 }
                 "Download list restored".toast(this@DownloadManager.context)

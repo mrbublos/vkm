@@ -8,8 +8,9 @@ object State {
     var developerMode = false
     var enableDownloadAll = true
     var enableTextSuggestions = true
-    var useSpotify = false
-    var useVk = true
+    var trackProvider = "ym"
+    var userProvider = "vk"
+    var groupProvider = "vk"
     val compositionElementList = mutableListOf<Composition>()
     var userElementList = mutableListOf<User>()
     var groupElementList = mutableListOf<User>()
@@ -317,8 +318,10 @@ object State {
             Proxy("109.232.107.150", 8080, "RussianFederation", "anonymous"),
             Proxy("47.52.59.45", 80, "HongKong", "elite proxy"),
             Proxy("37.29.77.221", 8080, "RussianFederation", "anonymous"),
+            Proxy("109.68.75.195", 3128, "RussianFederation", "anonymous"),
             Proxy("159.192.235.188", 62225, "Thailand", "elite proxy"),
             Proxy("78.9.110.69", 62225, "Poland", "elite proxy"),
             Proxy("94.248.145.173", 53281, "Hungary", "elite proxy")
     )
+
 }

@@ -124,7 +124,6 @@ class MusicPlayService : Service() {
 
     private fun createNotification(): Notification {
         val nextPendingIntent = PendingIntent.getService(this, 1, Intent(this, MusicPlayService::class.java).setAction("next"), PendingIntent.FLAG_UPDATE_CURRENT)
-        val prevPendingIntent = PendingIntent.getService(this, 2, Intent(this, MusicPlayService::class.java).setAction("previous"), PendingIntent.FLAG_UPDATE_CURRENT)
         val pausePendingIntent = PendingIntent.getService(this, 3, Intent(this, MusicPlayService::class.java).setAction("pause"), PendingIntent.FLAG_UPDATE_CURRENT)
 
 
@@ -137,11 +136,7 @@ class MusicPlayService : Service() {
 
         val publicNotification = NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_vkm_main)
-//                .setAutoCancel(false)
-//                .setPriority(PRIORITY_MAX)
-//                .setCategory(CATEGORY_SERVICE)
                 .setVisibility(VISIBILITY_PUBLIC)
-//                .setOngoing(true)
                 .setStyle(NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
                 .build()
 
@@ -185,6 +180,8 @@ class MusicPlayService : Service() {
     fun play(composition: Composition? = null, onProgressUpdate: () -> Unit = this.onProgressUpdate) {
         launch(CommonPool) {
             val compositionToPlay = composition ?: (currentComposition ?: playList.firstOrNull())
+            if (compositionToPlay != null) { MusicService.trackMusicService.preprocess(compositionToPlay) }
+
             isPaused.compareAndSet(true, compositionToPlay.equalsTo(currentComposition))
 
             "Starting to play ${compositionToPlay?.fileName()}".log()
@@ -266,7 +263,7 @@ class MusicPlayService : Service() {
         }
     }
 
-    suspend private fun fetchComposition(composition: Composition?): Composition? {
+    private suspend fun fetchComposition(composition: Composition?): Composition? {
         "Fetching composition ${composition?.fileName()}".log()
         if (composition == null) {
             return null

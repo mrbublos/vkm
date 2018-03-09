@@ -9,9 +9,9 @@ import vkm.vkm.SecurityService
 import vkm.vkm.State
 
 class SpotifyParsers(private val fragment: SearchFragment) {
-    val parseUserList = { result: JsonObject? -> }
+    val parseUserList = { _: JsonObject? -> }
 
-    val parsePlaylist = { result: JsonObject? -> }
+    val parsePlaylist = { _: JsonObject? -> }
 
     val parseCompositionList = { result: JsonObject? ->
         if (result == null) {

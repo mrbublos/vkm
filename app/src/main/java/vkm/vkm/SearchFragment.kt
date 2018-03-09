@@ -4,15 +4,11 @@ import android.text.InputType
 import android.view.View
 import android.widget.AbsListView
 import android.widget.BaseAdapter
-import android.widget.ListView
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
 import vkm.vkm.utils.*
 
 class SearchFragment : VkmFragment() {
-
-    // services
-    private var musicService: MusicService = VkMusicService()
 
     // private vars
     private var filterText: String = ""
@@ -45,7 +41,7 @@ class SearchFragment : VkmFragment() {
                 val size = State.compositionElementList.size
                 if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && resultVisibleIndex + resultVisible >= size && State.currentOffset < State.totalCompositions) {
                     currentElement = resultVisibleIndex + resultVisible
-                    musicService.getCompositions(this@SearchFragment, filterText, State.currentOffset)
+                    MusicService.trackMusicService.getCompositions(this@SearchFragment, filterText, State.currentOffset)
                 }
             }
         })
@@ -76,28 +72,28 @@ class SearchFragment : VkmFragment() {
             when (State.currentSearchTab) {
                 "user" -> {
                     if (State.selectedElement != null) {
-                        if (musicService.getPlaylist(this, State.selectedElement, filterText)) {
+                        if (MusicService.userMusicService.getPlaylist(this, State.selectedElement, filterText)) {
                             currentElement = 0
                             State.compositionElementList.clear()
                             State.currentOffset = 0
                         }
                     } else {
-                        musicService.getUsers(this, filterText)
+                        MusicService.userMusicService.getUsers(this, filterText)
                     }
                 }
                 "group" -> {
                     if (State.selectedElement != null) {
-                        if (musicService.getPlaylist(this, State.selectedElement, filterText)) {
+                        if (MusicService.groupMusicService.getPlaylist(this, State.selectedElement, filterText)) {
                             currentElement = 0
                             State.compositionElementList.clear()
                             State.currentOffset = 0
                         }
                     } else {
-                        musicService.getGroups(this, filterText)
+                        MusicService.groupMusicService.getGroups(this, filterText)
                     }
                 }
                 "tracks" -> {
-                    if (musicService.getCompositions(this, filterText)) {
+                    if (MusicService.trackMusicService.getCompositions(this, filterText)) {
                         currentElement = 0
                         State.compositionElementList.clear()
                         State.currentOffset = 0
@@ -150,7 +146,7 @@ class SearchFragment : VkmFragment() {
         if (isPlaylist) {
             // fetching complete playlist, because user can download it all at once
             if (State.compositionElementList.size < State.totalCompositions && filteredData.isNotEmpty()) {
-                musicService.getPlaylist(this, State.selectedElement, "", State.currentOffset)
+                MusicService.userMusicService.getPlaylist(this, State.selectedElement, "", State.currentOffset)
             } else {
                 showDownloadAllButton()
             }
@@ -172,7 +168,7 @@ class SearchFragment : VkmFragment() {
         State.selectedElement = newSelectedElement
 
         State.compositionElementList.clear()
-        musicService.getPlaylist(this, newSelectedElement, filterText)
+        MusicService.userMusicService.getPlaylist(this, newSelectedElement, filterText)
 
         searchTabsSwiper.setCurrentString("tracks")
         State.currentSearchTab = "tracks"

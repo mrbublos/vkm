@@ -1,6 +1,5 @@
 package vkm.vkm
 
-import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -36,7 +35,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
 
         bindService(Intent(applicationContext, MusicPlayService::class.java), this, Context.BIND_AUTO_CREATE)
 
-        if (!SecurityService.isLoggedIn()) { startActivity(Intent(applicationContext, LoginActivity::class.java)) }
+//        if (!SecurityService.isLoggedIn()) { startActivity(Intent(applicationContext, LoginActivity::class.java)) }
     }
 
     override fun onDestroy() {
