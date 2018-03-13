@@ -15,8 +15,8 @@ class YMusicParsers(private val fragment: SearchFragment) {
         val compositionsFound = mutableListOf<Composition>()
         if (result != null && result.string("text") != null) {
             try {
-                result.obj("tracks").let { tracks ->
-                    tracks?.array<JsonObject>("items")?.takeIf { it.isNotEmpty() }?.let {
+                result.obj("tracks")?.let { tracks ->
+                    tracks.array<JsonObject>("items")?.takeIf { it.isNotEmpty() }?.let {
                         val compositions = it.map { track ->
                             Composition(id = track.long("id")?.toString() ?: "",
                                     artist = track.array<JsonObject>("artists")?.joinToString(",") { artist ->
@@ -28,7 +28,7 @@ class YMusicParsers(private val fragment: SearchFragment) {
                         }
                         compositionsFound.addAll(compositions)
                     }
-                    State.totalCompositions = tracks?.int("total") ?: 0
+                    State.totalCompositions = tracks.int("total") ?: 0
                 }
             } catch (e: Exception) {
                 "Error parsing YM response".logE(e)
@@ -42,7 +42,7 @@ object YMusicApi {
     private val proxy = "193.106.94.118:3128"
 
     suspend fun search(text: String, offset: Int): JsonObject {
-        val urlEncText = URLEncoder.encode(text, StandardCharsets.UTF_8.name())
+        val urlEncText = URLEncoder.encode(text.replace(" ", "%20"), StandardCharsets.UTF_8.name())
         val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=tracks&page=${offset / 100}"
         return callHttp(url, false)
     }
@@ -59,7 +59,7 @@ object YMusicApi {
         val ts = result.string("ts")!!
         val server = result.string("host")!!
         val trackId = composition.url.split(".").last()
-        val md5 = "XGRlBW9FXlekg" + "bPrRHuSiA$path$s".md5()
+        val md5 = "XGRlBW9FXlekgbPrRHuSiA$path$s".md5()
         composition.url = "https://$server/get-mp3/$md5/$ts/$path?track-id=$trackId&play=false"
         "Resolved to link: ${composition.url}".log()
     }
