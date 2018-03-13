@@ -264,7 +264,7 @@ class MusicPlayService : Service() {
     private suspend fun fetchComposition(composition: Composition?): Composition? {
         "Fetching composition ${composition?.fileName()}".log()
         if (composition == null) { return null }
-        composition.let { MusicService.trackMusicService.preprocess(it) }
+        MusicService.trackMusicService.preprocess(composition)
 
         val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName())
 
