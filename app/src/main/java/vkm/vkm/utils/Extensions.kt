@@ -17,6 +17,7 @@ import java.io.InputStream
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import kotlin.coroutines.experimental.suspendCoroutine
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaType
@@ -131,12 +132,11 @@ fun Composition?.equalsTo(other: Composition?): Boolean {
     return this?.name.normalize() == other?.name.normalize() && this?.artist.normalize() == other?.artist.normalize()
 }
 
-suspend fun Request.execute(): Triple<Request, Response, Result<String, FuelError>> {
-    return this.responseString()
-}
-
 suspend fun MediaPlayer.loadAsync() {
-    this.prepare()
+    suspendCoroutine<Unit> { continuation ->
+        this.setOnPreparedListener {
+            continuation.resume(Unit)
+        }
+        this.prepareAsync()
+    }
 }
-
-private fun <T> unsafeLazy(initializer: () -> T) = lazy(LazyThreadSafetyMode.NONE, initializer)

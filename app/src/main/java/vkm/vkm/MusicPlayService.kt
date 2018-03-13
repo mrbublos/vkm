@@ -180,13 +180,9 @@ class MusicPlayService : Service() {
     fun play(composition: Composition? = null, onProgressUpdate: () -> Unit = this.onProgressUpdate) {
         launch(CommonPool) {
             val compositionToPlay = composition ?: (currentComposition ?: playList.firstOrNull())
-            if (compositionToPlay != null) { MusicService.trackMusicService.preprocess(compositionToPlay) }
-
             isPaused.compareAndSet(true, compositionToPlay.equalsTo(currentComposition))
 
             "Starting to play ${compositionToPlay?.fileName()}".log()
-
-
             playList.takeIf { !isPaused.get() && compositionToPlay != null }?.let {
                 isLoading.compareAndSet(false, true)
                 currentComposition = try {
@@ -211,10 +207,11 @@ class MusicPlayService : Service() {
     }
 
     fun pause() {
-        mp.takeIf { it.isPlaying }?.pause()
-        isPaused.compareAndSet(false, true)
-        _onPause()
-        createNotification()
+        if (isPaused.compareAndSet(false, true)) {
+            mp.takeIf { it.isPlaying }?.pause()
+            _onPause()
+            createNotification()
+        }
     }
 
     fun skipTo(time: Int) = mp.seekTo(time)
@@ -254,6 +251,7 @@ class MusicPlayService : Service() {
                     updateMediaSession(PlaybackStateCompat.STATE_BUFFERING)
                     fetchComposition(playList.getOrNull(index))
                 } catch (e: Exception) {
+                    "Error fetching next composition".logE(e)
                     null
                 }
                 "Next sibling is ${currentComposition?.fileName()}".log()
@@ -265,9 +263,8 @@ class MusicPlayService : Service() {
 
     private suspend fun fetchComposition(composition: Composition?): Composition? {
         "Fetching composition ${composition?.fileName()}".log()
-        if (composition == null) {
-            return null
-        }
+        if (composition == null) { return null }
+        composition.let { MusicService.trackMusicService.preprocess(it) }
 
         val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName())
 
