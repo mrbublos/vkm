@@ -12,8 +12,10 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.session.PlaybackState
 import android.net.Uri
+import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.IBinder
+import android.os.PowerManager
 import android.support.v4.app.NotificationCompat.*
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -61,6 +63,9 @@ class MusicPlayService : Service() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var notificationManager: NotificationManager
     private lateinit var audioManager: AudioManager
+    private lateinit var powerManager: PowerManager
+    private lateinit var wifiManager: WifiManager
+    private lateinit var wifiLock: WifiManager.WifiLock
 
     private val playerControlsCallback = object : MediaSessionCompat.Callback() {
         override fun onPlay() { play() }
@@ -95,6 +100,9 @@ class MusicPlayService : Service() {
         "Service created".log()
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL,"VkmPlayerWifiLock")
 
         mediaSession = MediaSessionCompat(baseContext, "vkm")
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
@@ -269,7 +277,9 @@ class MusicPlayService : Service() {
         val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName())
 
         mp.reset()
+        var internetLockRequired = false
         if (composition.url.startsWith("http")) {
+            internetLockRequired = true
             mp.setDataSource(resource as String)
         } else {
             mp.setDataSource(applicationContext, Uri.fromFile(resource as File))
@@ -281,7 +291,9 @@ class MusicPlayService : Service() {
             return@setOnErrorListener true
         }
 
+        if (internetLockRequired) { wifiLock.acquire() }
         mp.loadAsync()
+        if (internetLockRequired) { wifiLock.release() }
         trackLength = mp.duration
         trackProgress = 0
         return composition
