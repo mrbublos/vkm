@@ -39,12 +39,12 @@ class YMusicParsers(private val fragment: SearchFragment) {
 }
 
 object YMusicApi {
-    private val proxy = "193.106.94.118:3128"
+    private val proxy = "89.179.33.21:80"
 
     suspend fun search(text: String, offset: Int): JsonObject {
         val urlEncText = URLEncoder.encode(text.replace(" ", "%20"), StandardCharsets.UTF_8.name())
         val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=tracks&page=${offset / 100}"
-        return callHttp(url, false)
+        return callHttp(url, true)
     }
 
     suspend fun preprocessUrl(composition: Composition) {

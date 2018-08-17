@@ -117,14 +117,14 @@ class SearchFragment : VkmFragment() {
         screen(false)
         spinner(false)
         State.userElementList = data.toMutableList()
-        resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
+        resultList.adapter = UserListAdapter(context!!, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setGroupList(data: List<User>) {
         screen(false)
         spinner(false)
         State.groupElementList = data.toMutableList()
-        resultList.adapter = UserListAdapter(context, R.layout.composition_list_element, data, this::selectUserOrGroup)
+        resultList.adapter = UserListAdapter(context!!, R.layout.composition_list_element, data, this::selectUserOrGroup)
     }
 
     fun setCompositionsList(data: List<Composition>, isPlaylist: Boolean = false) {
@@ -158,7 +158,7 @@ class SearchFragment : VkmFragment() {
         if (!DownloadManager.getDownloaded().contains(composition)) {
             DownloadManager.downloadComposition(composition)
             val actionButton = view.imageView
-            actionButton.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
+            actionButton.setImageDrawable(context!!.getDrawable(R.drawable.ic_downloading))
             actionButton.setOnClickListener {}
         }
     }

@@ -16,12 +16,12 @@ import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
+import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.*
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
-import android.support.v7.app.NotificationCompat
 import android.widget.RemoteViews
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Job
@@ -98,11 +98,12 @@ class MusicPlayService : Service() {
         super.onCreate()
         instance = this
         "Service created".log()
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        powerManager = applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL,"VkmPlayerWifiLock")
+        wifiLock.setReferenceCounted(false)
 
         mediaSession = MediaSessionCompat(baseContext, "vkm")
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
@@ -145,7 +146,7 @@ class MusicPlayService : Service() {
         val publicNotification = NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_vkm_main)
                 .setVisibility(VISIBILITY_PUBLIC)
-                .setStyle(NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
+                .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
                 .build()
 
         return NotificationCompat.Builder(this)
@@ -291,7 +292,10 @@ class MusicPlayService : Service() {
             return@setOnErrorListener true
         }
 
-        if (internetLockRequired) { wifiLock.acquire() }
+        if (internetLockRequired) {
+            wifiLock.acquire()
+            "Wifi lock acquired ${wifiLock.isHeld}".log()
+        }
         mp.loadAsync()
         if (internetLockRequired) { wifiLock.release() }
         trackLength = mp.duration

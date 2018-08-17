@@ -216,28 +216,28 @@ open class SpotifyMusicService : MusicService {
 class MusicServiceMock : MusicService {
     override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int): Boolean {
         "Running getUserPlaylistMock".log()
-        val mock = fragment.context.assets.open("getUserPlayList.json").readAll()
+        val mock = fragment.context?.assets?.open("getUserPlayList.json")?.readAll()
         VkParsers(fragment).parsePlaylist.invoke(mock.toJson())
         return true
     }
 
     override fun getGroups(fragment: SearchFragment, filter: String, offset: Int): Boolean {
         "Running getGroups".log()
-        val mock = fragment.context.assets.open("getGroups.json").readAll()
+        val mock = fragment.context?.assets?.open("getGroups.json")?.readAll()
         VkParsers(fragment).parseGroupList.invoke(mock.toJson())
         return true
     }
 
     override fun getUsers(fragment: SearchFragment, filter: String, offset: Int): Boolean {
         "Running getUsers".log()
-        val mock = fragment.context.assets.open("getUsers.json").readAll()
+        val mock = fragment.context?.assets?.open("getUsers.json")?.readAll()
         VkParsers(fragment).parseUserList.invoke(mock.toJson())
         return true
     }
 
     override fun getCompositions(fragment: SearchFragment, filter: String, offset: Int): Boolean {
         "Running getCompositions".log()
-        val mock = fragment.context.assets.open("getCompositionList.json").readAll()
+        val mock = fragment.context?.assets?.open("getCompositionList.json")?.readAll()
         VkParsers(fragment).parseCompositionList.invoke(mock.toJson())
         return true
     }
