@@ -1,13 +1,10 @@
 package vkm.vkm.utils
 
 import com.beust.klaxon.*
-import com.github.kittinunf.fuel.httpGet
-import vkm.vkm.ProxyActivity
 import vkm.vkm.SearchFragment
 import vkm.vkm.State
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import kotlin.coroutines.experimental.suspendCoroutine
 
 class YMusicParsers(private val fragment: SearchFragment) {
 
@@ -39,19 +36,18 @@ class YMusicParsers(private val fragment: SearchFragment) {
 }
 
 object YMusicApi {
-    private val proxy = "89.179.33.21:80"
 
     suspend fun search(text: String, offset: Int): JsonObject {
         val urlEncText = URLEncoder.encode(text.replace(" ", "%20"), StandardCharsets.UTF_8.name())
         val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=tracks&page=${offset / 100}"
-        return callHttp(url, true)
+        return HttpUtils.call4Json(url, true)
     }
 
     suspend fun preprocessUrl(composition: Composition) {
         if (composition.url.startsWith("http")) { return }
 
         val url = "https://storage.mds.yandex.net/download-info/${composition.url}/2?format=json"
-        val result = callHttp(url, false)
+        val result = HttpUtils.call4Json(url, false)
         if (result.string("path") == null) { return }
 
         val path = result.string("path")!!.substring(1)
@@ -62,28 +58,5 @@ object YMusicApi {
         val md5 = "XGRlBW9FXlekgbPrRHuSiA$path$s".md5()
         composition.url = "https://$server/get-mp3/$md5/$ts/$path?track-id=$trackId&play=false"
         "Resolved to link: ${composition.url}".log()
-    }
-
-    private suspend fun callHttp(url: String, withProxy: Boolean): JsonObject {
-        ProxyActivity.setProxy(if (withProxy) proxy else "")
-
-        "YM Calling: $url".log()
-        val caller = url.httpGet()
-        return suspendCoroutine { continuation ->
-            caller.responseString { _, response, result ->
-                "YM received result $result".log()
-                try {
-                    if (response.statusCode == 200) {
-                        continuation.resume(result.component1().toJson())
-                        return@responseString
-                    } else {
-                        result.component2().toString().logE()
-                    }
-                } catch (e: Exception) {
-                    "Error connecting YM".logE(e)
-                }
-                continuation.resume(JsonObject())
-            }
-        }
     }
 }

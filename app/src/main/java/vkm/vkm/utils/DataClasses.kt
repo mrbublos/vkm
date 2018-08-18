@@ -8,4 +8,4 @@ data class Composition(var id: String = "", var name: String = "", var url: Stri
         var vkmId: Long = System.currentTimeMillis())
 
 data class User(var userId: String = "", var password: String = "", var token: String = "", var fullname: String = "", var photoUrl: String = "", var photo: Bitmap? = null, var isGroup: Boolean = false)
-data class Proxy(val host: String, val port: Int, val country: String, val type: String)
+data class Proxy(val host: String, val port: Int, val country: String = "", val type: String, val speed: Int)
