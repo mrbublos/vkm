@@ -78,7 +78,7 @@ class HttpUtils {
 
         private fun getProxy(): Proxy? {
             val currProxy = currentProxy
-            if (currProxy != null && !blacklist.contains(currProxy)) { return currProxy }
+            if (currProxy != null && blacklist[currProxy] == null) { return currProxy }
 
             val result = mutableListOf<Proxy>()
             Jsoup.connect("https://www.proxy" + "nova.com/proxy-server-list/country-ru/").get().run {
