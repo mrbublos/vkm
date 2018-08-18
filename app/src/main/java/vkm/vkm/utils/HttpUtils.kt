@@ -8,7 +8,6 @@ import com.github.kittinunf.result.Result
 import org.jsoup.Jsoup
 import java.io.IOException
 import java.net.InetSocketAddress
-import java.net.SocketTimeoutException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.experimental.suspendCoroutine
 
@@ -34,19 +33,20 @@ class HttpUtils {
             var retries = 0
             while (true) {
                 try {
-                    retries++
                     val result = callHttp(url, withProxy)
-                    return result?.component1().toJson()
+                    return result.component1().toJson()
                 } catch (e: ProxyNotAvailableException) {
                     if (retries > 10) { return JsonObject() }
                     "Retrying with another proxy".log()
                 } catch (e: Exception) {
+                    "Error connecting".logE(e)
                     return JsonObject()
                 }
+                retries++
             }
         }
 
-        private suspend fun callHttp(url: String, withProxy: Boolean = false): Result<String, FuelError>? {
+        private suspend fun callHttp(url: String, withProxy: Boolean = false): Result<String, FuelError> {
             setProxy(if (withProxy) getProxy() else null)
 
             "Calling: $url".log()
@@ -69,13 +69,9 @@ class HttpUtils {
                             result.component2().toString().logE()
                             throw ProxyNotAvailableException()
                         }
-                    } catch (e: ProxyNotAvailableException) {
-                        continuation.resumeWithException(e)
-                        return@responseString
                     } catch (e: Exception) {
-                        "Error connecting".logE(e)
+                        continuation.resumeWithException(e)
                     }
-                    continuation.resume(null)
                 }
             }
         }
