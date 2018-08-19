@@ -112,5 +112,4 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
         lastItemPlayedView = view
         activity.playNewTrack(listOf(0 until count).flatten().map { getItem(it) }, item)
     }
-
 }

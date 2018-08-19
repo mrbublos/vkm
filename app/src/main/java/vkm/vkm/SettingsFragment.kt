@@ -43,8 +43,6 @@ class SettingsFragment : VkmFragment() {
 
         restoreDownloaded.setOnClickListener { DownloadManager.restoreDownloaded() }
 
-        logout.setOnClickListener { startActivity(Intent(context, LoginActivity::class.java)) }
-
 //        selectProxy.setOnClickListener { startActivity(Intent(context, ProxyActivity::class.java)) }
     }
 

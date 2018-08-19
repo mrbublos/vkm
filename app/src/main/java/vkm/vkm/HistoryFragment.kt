@@ -31,7 +31,7 @@ class HistoryFragment : VkmFragment() {
         tabsSwiper.setCurrentString("inProgress")
         initInProgressTab(true)
 
-        tabsSwiper.onSwiped = { _, tabName ->
+        tabsSwiper.onSwiped = { _, tabName, _ ->
             State.currentHistoryTab = tabName
             val text = search.text.toString()
             initInProgressTab(false)

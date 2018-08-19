@@ -34,8 +34,6 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         pager.currentItem = 0
 
         bindService(Intent(applicationContext, MusicPlayService::class.java), this, Context.BIND_AUTO_CREATE)
-
-//        if (!SecurityService.isLoggedIn()) { startActivity(Intent(applicationContext, LoginActivity::class.java)) }
     }
 
     override fun onDestroy() {

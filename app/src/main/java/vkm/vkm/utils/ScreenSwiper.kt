@@ -73,7 +73,7 @@ class ScreenSwiper @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 class StringSwiper @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : Swiper(context, attrs, defStyleAttr) {
     lateinit var view: TextView
-    var onSwiped: (index: Int, value: String) -> Unit = { _, _ -> }
+    var onSwiped: (index: Int, value: String, prev: Int) -> Unit = { _, _, _ -> }
     private var currentElementIndex = 0
 
     var value: MutableList<String> = mutableListOf()
@@ -110,13 +110,13 @@ class StringSwiper @JvmOverloads constructor(context: Context, attrs: AttributeS
     override val swipeRight = {
         currentElementIndex = next()
         changeText()
-        onSwiped(currentElementIndex, value[currentElementIndex])
+        onSwiped(currentElementIndex, value[currentElementIndex], previous())
     }
 
     override val swipeLeft = {
         currentElementIndex = previous()
         changeText()
-        onSwiped(currentElementIndex, value[currentElementIndex])
+        onSwiped(currentElementIndex, value[currentElementIndex], next())
     }
 
     private fun changeText() {

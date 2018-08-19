@@ -1,14 +1,12 @@
 package vkm.vkm.utils
 
 import com.beust.klaxon.*
-import vkm.vkm.SearchFragment
-import vkm.vkm.State
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-class YMusicParsers(private val fragment: SearchFragment) {
+object YMusicParsers {
 
-    val parseCompositionList = { result: JsonObject? ->
+    fun parseCompositionList(result: JsonObject?): MutableList<Composition> {
         val compositionsFound = mutableListOf<Composition>()
         if (result != null && result.string("text") != null) {
             try {
@@ -25,13 +23,12 @@ class YMusicParsers(private val fragment: SearchFragment) {
                         }
                         compositionsFound.addAll(compositions)
                     }
-                    State.totalCompositions = tracks.int("total") ?: 0
                 }
             } catch (e: Exception) {
                 "Error parsing YM response".logE(e)
             }
         }
-        fragment.setCompositionsList(compositionsFound, false)
+        return compositionsFound
     }
 }
 

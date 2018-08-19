@@ -3,16 +3,20 @@ package vkm.vkm
 import android.text.InputType
 import android.view.View
 import android.widget.AbsListView
+import android.widget.AbsListView.OnScrollListener.*
 import android.widget.BaseAdapter
+import android.widget.ListAdapter
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
 import vkm.vkm.utils.*
+import kotlin.reflect.KClass
 
 class SearchFragment : VkmFragment() {
 
     // private vars
     private var filterText: String = ""
     private var currentElement = 0
+    private var tabs = listOf<Tab<out Any>>(TracksTab(::setDataList))
 
     init { layout = R.layout.activity_search }
 
@@ -20,12 +24,10 @@ class SearchFragment : VkmFragment() {
         initializeElements()
         initializeTabs()
         initializeButton()
-        initializeLists()
     }
 
     private fun initializeElements() {
-        selectUserOrGroup(State.selectedElement)
-        spinner(false)
+        showSpinner(false)
         search.inputType = if (State.enableTextSuggestions) InputType.TYPE_CLASS_TEXT else InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
 
         resultList.setOnScrollListener(object : AbsListView.OnScrollListener {
@@ -37,123 +39,61 @@ class SearchFragment : VkmFragment() {
             }
 
             override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
-                if (State.currentSearchTab != "tracks") { return }
-                val size = State.compositionElementList.size
-                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && resultVisibleIndex + resultVisible >= size && State.currentOffset < State.totalCompositions) {
+                val tab = tabs[State.currentSearchTab]
+                if (scrollState == SCROLL_STATE_IDLE && resultVisibleIndex + resultVisible >= tab.dataList.size) {
                     currentElement = resultVisibleIndex + resultVisible
-                    MusicService.trackMusicService.getCompositions(this@SearchFragment, filterText, State.currentOffset)
+                    tab.onBottomReached()
                 }
             }
         })
     }
 
     private fun initializeTabs() {
-        searchTabsSwiper.value = mutableListOf("user", "group", "tracks")
-        searchTabsSwiper.setCurrentString(State.currentSearchTab)
-        searchTabsSwiper.onSwiped = { _, tabName ->
-            State.currentSearchTab = tabName
-            when (State.currentSearchTab) {
-                "user" -> setUserList(State.userElementList)
-                "group" -> setGroupList(State.groupElementList)
-                "tracks" -> setCompositionsList(State.compositionElementList)
-            }
+        searchTabsSwiper.value = tabs.map { it.name }.toMutableList()
+        searchTabsSwiper.setCurrentString(tabs[State.currentSearchTab].name)
+        searchTabsSwiper.onSwiped = { index, _, prev ->
+            State.currentSearchTab = index
+            tabs[index].activate()
+            tabs[prev].deactivate()
         }
     }
 
     private fun initializeButton() {
-        screen(false)
+        lockScreen(false)
         searchButton.setOnClickListener { _ ->
             filterText = search.text.toString()
             if (filterText.isEmpty()) { return@setOnClickListener }
 
-            spinner(true)
-            screen(true)
-
-            when (State.currentSearchTab) {
-                "user" -> {
-                    if (State.selectedElement != null) {
-                        if (MusicService.userMusicService.getPlaylist(this, State.selectedElement, filterText)) {
-                            currentElement = 0
-                            State.compositionElementList.clear()
-                            State.currentOffset = 0
-                        }
-                    } else {
-                        MusicService.userMusicService.getUsers(this, filterText)
-                    }
-                }
-                "group" -> {
-                    if (State.selectedElement != null) {
-                        if (MusicService.groupMusicService.getPlaylist(this, State.selectedElement, filterText)) {
-                            currentElement = 0
-                            State.compositionElementList.clear()
-                            State.currentOffset = 0
-                        }
-                    } else {
-                        MusicService.groupMusicService.getGroups(this, filterText)
-                    }
-                }
-                "tracks" -> {
-                    if (MusicService.trackMusicService.getCompositions(this, filterText)) {
-                        currentElement = 0
-                        State.compositionElementList.clear()
-                        State.currentOffset = 0
-                        resultList.adapter = null
-                    }
-                }
-            }
-
+            showSpinner(true)
+            lockScreen(true)
+            tabs[State.currentSearchTab].search(filterText)
             return@setOnClickListener
         }
     }
 
-    private fun initializeLists() {
-        if (State.userElementList.isNotEmpty()) { setUserList(State.userElementList) }
-        if (State.groupElementList.isNotEmpty()) { setGroupList(State.groupElementList) }
-        if (State.compositionElementList.isNotEmpty()) { setCompositionsList(State.compositionElementList) }
-    }
+    fun setDataList(data: MutableList<out Any>, adaptorClass: KClass<out ListAdapter>) {
+        lockScreen(false)
+        showSpinner(false)
 
-    // callback functions
-    fun setUserList(data: List<User>) {
-        screen(false)
-        spinner(false)
-        State.userElementList = data.toMutableList()
-        resultList.adapter = UserListAdapter(context!!, R.layout.composition_list_element, data, this::selectUserOrGroup)
-    }
-
-    fun setGroupList(data: List<User>) {
-        screen(false)
-        spinner(false)
-        State.groupElementList = data.toMutableList()
-        resultList.adapter = UserListAdapter(context!!, R.layout.composition_list_element, data, this::selectUserOrGroup)
-    }
-
-    fun setCompositionsList(data: List<Composition>, isPlaylist: Boolean = false) {
-        screen(false)
-        spinner(false)
-
-        State.currentOffset += data.size
-        val filteredData = data.filter { it.url.isNotEmpty() }
-
-        // to prevent duplications when restoring list
-        if (State.compositionElementList != data) { State.compositionElementList.addAll(filteredData) }
-
-        resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, State.compositionElementList, compositionAction)
-        resultList.setSelection(currentElement)
-
-        // if no data returned, so whether we have not found anything or whether no more elements available in the search
-        if (data.isEmpty()) { State.currentOffset = State.totalCompositions }
-
-        if (isPlaylist) {
-            // fetching complete playlist, because user can download it all at once
-            if (State.compositionElementList.size < State.totalCompositions && filteredData.isNotEmpty()) {
-                MusicService.userMusicService.getPlaylist(this, State.selectedElement, "", State.currentOffset)
-            } else {
-                showDownloadAllButton()
-            }
+        when (adaptorClass) {
+            CompositionListAdapter::class -> resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, data as MutableList<Composition>, compositionAction)
         }
+
+        resultList.setSelection(currentElement)
     }
 
     // actions
+
+    private fun lockScreen(locked: Boolean) {
+        searchButton.isFocusable = !locked
+        searchButton.isClickable = !locked
+    }
+
+    private fun showSpinner(show: Boolean) {
+        resultList.visibility = if (!show) View.VISIBLE else View.GONE
+        loadingSpinner.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
     private val compositionAction = { composition: Composition, view: View ->
         if (!DownloadManager.getDownloaded().contains(composition)) {
             DownloadManager.downloadComposition(composition)
@@ -161,59 +101,5 @@ class SearchFragment : VkmFragment() {
             actionButton.setImageDrawable(context!!.getDrawable(R.drawable.ic_downloading))
             actionButton.setOnClickListener {}
         }
-    }
-
-    private fun selectUserOrGroup(newSelectedElement: User?) {
-        selectedUserContainer.visibility = View.GONE
-        State.selectedElement = newSelectedElement
-
-        State.compositionElementList.clear()
-        MusicService.userMusicService.getPlaylist(this, newSelectedElement, filterText)
-
-        searchTabsSwiper.setCurrentString("tracks")
-        State.currentSearchTab = "tracks"
-
-        newSelectedElement?.let {
-            selectedUserContainer.visibility = View.VISIBLE
-            selectedUserName.text = it.fullname
-            selectedUserId.text = it.userId
-
-            if (it.photo == null) {
-                UserListAdapter.schedulePhotoDownload(selectedUserPhoto, it)
-            } else {
-                selectedUserPhoto.setImageBitmap(it.photo)
-            }
-
-            // hiding download all until we have all tracks downloaded
-            selectedUserDownloadAllButton.visibility = View.GONE
-            selectedUserDownloadAllButton.setOnClickListener {
-                spinner(true)
-                screen(true)
-                selectedUserDownloadAllButton.visibility = View.GONE
-                State.compositionElementList.forEach { DownloadManager.downloadComposition(it) }
-                (resultList.adapter as BaseAdapter).notifyDataSetChanged()
-                screen(false)
-                spinner(false)
-            }
-
-            deselectUserButton.setOnClickListener {
-                selectedUserContainer.visibility = View.GONE
-                State.selectedElement = null
-            }
-        }
-    }
-
-    private fun showDownloadAllButton() {
-        selectedUserDownloadAllButton.visibility = if (State.enableDownloadAll) View.VISIBLE else View.GONE
-    }
-
-    private fun screen(locked: Boolean) {
-        searchButton.isFocusable = !locked
-        searchButton.isClickable = !locked
-    }
-
-    private fun spinner(show: Boolean) {
-        resultList.visibility = if (!show) View.VISIBLE else View.GONE
-        loadingSpinner.visibility = if (show) View.VISIBLE else View.GONE
     }
 }
