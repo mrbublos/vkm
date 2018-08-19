@@ -71,12 +71,13 @@ class SearchFragment : VkmFragment() {
         }
     }
 
-    fun setDataList(data: MutableList<out Any>, adaptorClass: KClass<out ListAdapter>) {
+    private fun setDataList(data: MutableList<out Any>, adaptorClass: KClass<out ListAdapter>) {
         lockScreen(false)
         showSpinner(false)
 
-        when (adaptorClass) {
-            CompositionListAdapter::class -> resultList.adapter = CompositionListAdapter(this, R.layout.composition_list_element, data as MutableList<Composition>, compositionAction)
+        resultList.adapter = when (adaptorClass) {
+            CompositionListAdapter::class -> CompositionListAdapter(this, R.layout.composition_list_element, data as MutableList<Composition>, compositionAction)
+            else -> throw Exception()
         }
 
         resultList.setSelection(currentElement)
