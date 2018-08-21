@@ -3,12 +3,13 @@ package vkm.vkm
 import android.text.InputType
 import android.view.View
 import android.widget.AbsListView
-import android.widget.AbsListView.OnScrollListener.*
-import android.widget.BaseAdapter
+import android.widget.AbsListView.OnScrollListener.SCROLL_STATE_IDLE
 import android.widget.ListAdapter
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
-import vkm.vkm.utils.*
+import vkm.vkm.utils.Composition
+import vkm.vkm.utils.CompositionListAdapter
+import vkm.vkm.utils.VkmFragment
 import kotlin.reflect.KClass
 
 class SearchFragment : VkmFragment() {

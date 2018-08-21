@@ -1,10 +1,10 @@
 package vkm.vkm.utils
 
-import com.beust.klaxon.JsonObject
-import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.android.core.Json
+import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.result.Result
+import com.github.kittinunf.fuel.httpPost
 import org.jsoup.Jsoup
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -15,7 +15,7 @@ class HttpUtils {
 
     companion object {
 
-        private val blacklist = ConcurrentHashMap<Proxy, Long>()
+        private val proxyBlacklist = ConcurrentHashMap<Proxy, Long>()
         private var currentProxy: Proxy? = null
 
         private fun setProxy(proxy: Proxy?) {
@@ -29,42 +29,45 @@ class HttpUtils {
             FuelManager.instance.timeoutReadInMillisecond = 5000
         }
 
-        suspend fun call4Json(url: String, withProxy: Boolean = false): JsonObject {
+        suspend fun call4Json(method: HttpMethod, url: String, withProxy: Boolean = false): Json {
             var retries = 0
             while (true) {
                 try {
-                    val result = callHttp(url, withProxy)
-                    return result.component1().toJson()
+                    return callHttp(method, url, withProxy)
                 } catch (e: ProxyNotAvailableException) {
-                    if (retries > 10) { return JsonObject() }
+                    if (retries > 10) { return Json("{}") }
                     "Retrying with another proxy".log()
                 } catch (e: Exception) {
                     "Error connecting".logE(e)
-                    return JsonObject()
+                    return Json("{}")
                 }
                 retries++
             }
         }
 
-        private suspend fun callHttp(url: String, withProxy: Boolean = false): Result<String, FuelError> {
+        private suspend fun callHttp(method: HttpMethod = HttpMethod.GET, url: String, withProxy: Boolean = false): Json {
             setProxy(if (withProxy) getProxy() else null)
 
-            "Calling: $url".log()
-            val caller = url.httpGet()
+            "Calling: $method $url".log()
+            val caller = when (method) {
+                HttpMethod.GET -> url.httpGet()
+                HttpMethod.POST -> url.httpPost()
+            }
+
             return suspendCoroutine { continuation ->
-                caller.responseString { _, response, result ->
+                caller.responseJson { _, response, result ->
                     "Received result $result".log()
                     try {
                         if (response.statusCode == 200) {
-                            continuation.resume(result)
-                            return@responseString
+                            continuation.resume(result.component1()!!)
+                            return@responseJson
                         } else {
                             val currProxy = currentProxy
                             if (currProxy != null
                                     && result.component2() != null
                                     && result.component2()!!.exception is IOException) {
                                 "Blacklisting $currProxy".log()
-                                blacklist[currProxy] = System.currentTimeMillis()
+                                proxyBlacklist[currProxy] = System.currentTimeMillis()
                             }
                             result.component2().toString().logE()
                             throw ProxyNotAvailableException()
@@ -78,7 +81,7 @@ class HttpUtils {
 
         private fun getProxy(): Proxy? {
             val currProxy = currentProxy
-            if (currProxy != null && blacklist[currProxy] == null) { return currProxy }
+            if (currProxy != null && proxyBlacklist[currProxy] == null) { return currProxy }
 
             val result = mutableListOf<Proxy>()
             Jsoup.connect("https://www.proxy" + "nova.com/proxy-server-list/country-ru/").get().run {
@@ -100,13 +103,18 @@ class HttpUtils {
 
             while (true) {
                 val proxy = if (result.isNotEmpty()) result[0] else return null
-                val time = blacklist[proxy] ?: return proxy
+                val time = proxyBlacklist[proxy] ?: return proxy
                 if (System.currentTimeMillis() - time > 1000 * 60 * 60 * 24) {
-                    blacklist.remove(proxy)
+                    proxyBlacklist.remove(proxy)
                     return proxy
                 }
                 result.removeAt(0)
             }
         }
     }
+}
+enum class HttpMethod {
+    GET,
+    POST
+    ;
 }

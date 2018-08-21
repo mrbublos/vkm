@@ -2,18 +2,12 @@ package vkm.vkm.utils
 
 import android.content.Context
 import android.media.MediaPlayer
-import android.util.Base64
 import android.util.Log
 import android.widget.Toast
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.result.Result
+import org.json.JSONArray
+import org.json.JSONObject
 import vkm.vkm.DownloadManager
 import java.io.File
-import java.io.InputStream
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -35,27 +29,13 @@ fun ByteArray?.md5(): String {
 }
 
 
-fun InputStream.readAll(charset: Charset = StandardCharsets.UTF_8): String {
-    return use { it.bufferedReader(charset).use { it.readText() } }
-}
-
-fun String?.toJson(): JsonObject {
-    if (this == null) { return JsonObject() }
-    return Parser().parse(StringBuilder(this)) as JsonObject
-}
-
 fun String.md5(charset: Charset = StandardCharsets.UTF_8): String {
     return toByteArray(charset).md5()
 }
 
 fun String?.beginning(length: Int): String {
     if (this == null) { return "" }
-    return filterIndexed({ index, _ -> index < length })
-}
-
-fun String?.base64(charset: Charset = StandardCharsets.UTF_8): String {
-    if (this == null) { return "" }
-    return String(Base64.encode(this.toByteArray(charset), Base64.DEFAULT), StandardCharsets.UTF_8)
+    return filterIndexed { index, _ -> index < length }
 }
 
 fun String?.log() {
@@ -80,6 +60,7 @@ fun String.toComposition(): Composition {
             map[pair[0]] = pair[1]
         }
     }
+
     composition::class.memberProperties.forEach {
         val kMutableProperty = it as KMutableProperty<*>
         map[it.name]?.let { propertyValue ->
@@ -139,4 +120,34 @@ suspend fun MediaPlayer.loadAsync() {
         }
         this.prepareAsync()
     }
+}
+
+fun JSONObject.gets(name: String): String {
+    return try {
+        this.get(name).toString()
+    } catch (e: Exception) {
+        ""
+    }
+}
+
+fun JSONObject.geta(name: String): JSONArray {
+    return try {
+        this.getJSONArray(name)
+    } catch (e: Exception) {
+        JSONArray("[]")
+    }
+}
+
+fun JSONObject.geto(name: String): JSONObject {
+    return try {
+        this.getJSONObject(name)
+    } catch (e: Exception) {
+        JSONObject("{}")
+    }
+}
+
+fun <R> JSONArray.map(action: (obj: JSONObject) -> R): MutableList<R>  {
+    return (0 until this.length()).map {
+        action(this.get(it) as JSONObject)
+    }.toMutableList()
 }
