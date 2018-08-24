@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         if (initialized) {
-            DownloadManager.initialize(applicationContext)
+            DownloadManager.initialize()
             DownloadManager.downloadComposition(null)
         }
     }
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (initialized) {
-            DownloadManager.initialize(applicationContext)
+            DownloadManager.initialize()
             DownloadManager.downloadComposition(null)
         }
     }
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         windowManager.defaultDisplay.getSize(point)
         Swiper.SWIPE_DISTANCE_MIN = Math.max(point.x  / 3, 200)
         loadProxy()
-        DownloadManager.initialize(applicationContext)
+        DownloadManager.initialize()
         initialized = true
     }
 
@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         if (initialized) {
             "Dumping all lists".log()
-            DownloadManager.stopDownload("")
+            DownloadManager.stopDownload()
             DownloadManager.dumpAll()
         }
     }
@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
         if (initialized) {
             "Dumping all lists".log()
-            DownloadManager.stopDownload("")
+            DownloadManager.stopDownload()
             DownloadManager.dumpAll()
         }
         saveProxy()

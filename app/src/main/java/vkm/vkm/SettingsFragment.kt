@@ -3,7 +3,12 @@ package vkm.vkm
 import android.content.Intent
 import android.view.View
 import kotlinx.android.synthetic.main.activity_settings.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.VkmFragment
+import vkm.vkm.utils.logE
+import vkm.vkm.utils.toast
 
 class SettingsFragment : VkmFragment() {
 
@@ -27,7 +32,7 @@ class SettingsFragment : VkmFragment() {
 
         clearQueue.setOnClickListener { DownloadManager.clearQueue() }
 
-        stopDownload.setOnClickListener { DownloadManager.stopDownload("") }
+        stopDownload.setOnClickListener { DownloadManager.stopDownload() }
 
         startDownload.setOnClickListener { DownloadManager.downloadComposition(null) }
 
@@ -41,9 +46,20 @@ class SettingsFragment : VkmFragment() {
 
         rehashDownloaded.setOnClickListener { DownloadManager.rehashAndDump() }
 
-        restoreDownloaded.setOnClickListener { DownloadManager.restoreDownloaded() }
-
-//        selectProxy.setOnClickListener { startActivity(Intent(context, ProxyActivity::class.java)) }
+        restoreDownloaded.setOnClickListener {
+            val me = this
+            restoreDownloaded.visibility = View.GONE
+            launch(CommonPool) {
+                try {
+                    DownloadManager.restoreDownloaded()
+                    "List of downloaded files restored".toast(me.context)
+                } catch (e: Exception) {
+                    "".logE(e)
+                    "Error restoring downloaded files ${e.message}".toast(me.context)
+                }
+                launch(UI) { restoreDownloaded.visibility = View.VISIBLE }
+            }
+        }
     }
 
     private fun dangerousCommandsVisibility(visible: Boolean) {

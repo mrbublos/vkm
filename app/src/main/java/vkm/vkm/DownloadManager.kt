@@ -1,6 +1,5 @@
 package vkm.vkm
 
-import android.content.Context
 import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.experimental.CommonPool
@@ -25,10 +24,7 @@ object DownloadManager {
     var downloadedPercent = 0
     private val lock = Mutex()
 
-    private var context: Context? = null
-
-    fun initialize(context: Context) {
-        this.context = context
+    fun initialize() {
         "Loading all lists".log()
         loadAll()
     }
@@ -164,12 +160,11 @@ object DownloadManager {
         }
     }
 
-    fun stopDownload(error: String) {
+    fun stopDownload() {
         currentDownload.get()?.let { composition ->
             _queue.offer(composition)
             _inProgress.remove(composition)
             currentDownload.set(null)
-            error.toast(context)
         }
     }
 
@@ -203,9 +198,9 @@ object DownloadManager {
         }
 
         try {
-            val _url = URL(composition.url)
-            "Starting download track $_url".log()
-            val connection = _url.openConnection()
+            val url = URL(composition.url)
+            "Starting download track $url".log()
+            val connection = url.openConnection()
             connection.connect()
             val totalBytes = connection.contentLength
             val out = ByteArrayOutputStream()
@@ -237,7 +232,7 @@ object DownloadManager {
                     return "Error saving fie"
                 }
             } else {
-                return "Not enough free space or unable to write to the $dir".toast(context)
+                "Not enough free space or unable to write to the $dir".logE()
             }
         } catch(e: Exception) {
             Log.e(this.toString(), "Error downloading track", e)
@@ -248,7 +243,6 @@ object DownloadManager {
 
     fun removeAllMusic() {
         getDownloadDir().deleteRecursively()
-        "All music removed".toast(context)
     }
 
     fun rehashAndDump() {
@@ -258,25 +252,21 @@ object DownloadManager {
                     it.hash = it.localFile()?.readBytes().md5()
                 }
                 dumpList(downloaded, getDownloaded())
-                "Rehashing complete".toast(this@DownloadManager.context)
             }
         }
     }
 
-    fun restoreDownloaded() {
-        launch(CommonPool) {
-            lock.withLock {
-                clearDownloaded()
-                getDownloadDir().listFiles().forEach { file ->
-                    takeIf { file.isFile }.let {
-                        val fileName = file.name.beginning(file.name.length - 4) // cutting .mp3
-                        val data = fileName.replace('_', ' ').split('-')
-                        downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
-                    }
+    suspend fun restoreDownloaded() {
+        lock.withLock {
+            clearDownloaded()
+            getDownloadDir().listFiles().forEach { file ->
+                takeIf { file.isFile && file.extension == "mp3" }.let {
+                    val fileName = file.name.beginning(file.name.length - 4) // cutting .mp3
+                    val data = fileName.replace('_', ' ').split('-')
+                    downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
                 }
-                "Download list restored".toast(this@DownloadManager.context)
-                dumpList(downloaded, getDownloaded())
             }
+            dumpList(downloaded, getDownloaded())
         }
     }
 }
