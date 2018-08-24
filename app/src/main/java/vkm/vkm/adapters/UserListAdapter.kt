@@ -1,4 +1,4 @@
-package vkm.vkm.utils
+package vkm.vkm.adapters
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -8,12 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
-import android.widget.TextView
 import kotlinx.android.synthetic.main.user_list_element.view.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.*
+import vkm.vkm.utils.User
+import vkm.vkm.utils.log
+import vkm.vkm.utils.logE
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 
@@ -59,7 +61,7 @@ class UserListAdapter(context: Context, resource: Int, data: List<User>, private
             view?.user_id?.text = item.userId
             view?.setOnClickListener { elementClickListener.invoke(item) }
 
-            schedulePhotoDownload( view?.user_photo, item)
+            schedulePhotoDownload(view?.user_photo, item)
         }
 
         return view

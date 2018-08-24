@@ -46,6 +46,8 @@
     <string name="currently_playing_title">Currently playing</string>
     <string name="enable_developer_mode">Enable developer mode</string>
     <string name="logout">Logout</string>
+    <string name="album_cover">Album cover</string>
+    <string name="listen_to_album">Listen to album</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

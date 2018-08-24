@@ -1,6 +1,5 @@
 package vkm.vkm.utils
 
-import com.beust.klaxon.*
 import org.json.JSONArray
 import org.json.JSONObject
 import vkm.vkm.utils.HttpMethod.GET
@@ -9,20 +8,20 @@ import java.nio.charset.StandardCharsets
 
 object YMusicParsers {
 
-    fun parseCompositionList(result: JsonObject?): MutableList<Composition> {
+    fun parseCompositionList(result: JSONObject?): MutableList<Composition> {
         val compositionsFound = mutableListOf<Composition>()
-        if (result != null && result.string("text") != null) {
+        if (result != null && result.gets("text").isNotEmpty()) {
             try {
-                result.obj("tracks")?.let { tracks ->
-                    tracks.array<JsonObject>("items")?.takeIf { it.isNotEmpty() }?.let {
+                result.geto("tracks").let { tracks ->
+                    tracks.geta("items").takeIf { it.length() > 0 }?.let {
                         val compositions = it.map { track ->
-                            Composition(id = track.long("id")?.toString() ?: "",
-                                    artist = track.array<JsonObject>("artists")?.joinToString(",") { artist ->
-                                        artist.string("name") ?: ""
-                                    }!!,
-                                    name = track.string("title") ?: "",
-                                    url = track.string("storageDir") ?: "",
-                                    length = track.long("durationMs")?.toString() ?: "")
+                            Composition(id = track.getl("id").toString(),
+                                    artist = track.geta("artists").map { artist ->
+                                        artist.gets("name")
+                                    }.joinToString(","),
+                                    name = track.gets("title"),
+                                    url = track.gets("storageDir"),
+                                    length = track.getl("durationMs").toString())
                         }
                         compositionsFound.addAll(compositions)
                     }
@@ -48,6 +47,31 @@ object YMusicParsers {
         }
     }
 
+    fun parseAlbum(result: JSONObject): MutableList<Composition> {
+        val artist = result.geta("artists").map { it.gets("name") }.joinToString(",")
+        return result.geta("volumes").mapArr { volume ->
+            volume.map { composition ->
+                Composition(id = composition.gets("id"),
+                        name = composition.gets("title"),
+                        artist = artist,
+                        length = (composition.getl("durationMs") / 1000).toString(),
+                        vkmId = System.nanoTime(),
+                        url = composition.gets("storageDir"))
+            }
+        }.flatten() as MutableList<Composition>
+    }
+
+    fun parseChart(result: JSONObject): MutableList<Composition> {
+        return result.geto("chart").geta("tracks").map { composition ->
+            val artist = composition.geta("artists").map { it.gets("name") }.joinToString(",")
+            Composition(id = composition.gets("id"),
+                    name = composition.gets("title"),
+                    artist = artist,
+                    length = (composition.getl("durationMs") / 1000).toString(),
+                    vkmId = System.nanoTime(),
+                    url = composition.gets("storageDir"))
+        }
+    }
 }
 
 object YMusicApi {
@@ -65,7 +89,17 @@ object YMusicApi {
 
     suspend fun getAlbums(ids: List<String>): JSONArray {
         val url = "https://music.yandex.ru/handlers/albums.jsx?albumIds=${ids.joinToString(",")}"
-        return HttpUtils.call4Json(GET, url, false).array() // TODO check if need proxy
+        return HttpUtils.call4Json(GET, url, true).array()
+    }
+
+    suspend fun getAlbum(id: String): JSONObject {
+        val url = "https://music.yandex.ru/handlers/album.jsx?album=$id"
+        return HttpUtils.call4Json(GET, url, true).obj()
+    }
+
+    suspend fun getChart(): JSONObject {
+        val url = "https://music.yandex.ru/handlers/main.jsx?what=chart"
+        return HttpUtils.call4Json(GET, url, true).obj()
     }
 
     suspend fun preprocessUrl(composition: Composition) {

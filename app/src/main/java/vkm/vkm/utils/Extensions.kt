@@ -4,6 +4,8 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
 import android.widget.Toast
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import vkm.vkm.DownloadManager
@@ -79,8 +81,9 @@ fun String.toComposition(): Composition {
 
 fun String?.toast(context: Context?, length: Int = Toast.LENGTH_SHORT): String? {
     if (this == null) { return this }
+    val me = this
     context?.let {
-        Toast.makeText(context, this, length).show()
+        launch(UI) { Toast.makeText(context, me, length).show() }
     }
     return this
 }
@@ -146,8 +149,22 @@ fun JSONObject.geto(name: String): JSONObject {
     }
 }
 
+fun JSONObject.getl(name: String): Long {
+    return try {
+        this.getLong(name)
+    } catch (e: Exception) {
+        0L
+    }
+}
+
 fun <R> JSONArray.map(action: (obj: JSONObject) -> R): MutableList<R>  {
     return (0 until this.length()).map {
         action(this.get(it) as JSONObject)
+    }.toMutableList()
+}
+
+fun <R> JSONArray.mapArr(action: (obj: JSONArray) -> R): MutableList<R>  {
+    return (0 until this.length()).map {
+        action(this.get(it) as JSONArray)
     }.toMutableList()
 }

@@ -16,7 +16,7 @@ class HttpUtils {
     companion object {
 
         private val proxyBlacklist = ConcurrentHashMap<Proxy, Long>()
-        private var currentProxy: Proxy? = null
+        var currentProxy: Proxy? = null
 
         private fun setProxy(proxy: Proxy?) {
             "Using proxy: $proxy".log()

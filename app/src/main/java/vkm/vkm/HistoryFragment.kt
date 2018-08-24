@@ -2,15 +2,14 @@ package vkm.vkm
 
 import android.text.InputType
 import android.view.View
-import android.widget.BaseAdapter
 import kotlinx.android.synthetic.main.activity_history.*
-import kotlinx.android.synthetic.main.composition_list_element.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import vkm.vkm.adapters.CompositionListAdapter
 import vkm.vkm.utils.*
 
 class HistoryFragment : VkmFragment() {

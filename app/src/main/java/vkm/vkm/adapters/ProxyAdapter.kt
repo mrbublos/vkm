@@ -1,4 +1,4 @@
-package vkm.vkm.utils
+package vkm.vkm.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.proxy_element.view.*
 import vkm.vkm.R
+import vkm.vkm.utils.Proxy
 
 class ProxyAdapter(context: Context, resource: Int, data: List<Proxy?>, private var elementClickListener: (user: Proxy?) -> Unit? = {}) : ArrayAdapter<Proxy>(context, resource, data) {
 

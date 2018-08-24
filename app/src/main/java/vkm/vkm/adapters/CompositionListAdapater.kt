@@ -1,4 +1,4 @@
-package vkm.vkm.utils
+package vkm.vkm.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +8,9 @@ import kotlinx.android.synthetic.main.composition_list_element.view.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.*
+import vkm.vkm.utils.Composition
+import vkm.vkm.utils.VkmFragment
+import vkm.vkm.utils.equalsTo
 
 class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(fragment.context, resource, data) {
 

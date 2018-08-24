@@ -9,4 +9,4 @@ data class Composition(var id: String = "", var name: String = "", var url: Stri
 
 data class User(var userId: String = "", var password: String = "", var token: String = "", var fullname: String = "", var photoUrl: String = "", var photo: Bitmap? = null, var isGroup: Boolean = false)
 data class Proxy(val host: String, val port: Int, val country: String = "", val type: String, val speed: Int)
-data class Album(val id: String, val name: String, val url: String, val artist: String)
+data class Album(val id: String, val name: String, val url: String, val artist: String, var compositions: List<Composition>? = null, var compositionFetcher: (() -> Unit)? = null)
