@@ -114,7 +114,7 @@ object DownloadManager {
 
     private fun getListFileName(name: ListType, suffix: String = ""): File {
         return when (name) {
-            downloaded -> File(getPropertiesDir(), "downloadedList.json$suffix")
+            downloaded -> File(getDownloadDir(), "downloadedList.json$suffix")
             queue -> File(getPropertiesDir(), "queue.json$suffix")
             inProgress -> File(getPropertiesDir(), "inProgress.json$suffix")
         }
