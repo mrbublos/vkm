@@ -95,7 +95,7 @@ object DownloadManager {
     private fun loadList(name: ListType, data: ConcurrentLinkedQueue<Composition>) {
         val file = getListFileName(name)
         data.clear()
-
+        val start = System.currentTimeMillis()
         file.takeIf { it.exists() && it.canRead() }?.bufferedReader()?.use { reader ->
             reader.readLines().forEach { line ->
                 try {
@@ -106,6 +106,7 @@ object DownloadManager {
             }
             data.sortedByDescending { it.vkmId }
         }
+        "Loading list took ${(System.currentTimeMillis() - start) / 1000}".log()
     }
 
     private fun getListFileName(name: ListType, suffix: String = ""): File {
@@ -261,7 +262,7 @@ object DownloadManager {
             clearDownloaded()
             getDownloadDir().listFiles().forEach { file ->
                 takeIf { file.isFile && file.extension == "mp3" }.let {
-                    val fileName = file.name.beginning(file.name.length - 4) // cutting .mp3
+                    val fileName = file.name.substringBeforeLast(".") // cutting .mp3
                     val data = fileName.replace('_', ' ').split('-')
                     downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
                 }

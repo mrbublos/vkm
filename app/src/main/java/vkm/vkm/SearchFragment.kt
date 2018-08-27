@@ -61,6 +61,8 @@ class SearchFragment : VkmFragment() {
     private fun initializeTabs() {
         searchTabsSwiper.value = tabs.map { it.name }.toMutableList()
         searchTabsSwiper.setCurrentString(tabs[State.currentSearchTab].name)
+        tabs[State.currentSearchTab].activate(null)
+
         searchTabsSwiper.onSwiped = { index, _, prev ->
             lockScreen(true)
             showSpinner(true)

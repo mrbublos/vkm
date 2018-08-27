@@ -7,9 +7,8 @@ import kotlin.reflect.KProperty
 
 typealias SearchTabCallback = (data: MutableList<out Any>, adaptorClass: KClass<out ListAdapter>) -> Unit
 
-abstract class Tab<T> {
+abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
 
-    var name: String
     var currentOffset: Int by TabStateDelegate<Int, T>()
     var filter: String by TabStateDelegate<String, T>()
     var callback: SearchTabCallback by TabStateDelegate<SearchTabCallback, T>()
@@ -18,14 +17,14 @@ abstract class Tab<T> {
 
     open val hideSearch = false
 
-    constructor(callback: SearchTabCallback, name: String) {
-        // TODO rework this crap, we do not need delegates, if we recreate vars every time
-        this.name = name
-        currentOffset = 0
-        filter = ""
-        dataList = mutableListOf()
-        lastPopulated = System.currentTimeMillis()
-        this.callback = callback
+    init {
+        State.tabState.putIfAbsent(name, ConcurrentHashMap())
+        val tabState = State.tabState[name]
+        currentOffset = tabState?.get("currentOffset") as Int? ?: 0
+        filter = tabState?.get("filter") as String? ?: ""
+        dataList = tabState?.get("dataList") as MutableList<T>? ?: mutableListOf()
+        lastPopulated = tabState?.get("lastPopulated") as Long? ?: System.currentTimeMillis()
+        this.callback = tabState?.get("callback") as SearchTabCallback? ?: callback
     }
 
     open fun activate(data: List<T>?) {}

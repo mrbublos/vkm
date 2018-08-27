@@ -74,11 +74,17 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         })
     }
 
+    private fun refreshList() {
+        launch (UI) {
+            ((findViewById<ListView>(R.id.resultList))?.adapter as BaseAdapter?)?.notifyDataSetChanged()
+        }
+    }
+
     private val onPlayerPlay: () -> Unit = {
         launch(UI) {
             currentTrackPlaying.visibility = View.VISIBLE
             pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_pause_player))
-            ((findViewById(R.id.resultList) as ListView?)?.adapter as BaseAdapter?)?.notifyDataSetChanged()
+            refreshList()
         }
     }
 
@@ -86,7 +92,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         launch(UI) {
             currentTrackPlaying.visibility = View.VISIBLE
             pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
-            ((findViewById(R.id.resultList) as ListView?)?.adapter as BaseAdapter?)?.notifyDataSetChanged()
+            refreshList()
         }
     }
 
@@ -94,6 +100,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         launch(UI) {
             currentTrackPlaying.visibility = View.VISIBLE
             pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
+            refreshList()
         }
     }
 
@@ -103,18 +110,20 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         newPlayList.addAll(list)
         musicPlayer?.playList = newPlayList
         musicPlayer?.play(track, this::onPlayingProgressUpdated)
+        refreshList()
     }
 
     private fun onPlayingProgressUpdated() {
         currentTrackPlaying.trackPlayingProgress.progress = musicPlayer?.trackProgress ?: 0
         val composition = musicPlayer?.currentComposition
-        if (!composition.equalsTo(displayedComposition)) {
+        if (composition?.equalsTo(displayedComposition) != true) {
             displayedComposition = composition
             launch(UI) {
-                currentTrackPlaying.name.text = composition?.name ?: ""
-                currentTrackPlaying.name.isSelected = true
-                currentTrackPlaying.artist.text = composition?.artist ?: ""
-                currentTrackPlaying.artist.isSelected = true
+                currentTrackPlaying?.name?.text = composition?.name ?: ""
+                currentTrackPlaying?.name?.isSelected = true
+                currentTrackPlaying?.artist?.text = composition?.artist ?: ""
+                currentTrackPlaying?.artist?.isSelected = true
+                refreshList()
             }
         }
     }

@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity() {
             DownloadManager.stopDownload()
             DownloadManager.dumpAll()
         }
+        saveProxy()
     }
 
     override fun onStop() {
