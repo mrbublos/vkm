@@ -31,9 +31,13 @@ abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
 
     open fun deactivate() {}
 
+    open fun destroy() { callback = ::noopCallback }
+
     open fun onBottomReached() {}
 
     abstract fun search(query: String)
+
+    private fun noopCallback(data: MutableList<out Any>, adaptorClass: KClass<out ListAdapter>) {}
 }
 
 class TabStateDelegate<T, R> {

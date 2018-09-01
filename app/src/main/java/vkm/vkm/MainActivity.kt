@@ -13,18 +13,21 @@ import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.HttpUtils
 import vkm.vkm.utils.Proxy
 import vkm.vkm.utils.Swiper
+import vkm.vkm.utils.db.Db
 import vkm.vkm.utils.log
 import java.io.File
-import java.util.*
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
 class MainActivity : AppCompatActivity() {
 
-    private val EXTERNAL_STORAGE_WRITE_PERMISSION = 1
-    var initialized = false
-    var permissionContinuation: Continuation<IntArray>? = null
+    companion object {
+        private const val EXTERNAL_STORAGE_WRITE_PERMISSION = 1
+    }
+
+    private var initialized = false
+    private var permissionContinuation: Continuation<IntArray>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,29 +53,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (initialized) {
-            DownloadManager.initialize()
-            DownloadManager.downloadComposition(null)
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (initialized) {
-            DownloadManager.initialize()
-            DownloadManager.downloadComposition(null)
-        }
-    }
-
     private fun initialize() {
-        SecurityService.context = applicationContext
         val point = Point()
         windowManager.defaultDisplay.getSize(point)
         Swiper.SWIPE_DISTANCE_MIN = Math.max(point.x  / 3, 200)
         loadProxy()
-        DownloadManager.initialize()
+        DownloadManager.initialize(Db.instance(applicationContext).tracksDao())
         initialized = true
     }
 
@@ -95,21 +81,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        if (initialized) {
-            "Dumping all lists".log()
-            DownloadManager.stopDownload()
-            DownloadManager.dumpAll()
-        }
+        if (initialized) { DownloadManager.stopDownload() }
         saveProxy()
     }
 
     override fun onStop() {
         super.onStop()
-        if (initialized) {
-            "Dumping all lists".log()
-            DownloadManager.stopDownload()
-            DownloadManager.dumpAll()
-        }
+        if (initialized) { DownloadManager.stopDownload() }
         saveProxy()
     }
 

@@ -30,19 +30,17 @@ class HttpUtils {
         }
 
         suspend fun call4Json(method: HttpMethod, url: String, withProxy: Boolean = false): Json {
-            var retries = 0
-            while (true) {
+            for (retries in 0..10) {
                 try {
                     return callHttp(method, url, withProxy)
                 } catch (e: ProxyNotAvailableException) {
-                    if (retries > 10) { return Json("{}") }
                     "Retrying with another proxy".log()
                 } catch (e: Exception) {
                     "Error connecting".logE(e)
-                    return Json("{}")
+                    break
                 }
-                retries++
             }
+            return Json("{}")
         }
 
         private suspend fun callHttp(method: HttpMethod = HttpMethod.GET, url: String, withProxy: Boolean = false): Json {

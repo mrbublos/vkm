@@ -3,11 +3,12 @@ package vkm.vkm
 import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.sync.Mutex
 import kotlinx.coroutines.experimental.sync.withLock
-import vkm.vkm.ListType.*
 import vkm.vkm.utils.*
+import vkm.vkm.utils.db.TracksDao
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URL
@@ -23,38 +24,42 @@ object DownloadManager {
     private val _queue = ConcurrentLinkedQueue<Composition>()
     var downloadedPercent = 0
     private val lock = Mutex()
+    private var dao: TracksDao? = null
 
-    fun initialize() {
+    fun initialize(dao: TracksDao) {
         "Loading all lists".log()
-        loadAll()
-    }
+        this.dao = dao
 
-    fun loadAll() {
-        loadList(downloaded, downloadedList)
-        loadList(queue, _queue)
-        loadList(inProgress, _inProgress)
-    }
+        downloadedList.clear()
+        _queue.clear()
 
-    fun dumpAll() {
-        "Dumping all lists".log()
-        dumpList(downloaded, getDownloaded())
-        dumpList(queue, getQueue())
-        dumpList(inProgress, getInProgress())
+        launch(CommonPool) {
+            "Fetching data from db".log()
+            downloadedList.addAll(dao.getDownloadedTracks())
+            _queue.addAll(dao.getQueuedTracks())
+            "Data fetching from db complete ${downloadedList.size}".log()
+        }
     }
 
     fun clearDownloaded() {
         downloadedList.clear()
+        launch(CommonPool) { dao?.deleteAllDownloaded() }
         "Cleared downloaded list".log()
     }
 
     fun clearQueue() {
         _queue.clear()
+        launch(CommonPool) { dao?.deleteAllQueued() }
         "Cleared queue list".log()
     }
 
     fun downloadComposition(composition: Composition?) {
-        composition?.vkmId = System.currentTimeMillis()
-        composition?.takeIf { it.url.isNotEmpty() }?.let { _queue.offer(composition) }
+        composition?.vkmId = System.nanoTime()
+        composition?.takeIf { it.url.isNotEmpty() }?.let {
+            _queue.offer(composition)
+            composition.status = "queued"
+            launch(CommonPool) { dao?.insert(composition) }
+        }
         downloadNext()
     }
 
@@ -71,60 +76,14 @@ object DownloadManager {
     }
 
     fun removeFromQueue(composition: Composition) {
-        _queue.remove(_queue.find { it.id == composition.id })
-    }
-
-    @Synchronized
-    private fun dumpList(name: ListType, data: List<Composition> = listOf()) {
-        val timeStamp = System.currentTimeMillis()
-        val file = getListFileName(name, timeStamp.toString())
-
-        file.bufferedWriter().use { writer ->
-            data.forEach {
-                val serialize = it.serialize()
-                writer.write(serialize)
-                writer.newLine()
-            }
-        }
-
-        file.copyTo(getListFileName(name), true)
-        file.delete()
-        "Dumping $name finished".log()
-    }
-
-    private fun loadList(name: ListType, data: ConcurrentLinkedQueue<Composition>) {
-        val file = getListFileName(name)
-        data.clear()
-        val start = System.currentTimeMillis()
-        file.takeIf { it.exists() && it.canRead() }?.bufferedReader()?.use { reader ->
-            reader.readLines().forEach { line ->
-                try {
-                    data.offer(line.toComposition())
-                } catch(e: Exception) {
-                    Log.e("vkm", "Unable to parse composition, skipping")
-                }
-            }
-            data.sortedByDescending { it.vkmId }
-        }
-        "Loading list took ${(System.currentTimeMillis() - start) / 1000}".log()
-    }
-
-    private fun getListFileName(name: ListType, suffix: String = ""): File {
-        return when (name) {
-            downloaded -> File(getDownloadDir(), "downloadedList.json$suffix")
-            queue -> File(getPropertiesDir(), "queue.json$suffix")
-            inProgress -> File(getPropertiesDir(), "inProgress.json$suffix")
+        _queue.find { it.id == composition.id }?.let {
+            _queue.remove(it)
+            launch(CommonPool) { dao?.delete(it) }
         }
     }
 
     fun getDownloadDir(): File {
         val destinationDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).resolve("vkm")
-        destinationDir.mkdirs()
-        return destinationDir
-    }
-
-    fun getPropertiesDir(): File {
-        val destinationDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).resolve("vkm")
         destinationDir.mkdirs()
         return destinationDir
     }
@@ -174,9 +133,10 @@ object DownloadManager {
         "Finished downloading composition " + composition.artist + " ${composition.name}".log()
         if (currentDownload.compareAndSet(composition, null)) {
             _inProgress.remove(downloaded)
-            dumpAll()
             if (wasDownloaded) {
                 downloadedList.offer(downloaded)
+                composition.status = "downloaded"
+                dao?.update(composition)
                 downloadNext()
             }
         } else {
@@ -187,17 +147,7 @@ object DownloadManager {
     private fun downloadTrack(vararg params: Composition): String? {
         val dir = getDownloadDir()
         val composition = params[0]
-        if (!State.developerMode && getDownloaded().find { it.id == composition.id } != null) {
-            "File already was downloaded, skipping download".log()
-            return null
-        }
-
         val dest = dir.resolve(composition.fileName())
-        if (!State.developerMode && dest.exists()) {
-            "File already exists, skipping download".log()
-            return null
-        }
-
         try {
             val url = URL(composition.url)
             "Starting download track $url".log()
@@ -226,7 +176,7 @@ object DownloadManager {
 
             if (dir.canWrite() && dir.usableSpace > bytes.size) {
                 try {
-                    if (!State.developerMode) { dest.writeBytes(bytes) }
+                    dest.writeBytes(bytes)
                     finishDownload(composition)
                 } catch (e: Exception) {
                     Log.e("vkm", "Error saving track", e)
@@ -243,16 +193,19 @@ object DownloadManager {
     }
 
     fun removeAllMusic() {
-        getDownloadDir().deleteRecursively()
+        launch(CommonPool) {
+            getDownloadDir().deleteRecursively()
+            dao?.deleteAllDownloaded()
+        }
     }
 
-    fun rehashAndDump() {
+    fun rehash() {
         launch(CommonPool) {
             lock.withLock {
                 downloadedList.filter { it.hash.isEmpty() }.forEach {
                     it.hash = it.localFile()?.readBytes().md5()
+                    dao?.update(it)
                 }
-                dumpList(downloaded, getDownloaded())
             }
         }
     }
@@ -260,18 +213,21 @@ object DownloadManager {
     suspend fun restoreDownloaded() {
         lock.withLock {
             clearDownloaded()
+            val jobs = mutableListOf<Job>()
             getDownloadDir().listFiles().forEach { file ->
-                takeIf { file.isFile && file.extension == "mp3" }.let {
-                    val fileName = file.name.substringBeforeLast(".") // cutting .mp3
-                    val data = fileName.replace('_', ' ').split('-')
-                    downloadedList.add(Composition(artist = data[0], name = data[1], hash = file.readBytes().md5()))
-                }
+                 file.takeIf { it.isFile && it.extension == "mp3" }?.let {
+                     val job = launch(CommonPool) {
+                         val fileName = file.name.substringBeforeLast(".") // cutting .mp3
+                         val data = fileName.replace('_', ' ').split('-')
+                         val existingComposition = Composition(artist = data[0], name = data[1], hash = file.readBytes().md5())
+                         downloadedList.add(existingComposition)
+                     }
+                     jobs.add(job)
+                 }
             }
-            dumpList(downloaded, getDownloaded())
+            jobs.forEach { it.join() }
+            dao?.insertAll(downloadedList.toList())
+            "Downloaded list restored with ${downloadedList.size} elements".log()
         }
     }
-}
-
-enum class ListType {
-    downloaded, queue, inProgress
 }

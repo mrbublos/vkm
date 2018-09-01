@@ -1,6 +1,5 @@
 package vkm.vkm
 
-import android.content.Intent
 import android.view.View
 import kotlinx.android.synthetic.main.activity_settings.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -17,14 +16,8 @@ class SettingsFragment : VkmFragment() {
     override fun init() {
         dangerousCommandsVisibility(false)
 
-        enableDownloadAll.isChecked = State.enableDownloadAll
-        enableDownloadAll.setOnCheckedChangeListener { _, value -> State.enableDownloadAll = value }
-
         enableSuggestions.isChecked = State.enableTextSuggestions
         enableSuggestions.setOnCheckedChangeListener { _, value -> State.enableTextSuggestions = value }
-
-        enableDeveloperMode.isChecked = State.developerMode
-        enableDeveloperMode.setOnCheckedChangeListener { _, value -> State.developerMode = value }
 
         showDangerousCommands.setOnCheckedChangeListener { _, value -> dangerousCommandsVisibility(value) }
 
@@ -36,15 +29,9 @@ class SettingsFragment : VkmFragment() {
 
         startDownload.setOnClickListener { DownloadManager.downloadComposition(null) }
 
-        loadLists.setOnClickListener { DownloadManager.loadAll() }
-
-        dumpLists.setOnClickListener { DownloadManager.dumpAll() }
-
         clearMusicDir.setOnClickListener { DownloadManager.removeAllMusic() }
 
-        removeAllSettings.setOnClickListener { SecurityService.clearAll() }
-
-        rehashDownloaded.setOnClickListener { DownloadManager.rehashAndDump() }
+        rehashDownloaded.setOnClickListener { DownloadManager.rehash() }
 
         restoreDownloaded.setOnClickListener {
             val me = this
@@ -64,7 +51,7 @@ class SettingsFragment : VkmFragment() {
 
     private fun dangerousCommandsVisibility(visible: Boolean) {
         val visibility = if (visible) View.VISIBLE else View.GONE
-        listOf(clearMusicDir, removeAllSettings, rehashDownloaded, restoreDownloaded, loadLists, dumpLists).forEach {
+        listOf(clearMusicDir, rehashDownloaded, restoreDownloaded).forEach {
             (it.parent as View).visibility = visibility
         }
     }
