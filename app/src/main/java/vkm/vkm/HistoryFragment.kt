@@ -111,7 +111,7 @@ class HistoryFragment : VkmFragment() {
         composition?.let {
             try {
                 composition.localFile()?.delete()
-                DownloadManager.downloadedList.remove(composition)
+                DownloadManager.removeDownloaded(composition)
             } catch (e: Exception) {
                 "Unable to remove track".toast(context)
                 return@let

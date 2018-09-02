@@ -82,6 +82,7 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
             // adding icon click listener
             actionButton?.takeIf { withAction }?.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
+                this.notifyDataSetInvalidated()
             }
         }
 

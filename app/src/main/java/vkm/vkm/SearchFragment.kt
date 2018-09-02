@@ -86,6 +86,7 @@ class SearchFragment : VkmFragment() {
             showSpinner(true)
             lockScreen(true)
             tabs[State.currentSearchTab].search(filterText)
+            currentElement = 0
             return@setOnClickListener
         }
     }

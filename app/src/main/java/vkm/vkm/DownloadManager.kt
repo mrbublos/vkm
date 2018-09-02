@@ -19,9 +19,9 @@ object DownloadManager {
 
     // TODO this should be a background service, but i do not care now 8)
 
-    val downloadedList = ConcurrentLinkedQueue<Composition>()
-    private val _inProgress = ConcurrentLinkedQueue<Composition>()
-    private val _queue = ConcurrentLinkedQueue<Composition>()
+    private val downloadedList = ConcurrentLinkedQueue<Composition>()
+    private val inProgress = ConcurrentLinkedQueue<Composition>()
+    private val queue = ConcurrentLinkedQueue<Composition>()
     var downloadedPercent = 0
     private val lock = Mutex()
     private var dao: TracksDao? = null
@@ -29,14 +29,12 @@ object DownloadManager {
     fun initialize(dao: TracksDao) {
         "Loading all lists".log()
         this.dao = dao
-
-        downloadedList.clear()
-        _queue.clear()
-
         launch(CommonPool) {
+            downloadedList.clear()
+            queue.clear()
             "Fetching data from db".log()
             downloadedList.addAll(dao.getDownloadedTracks())
-            _queue.addAll(dao.getQueuedTracks())
+            queue.addAll(dao.getQueuedTracks())
             "Data fetching from db complete ${downloadedList.size}".log()
         }
     }
@@ -48,7 +46,7 @@ object DownloadManager {
     }
 
     fun clearQueue() {
-        _queue.clear()
+        queue.clear()
         launch(CommonPool) { dao?.deleteAllQueued() }
         "Cleared queue list".log()
     }
@@ -56,7 +54,7 @@ object DownloadManager {
     fun downloadComposition(composition: Composition?) {
         composition?.vkmId = System.nanoTime()
         composition?.takeIf { it.url.isNotEmpty() }?.let {
-            _queue.offer(composition)
+            queue.offer(composition)
             composition.status = "queued"
             launch(CommonPool) { dao?.insert(composition) }
         }
@@ -64,7 +62,7 @@ object DownloadManager {
     }
 
     fun getQueue(): List<Composition> {
-        return _queue.mapNotNull { it }
+        return queue.mapNotNull { it }
     }
 
     fun getDownloaded(): List<Composition> {
@@ -72,12 +70,19 @@ object DownloadManager {
     }
 
     fun getInProgress(): List<Composition> {
-        return _inProgress.mapNotNull { it }
+        return inProgress.mapNotNull { it }
     }
 
     fun removeFromQueue(composition: Composition) {
-        _queue.find { it.id == composition.id }?.let {
-            _queue.remove(it)
+        queue.find { it.id == composition.id }?.let {
+            queue.remove(it)
+            launch(CommonPool) { dao?.delete(it) }
+        }
+    }
+
+    fun removeDownloaded(composition: Composition) {
+        downloadedList.find { it.vkmId == composition.vkmId }?.let {
+            downloadedList.remove(it)
             launch(CommonPool) { dao?.delete(it) }
         }
     }
@@ -93,16 +98,16 @@ object DownloadManager {
     private var currentDownload: AtomicReference<Composition?> = AtomicReference(null)
 
     private fun downloadNext() {
-        _queue.poll()?.let { itemToDownload ->
+        queue.poll()?.let { itemToDownload ->
             if (currentDownload.compareAndSet(null, itemToDownload)) {
-                _queue.remove(itemToDownload)
+                queue.remove(itemToDownload)
                 if (itemToDownload.url.isEmpty()) {
                     "Track ${itemToDownload.fileName()} is not available for download, skipping".log()
                     // TODO search track on alternative sources
                     currentDownload.set(null)
                     downloadNext()
                 } else {
-                    _inProgress.offer(itemToDownload)
+                    inProgress.offer(itemToDownload)
                     launch(CommonPool) {
                         MusicService.trackMusicService.preprocess(itemToDownload)
                         val error = downloadTrack(itemToDownload)
@@ -115,15 +120,15 @@ object DownloadManager {
                     }
                 }
             } else {
-                _queue.offer(itemToDownload)
+                queue.offer(itemToDownload)
             }
         }
     }
 
     fun stopDownload() {
         currentDownload.get()?.let { composition ->
-            _queue.offer(composition)
-            _inProgress.remove(composition)
+            queue.offer(composition)
+            inProgress.remove(composition)
             currentDownload.set(null)
         }
     }
@@ -132,7 +137,7 @@ object DownloadManager {
         val downloaded = currentDownload.get()
         "Finished downloading composition " + composition.artist + " ${composition.name}".log()
         if (currentDownload.compareAndSet(composition, null)) {
-            _inProgress.remove(downloaded)
+            inProgress.remove(downloaded)
             if (wasDownloaded) {
                 downloadedList.offer(downloaded)
                 composition.status = "downloaded"
