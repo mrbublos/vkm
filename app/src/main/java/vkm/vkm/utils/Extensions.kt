@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
 import android.widget.Toast
+import com.github.kittinunf.fuel.android.core.Json
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.json.JSONArray
@@ -167,4 +168,20 @@ fun <R> JSONArray.mapArr(action: (obj: JSONArray) -> R): MutableList<R>  {
     return (0 until this.length()).map {
         action(this.get(it) as JSONArray)
     }.toMutableList()
+}
+
+fun Json?.safeObj(): JSONObject {
+    return try {
+        this?.obj() ?: JSONObject()
+    } catch (e: Exception) {
+        JSONObject()
+    }
+}
+
+fun Json?.safeArr(): JSONArray {
+    return try {
+        this?.array() ?: JSONArray()
+    } catch (e: Exception) {
+        JSONArray()
+    }
 }

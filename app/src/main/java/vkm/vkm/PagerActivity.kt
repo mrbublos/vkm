@@ -19,7 +19,9 @@ import kotlinx.android.synthetic.main.pager_activity.view.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.Composition
+import vkm.vkm.utils.db.Db
 import vkm.vkm.utils.equalsTo
+import java.util.concurrent.ConcurrentHashMap
 
 class PagerActivity : AppCompatActivity(), ServiceConnection {
 
@@ -29,11 +31,23 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        savedInstanceState?.let {
+            State.currentSearchTab = it.getInt("currentSearchTab")
+            State.currentHistoryTab = it.getString("currentHistoryTab")
+            DownloadManager.initialize(Db.instance(applicationContext).tracksDao())
+        }
+
         setContentView(R.layout.pager_activity)
         pager.adapter = PagerAdapter(supportFragmentManager)
         pager.currentItem = 0
 
         bindService(Intent(applicationContext, MusicPlayService::class.java), this, Context.BIND_AUTO_CREATE)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putInt("currentSearchTab", State.currentSearchTab)
+        outState?.putString("currentHistoryTab", State.currentHistoryTab)
     }
 
     override fun onDestroy() {

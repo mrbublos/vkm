@@ -79,34 +79,34 @@ object YMusicApi {
     suspend fun search(text: String, offset: Int): JSONObject {
         val urlEncText = URLEncoder.encode(text.replace(" ", "%20"), StandardCharsets.UTF_8.name())
         val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=tracks&page=${offset / 100}"
-        return HttpUtils.call4Json(GET, url, true).obj()
+        return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
     suspend fun getNewReleases(): JSONObject {
         val url = "https://music.yandex.ru/handlers/main.jsx?what=new-releases"
-        return HttpUtils.call4Json(GET, url, true).obj()
+        return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
     suspend fun getAlbums(ids: List<String>): JSONArray {
         val url = "https://music.yandex.ru/handlers/albums.jsx?albumIds=${ids.joinToString(",")}"
-        return HttpUtils.call4Json(GET, url, true).array()
+        return HttpUtils.call4Json(GET, url, true).safeArr()
     }
 
     suspend fun getAlbum(id: String): JSONObject {
         val url = "https://music.yandex.ru/handlers/album.jsx?album=$id"
-        return HttpUtils.call4Json(GET, url, true).obj()
+        return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
     suspend fun getChart(): JSONObject {
         val url = "https://music.yandex.ru/handlers/main.jsx?what=chart"
-        return HttpUtils.call4Json(GET, url, true).obj()
+        return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
     suspend fun preprocessUrl(composition: Composition) {
         if (composition.url.startsWith("http")) { return }
 
         val url = "https://storage.mds.yandex.net/download-info/${composition.url}/2?format=json"
-        val result = HttpUtils.call4Json(GET, url, false).obj()
+        val result = HttpUtils.call4Json(GET, url, false).safeObj()
         if (result.gets("path").isBlank()) { return }
 
         val path = result.gets("path").substring(1)

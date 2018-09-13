@@ -48,6 +48,7 @@
     <string name="logout">Logout</string>
     <string name="album_cover">Album cover</string>
     <string name="listen_to_album">Listen to album</string>
+    <string name="use_proxy">Use proxy</string>
 
     <!--colors-->
     <color name="white">#FFFFFF</color>

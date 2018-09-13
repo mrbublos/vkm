@@ -5,7 +5,9 @@ import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.result.Result
 import org.jsoup.Jsoup
+import vkm.vkm.State
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
@@ -29,7 +31,7 @@ class HttpUtils {
             FuelManager.instance.timeoutReadInMillisecond = 5000
         }
 
-        suspend fun call4Json(method: HttpMethod, url: String, withProxy: Boolean = false): Json {
+        suspend fun call4Json(method: HttpMethod, url: String, withProxy: Boolean = false): Json? {
             for (retries in 0..10) {
                 try {
                     return callHttp(method, url, withProxy)
@@ -40,11 +42,11 @@ class HttpUtils {
                     break
                 }
             }
-            return Json("{}")
+            return null
         }
 
         private suspend fun callHttp(method: HttpMethod = HttpMethod.GET, url: String, withProxy: Boolean = false): Json {
-            setProxy(if (withProxy) getProxy() else null)
+            setProxy(if (State.useProxy && withProxy) getProxy() else null)
 
             "Calling: $method $url".log()
             val caller = when (method) {
@@ -53,10 +55,10 @@ class HttpUtils {
             }
 
             return suspendCoroutine { continuation ->
-                caller.responseJson { _, response, result ->
+                caller.responseJson { _, _, result ->
                     "Received result $result".log()
                     try {
-                        if (response.statusCode == 200) {
+                        if (result is Result.Success) {
                             continuation.resume(result.component1()!!)
                             return@responseJson
                         } else {
