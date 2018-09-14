@@ -54,7 +54,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
 
         // slow but simple
         val proxyDao = Db.instance(applicationContext).proxyDao()
-        val blackList = HttpUtils.getBlackList()
+        val blackList = HttpUtils.getBlackList().filter { it.added > System.currentTimeMillis() - 1000 * 60 * 60 * 24 }
         proxyDao.deleteAll()
         proxyDao.insertAll(blackList)
     }
