@@ -19,9 +19,9 @@ import kotlinx.android.synthetic.main.pager_activity.view.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.Composition
+import vkm.vkm.utils.HttpUtils
 import vkm.vkm.utils.db.Db
 import vkm.vkm.utils.equalsTo
-import java.util.concurrent.ConcurrentHashMap
 
 class PagerActivity : AppCompatActivity(), ServiceConnection {
 
@@ -31,9 +31,12 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         savedInstanceState?.let {
             State.currentSearchTab = it.getInt("currentSearchTab")
             State.currentHistoryTab = it.getString("currentHistoryTab")
+            val proxyDao = Db.instance(applicationContext).proxyDao()
+            HttpUtils.setBlackList(proxyDao.getAll())
             DownloadManager.initialize(Db.instance(applicationContext).tracksDao())
         }
 
@@ -48,6 +51,12 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         super.onSaveInstanceState(outState)
         outState?.putInt("currentSearchTab", State.currentSearchTab)
         outState?.putString("currentHistoryTab", State.currentHistoryTab)
+
+        // slow but simple
+        val proxyDao = Db.instance(applicationContext).proxyDao()
+        val blackList = HttpUtils.getBlackList()
+        proxyDao.deleteAll()
+        proxyDao.insertAll(blackList)
     }
 
     override fun onDestroy() {

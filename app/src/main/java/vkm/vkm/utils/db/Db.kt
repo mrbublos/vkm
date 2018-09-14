@@ -30,4 +30,5 @@ abstract class Db : RoomDatabase() {
     }
 
     abstract fun tracksDao(): TracksDao
+    abstract fun proxyDao(): ProxyDao
 }

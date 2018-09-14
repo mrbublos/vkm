@@ -31,6 +31,20 @@ class HttpUtils {
             FuelManager.instance.timeoutReadInMillisecond = 5000
         }
 
+        fun setBlackList(list: List<Proxy>) {
+            proxyBlacklist.clear()
+            list.forEach {
+                proxyBlacklist[it] = it.added
+            }
+        }
+
+        fun getBlackList(): List<Proxy> {
+            return proxyBlacklist.map {
+                it.key.added = it.value
+                it.key
+            }
+        }
+
         suspend fun call4Json(method: HttpMethod, url: String, withProxy: Boolean = false): Json? {
             for (retries in 0..10) {
                 try {
