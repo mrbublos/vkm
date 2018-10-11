@@ -8,8 +8,7 @@ import android.graphics.Bitmap
 data class Composition(var id: String = "", var name: String = "", var url: String = "",
                        var artist: String = "", var progress: Int = 0, var hash: String = "",
                        var length: String = "", var ownerId: String = "", var status: String = "downloaded",
-                       @PrimaryKey
-        var vkmId: Long = System.nanoTime())
+                       @PrimaryKey var vkmId: Long = System.nanoTime())
 
 data class User(var userId: String = "", var password: String = "", var token: String = "", var fullname: String = "", var photoUrl: String = "", @Transient var photo: Bitmap? = null, var isGroup: Boolean = false)
 

@@ -5,8 +5,9 @@ import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 import vkm.vkm.utils.Composition
+import vkm.vkm.utils.Proxy
 
-@Database(entities = [Composition::class], version = 1)
+@Database(entities = [Composition::class, Proxy::class], version = 1)
 abstract class Db : RoomDatabase() {
     companion object {
         @Volatile
