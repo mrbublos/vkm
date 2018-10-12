@@ -16,6 +16,7 @@ import android.widget.ListView
 import android.widget.SeekBar
 import kotlinx.android.synthetic.main.pager_activity.*
 import kotlinx.android.synthetic.main.pager_activity.view.*
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.Composition
@@ -53,10 +54,12 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         outState?.putString("currentHistoryTab", State.currentHistoryTab)
 
         // slow but simple
-        val proxyDao = Db.instance(applicationContext).proxyDao()
         val blackList = HttpUtils.getBlackList().filter { it.added > System.currentTimeMillis() - 1000 * 60 * 60 * 24 }
-        proxyDao.deleteAll()
-        proxyDao.insertAll(blackList)
+        launch(CommonPool) {
+            val proxyDao = Db.instance(applicationContext).proxyDao()
+            proxyDao.deleteAll()
+            proxyDao.insertAll(blackList)
+        }
     }
 
     override fun onDestroy() {

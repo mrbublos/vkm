@@ -18,6 +18,7 @@ class HttpUtils {
     companion object {
 
         private val proxyBlacklist = ConcurrentHashMap<Proxy, Long>()
+        private val untrustedProxyList = mutableListOf<Proxy>()
         var currentProxy: Proxy? = null
 
         private fun setProxy(proxy: Proxy?) {
@@ -50,6 +51,7 @@ class HttpUtils {
                 try {
                     return callHttp(method, url, withProxy)
                 } catch (e: ProxyNotAvailableException) {
+                    if (currentProxy == null) { return null }
                     "Retrying with another proxy".log()
                 } catch (e: Exception) {
                     "Error connecting".logE(e)
@@ -69,17 +71,15 @@ class HttpUtils {
             }
 
             return suspendCoroutine { continuation ->
-                caller.responseJson { _, _, result ->
-                    "Received result $result".log()
+                caller.responseJson { _, resp, result ->
                     try {
-                        if (result is Result.Success) {
+                        if (result is Result.Success && resp.headers["Content-Type"]?.firstOrNull()?.contains("application/json") == true) {
+                            "Received result ${result.component1()}".log()
                             continuation.resume(result.component1()!!)
                             return@responseJson
                         } else {
                             val currProxy = currentProxy
-                            if (currProxy != null
-                                    && result.component2() != null
-                                    && result.component2()!!.exception is IOException) {
+                            if (currProxy != null) {
                                 "Blacklisting $currProxy".log()
                                 proxyBlacklist[currProxy] = System.currentTimeMillis()
                             }
@@ -97,10 +97,30 @@ class HttpUtils {
             val currProxy = currentProxy
             if (currProxy != null && proxyBlacklist[currProxy] == null) { return currProxy }
 
-            val result = mutableListOf<Proxy>()
+            var fetched = false
+            while (true) {
+                if (untrustedProxyList.isEmpty()) {
+                    if (fetched) { return null } // we have already fetched during this iteration, next fetch will bring the same results
+                    untrustedProxyList.addAll(fetchProxyList())
+                    fetched = true
+                }
+
+                val proxy = untrustedProxyList[0]
+                val time = proxyBlacklist[proxy] ?: return proxy
+                if (System.currentTimeMillis() - time > 1000 * 60 * 60 * 24) {
+                    proxyBlacklist.remove(proxy)
+                    return proxy
+                }
+
+                // it is still blacklisted, removing from a list
+                untrustedProxyList.removeAt(0)
+            }
+        }
+
+        private fun fetchProxyList(): List<Proxy> {
             Jsoup.connect("https://www.proxy" + "nova.com/proxy-server-list/country-ru/").get().run {
-                getElementById("tbl_p" + "roxy_list").select("tbody tr").forEach { row ->
-                    if (!row.hasAttr("data-proxy-id")) { return@forEach }
+                return getElementById("tbl_p" + "roxy_list").select("tbody tr").map { row ->
+                    if (!row.hasAttr("data-proxy-id")) { return@map Proxy("", 0) }
 
                     val columns = row.select("td")
                     val ip = columns[0].select("abbr").attr("title")
@@ -108,25 +128,14 @@ class HttpUtils {
                     val speed = columns[3].select("small").text().split(" ")[0]
                     val type = columns[6].select("span").text()
 
-                    if (port.isBlank() || speed.isBlank()) { return@forEach }
-                    result.add(Proxy(host = ip, port = port.toInt(), type = type, speed = speed.toInt()))
-                }
-            }
-
-            result.sortBy { it.speed }
-
-            while (true) {
-                val proxy = if (result.isNotEmpty()) result[0] else return null
-                val time = proxyBlacklist[proxy] ?: return proxy
-                if (System.currentTimeMillis() - time > 1000 * 60 * 60 * 24) {
-                    proxyBlacklist.remove(proxy)
-                    return proxy
-                }
-                result.removeAt(0)
+                    if (port.isBlank() || speed.isBlank()) { return@map Proxy("", 0) }
+                    Proxy(host = ip, port = port.toInt(), type = type, speed = speed.toInt())
+                }.filter { it.port != 0 }
             }
         }
     }
 }
+
 enum class HttpMethod {
     GET,
     POST

@@ -25,7 +25,8 @@ class SettingsFragment : VkmFragment() {
 
         clearQueue.setOnClickListener { DownloadManager.clearQueue() }
 
-        useProxy.setOnCheckedChangeListener { _, value -> State.enableTextSuggestions = value }
+        useProxy.isChecked = State.useProxy
+        useProxy.setOnCheckedChangeListener { _, value -> State.useProxy = value }
 
         stopDownload.setOnClickListener { DownloadManager.stopDownload() }
 

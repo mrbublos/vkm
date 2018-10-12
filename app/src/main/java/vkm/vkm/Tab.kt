@@ -24,7 +24,7 @@ abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
         filter = tabState?.get("filter") as String? ?: ""
         dataList = tabState?.get("dataList") as MutableList<T>? ?: mutableListOf()
         lastPopulated = tabState?.get("lastPopulated") as Long? ?: System.currentTimeMillis()
-        this.callback = tabState?.get("callback") as SearchTabCallback? ?: callback
+        this.callback = callback
     }
 
     open fun activate(data: List<T>?) {}

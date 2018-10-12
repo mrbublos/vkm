@@ -225,7 +225,7 @@ object DownloadManager {
                          val fileName = file.name.substringBeforeLast(".") // cutting .mp3
                          val data = fileName.replace('_', ' ').split('-')
                          val existingComposition = Composition(artist = data[0], name = data[1], hash = file.readBytes().md5())
-                         downloadedList.add(existingComposition)
+                         if (existingComposition !in downloadedList ) { downloadedList.add(existingComposition) }
                      }
                      jobs.add(job)
                  }
