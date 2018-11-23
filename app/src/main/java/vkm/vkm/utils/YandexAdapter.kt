@@ -35,9 +35,10 @@ object YMusicParsers {
 
     fun parseArtists(result: JSONObject): MutableList<Artist> {
         return result.geto("artists").geta("items").map { artist ->
+            val cover = artist.geto("cover").gets("uri").substringBefore("%%")
             Artist(id = artist.gets("id"),
                    name = artist.gets("name"),
-                   url = "http://${artist.geto("cover").gets("uri").substringBefore("%%")}50x50")
+                   url = if (cover.isEmpty()) "" else "http://${cover}50x50")
         }
     }
 

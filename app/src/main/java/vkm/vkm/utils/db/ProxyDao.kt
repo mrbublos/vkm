@@ -18,9 +18,6 @@ interface ProxyDao {
     @Insert
     fun insert(proxy: Proxy)
 
-    @Query("SELECT * FROM blacklisted_proxy WHERE type = 'current'")
-    fun get(proxy: Proxy)
-
     @Delete
     fun delete(proxy: Proxy)
 

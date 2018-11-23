@@ -38,6 +38,7 @@ class HttpUtils {
             proxyBlacklist.clear()
             list.forEach {
                 if (it.type == "current") {
+                    "Setting proxy $it".log()
                     currentProxy = it
                     return@forEach
                 }
@@ -80,7 +81,7 @@ class HttpUtils {
                 caller.responseJson { _, resp, result ->
                     try {
                         if (result is Result.Success && resp.headers["Content-Type"]?.firstOrNull()?.contains("application/json") == true) {
-                            "Received result ${result.component1()}".log()
+                            "Received result ${result.component1()?.content}".log()
                             continuation.resume(result.component1()!!)
                             return@responseJson
                         } else {
@@ -100,7 +101,7 @@ class HttpUtils {
             }
         }
 
-        private fun getProxy(): Proxy? {
+        private suspend fun getProxy(): Proxy? {
             val currProxy = currentProxy
             if (currProxy != null && proxyBlacklist[currProxy] == null) { return currProxy }
 
@@ -124,20 +125,33 @@ class HttpUtils {
             }
         }
 
-        private fun fetchProxyList(): List<Proxy> {
-            Jsoup.connect("https://www.proxy" + "nova.com/proxy-server-list/country-ru/").get().run {
-                return getElementById("tbl_p" + "roxy_list").select("tbody tr").map { row ->
-                    if (!row.hasAttr("data-proxy-id")) { return@map Proxy("", 0) }
+        private suspend fun fetchProxyList(): List<Proxy> {
+            "Fetching proxy list".log()
+            return suspendCoroutine { continuation ->
+                try {
+                    Jsoup.connect("https://www.proxy" + "nova.com/proxy-server-list/country-ru/").get().run {
+                        "Proxy list fetched".log()
+                        val result = getElementById("tbl_p" + "roxy_list").select("tbody tr").map { row ->
+                            if (!row.hasAttr("data-proxy-id")) {
+                                return@map Proxy("", 0)
+                            }
 
-                    val columns = row.select("td")
-                    val ip = columns[0].select("abbr").attr("title")
-                    val port = columns[1].select("a").text()
-                    val speed = columns[3].select("small").text().split(" ")[0]
-                    val type = columns[6].select("span").text()
+                            val columns = row.select("td")
+                            val ip = columns[0].select("abbr").attr("title")
+                            val port = columns[1].select("a").text()
+                            val speed = columns[3].select("small").text().split(" ")[0]
+                            val type = columns[6].select("span").text()
 
-                    if (port.isBlank() || speed.isBlank()) { return@map Proxy("", 0) }
-                    Proxy(host = ip, port = port.toInt(), type = type, speed = speed.toInt())
-                }.filter { it.port != 0 }
+                            if (port.isBlank() || speed.isBlank()) {
+                                return@map Proxy("", 0)
+                            }
+                            Proxy(host = ip, port = port.toInt(), type = type, speed = speed.toInt())
+                        }.filter { it.port != 0 }
+                        continuation.resume(result)
+                    }
+                } catch (e: Exception) {
+                    continuation.resumeWithException(e)
+                }
             }
         }
     }
