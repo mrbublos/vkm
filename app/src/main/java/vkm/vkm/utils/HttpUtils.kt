@@ -8,7 +8,6 @@ import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import org.jsoup.Jsoup
 import vkm.vkm.State
-import java.io.IOException
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.experimental.suspendCoroutine
@@ -23,7 +22,10 @@ class HttpUtils {
 
         private fun setProxy(proxy: Proxy?) {
             "Using proxy: $proxy".log()
-            currentProxy = proxy
+            if (proxy != null) {
+                currentProxy = proxy
+                currentProxy?.type = "current"
+            }
             FuelManager.instance = FuelManager()
             FuelManager.instance.proxy = proxy?.let {
                 java.net.Proxy(java.net.Proxy.Type.HTTP, InetSocketAddress(it.host, it.port))
@@ -35,6 +37,10 @@ class HttpUtils {
         fun setBlackList(list: List<Proxy>) {
             proxyBlacklist.clear()
             list.forEach {
+                if (it.type == "current") {
+                    currentProxy = it
+                    return@forEach
+                }
                 proxyBlacklist[it] = it.added
             }
         }
@@ -81,6 +87,7 @@ class HttpUtils {
                             val currProxy = currentProxy
                             if (currProxy != null) {
                                 "Blacklisting $currProxy".log()
+                                currProxy.type = "blacklisted"
                                 proxyBlacklist[currProxy] = System.currentTimeMillis()
                             }
                             result.component2().toString().logE()

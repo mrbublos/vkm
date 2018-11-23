@@ -6,9 +6,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.album_list_element.view.*
 import vkm.vkm.R
-import vkm.vkm.utils.*
+import vkm.vkm.utils.Artist
+import vkm.vkm.utils.PictureDownloader
+import vkm.vkm.utils.VkmFragment
 
-class AlbumListAdapter(fragment: VkmFragment, resource: Int, data: List<Album>, private var elementClickListener: (album: Album, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Album>(fragment.context, resource, data) {
+class ArtistListAdapter(fragment: VkmFragment, resource: Int, data: List<Artist>, private var elementClickListener: (album: Artist, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Artist>(fragment.context, resource, data) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.album_list_element, null)
@@ -16,7 +18,6 @@ class AlbumListAdapter(fragment: VkmFragment, resource: Int, data: List<Album>, 
 
         item?.let {
             view.name.text = it.name
-            view.artist.text = it.artist
 
             view.action.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)

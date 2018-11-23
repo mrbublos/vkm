@@ -8,29 +8,8 @@ import java.nio.charset.StandardCharsets
 
 object YMusicParsers {
 
-    fun parseCompositionList(result: JSONObject?): MutableList<Composition> {
-        val compositionsFound = mutableListOf<Composition>()
-        if (result != null && result.gets("text").isNotEmpty()) {
-            try {
-                result.geto("tracks").let { tracks ->
-                    tracks.geta("items").takeIf { it.length() > 0 }?.let {
-                        val compositions = it.map { track ->
-                            Composition(id = track.getl("id").toString(),
-                                    artist = track.geta("artists").map { artist ->
-                                        artist.gets("name")
-                                    }.joinToString(","),
-                                    name = track.gets("title"),
-                                    url = track.gets("storageDir"),
-                                    length = track.getl("durationMs").toString())
-                        }
-                        compositionsFound.addAll(compositions)
-                    }
-                }
-            } catch (e: Exception) {
-                "Error parsing YM response".logE(e)
-            }
-        }
-        return compositionsFound
+    fun parseCompositionList(result: JSONObject): MutableList<Composition> {
+        return parseTracks(result.geto("tracks").geta("items"))
     }
 
     fun parseNewReleases(result: JSONObject): List<String> {
@@ -39,46 +18,53 @@ object YMusicParsers {
 
     fun parseAlbums(result: JSONArray): MutableList<Album> {
         return result.map { album ->
-            val artist = album.geta("artists").map { it.gets("name") }.joinToString(",")
             Album(id = album.gets("id"),
-                    artist = artist,
+                    artist = getItemArtist(album),
                     name = album.gets("title"),
                     url = "http://${album.gets("coverUri").substringBefore("%%")}50x50")
         }
     }
 
     fun parseAlbum(result: JSONObject): MutableList<Composition> {
-        val artist = result.geta("artists").map { it.gets("name") }.joinToString(",")
-        return result.geta("volumes").mapArr { volume ->
-            volume.map { composition ->
-                Composition(id = composition.gets("id"),
-                        name = composition.gets("title"),
-                        artist = artist,
-                        length = (composition.getl("durationMs") / 1000).toString(),
-                        vkmId = System.nanoTime(),
-                        url = composition.gets("storageDir"))
-            }
-        }.flatten() as MutableList<Composition>
+        return result.geta("volumes").mapArr { parseTracks(it) }.flatten() as MutableList<Composition>
     }
 
     fun parseChart(result: JSONObject): MutableList<Composition> {
-        return result.geto("chart").geta("tracks").map { composition ->
-            val artist = composition.geta("artists").map { it.gets("name") }.joinToString(",")
-            Composition(id = composition.gets("id"),
-                    name = composition.gets("title"),
-                    artist = artist,
-                    length = (composition.getl("durationMs") / 1000).toString(),
-                    vkmId = System.nanoTime(),
-                    url = composition.gets("storageDir"))
+        return parseTracks(result.geto("chart").geta("tracks"))
+    }
+
+    fun parseArtists(result: JSONObject): MutableList<Artist> {
+        return result.geto("artists").geta("items").map { artist ->
+            Artist(id = artist.gets("id"),
+                   name = artist.gets("name"),
+                   url = "http://${artist.geto("cover").gets("uri").substringBefore("%%")}50x50")
         }
     }
+
+    fun parseArtistTracks(result: JSONObject): MutableList<Composition> {
+        return parseTracks(result.geta("tracks"))
+    }
+
+    private fun parseTracks(tracks: JSONArray): MutableList<Composition> {
+        return tracks.map { track ->
+            Composition(id = track.gets("id"),
+                        name = track.gets("title"),
+                        artist = getItemArtist(track),
+                        length = (track.getl("durationMs") / 1000).toString(),
+                        vkmId = System.nanoTime(),
+                        url = track.gets("storageDir"))
+        }
+    }
+
+    private fun getItemArtist(item: JSONObject) = item.geta("artists").map { it.gets("name") }.joinToString(",")
 }
 
 object YMusicApi {
 
-    suspend fun search(text: String, offset: Int): JSONObject {
+    // type: (artist|album|track|all)
+    suspend fun search(text: String, offset: Int, type: String): JSONObject {
         val urlEncText = URLEncoder.encode(text.replace(" ", "%20"), StandardCharsets.UTF_8.name())
-        val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=tracks&page=${offset / 100}"
+        val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=$type&page=${offset / 100}"
         return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
@@ -99,6 +85,11 @@ object YMusicApi {
 
     suspend fun getChart(): JSONObject {
         val url = "https://music.yandex.ru/handlers/main.jsx?what=chart"
+        return HttpUtils.call4Json(GET, url, true).safeObj()
+    }
+
+    suspend fun getArtistTracks(id: String): JSONObject {
+        val url = "https://music.yandex.ru/handlers/artist.jsx?artist=$id&what=tracks&sort=&dir=&lang=ru"
         return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 

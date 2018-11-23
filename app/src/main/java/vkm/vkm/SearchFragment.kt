@@ -16,11 +16,9 @@ import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.R.layout.*
 import vkm.vkm.adapters.AlbumListAdapter
+import vkm.vkm.adapters.ArtistListAdapter
 import vkm.vkm.adapters.CompositionListAdapter
-import vkm.vkm.utils.Album
-import vkm.vkm.utils.Composition
-import vkm.vkm.utils.VkmFragment
-import vkm.vkm.utils.toast
+import vkm.vkm.utils.*
 import kotlin.reflect.KClass
 
 class SearchFragment : VkmFragment() {
@@ -35,7 +33,7 @@ class SearchFragment : VkmFragment() {
     init { layout = activity_search }
 
     override fun init() {
-        tabs = listOf(TracksTab(::setDataList), NewAlbumsTab(::setDataList), ChartTab(::setDataList))
+        tabs = listOf(TracksTab(::setDataList), NewAlbumsTab(::setDataList), ChartTab(::setDataList), ArtistTab(::setDataList))
         initializeElements()
         initializeTabs()
         initializeButton()
@@ -64,7 +62,7 @@ class SearchFragment : VkmFragment() {
     }
 
     private fun initializeTabs() {
-        searchTabsSwiper.value = tabs.map { it.name }.toMutableList()
+        searchTabsSwiper.value = tabs.asSequence().map { it.name }.toMutableList()
         searchTabsSwiper.setCurrentString(tabs[State.currentSearchTab].name)
         tabs[State.currentSearchTab].activate(null)
 
@@ -99,7 +97,8 @@ class SearchFragment : VkmFragment() {
 
             resultList.adapter = when (adaptorClass) {
                 CompositionListAdapter::class -> CompositionListAdapter(me, composition_list_element, data as MutableList<Composition>, compositionAction)
-                AlbumListAdapter::class -> AlbumListAdapter(me, album_list_element, data as MutableList<Album>, ::albumAction)
+                AlbumListAdapter::class -> AlbumListAdapter(me, album_list_element, data as MutableList<Album>, ::compositionContainerAction)
+                ArtistListAdapter::class -> ArtistListAdapter(me, album_list_element, data as MutableList<Artist>, ::compositionContainerAction)
                 else -> throw Exception()
             }
 
@@ -127,16 +126,18 @@ class SearchFragment : VkmFragment() {
         }
     }
 
-    private fun albumAction(album: Album, view: View) {
+    private fun compositionContainerAction(item: CompositionContainer, view: View) {
         lockScreen(true)
         showSpinner(true)
 
+        val fromTab = State.currentSearchTab
+
         switchTo("tracks")
         launch(CommonPool) {
-            val fetchCompositions = album.compositionFetcher
+            val fetchCompositions = item.compositionFetcher
             if (fetchCompositions == null) {
-                "Error loading album tracks".toast(getContext())
-                switchTo("new")
+                "Error loading item tracks".toast(getContext())
+                switchTo(fromTab)
                 launch(UI) {
                     lockScreen(false)
                     showSpinner(false)
@@ -146,13 +147,13 @@ class SearchFragment : VkmFragment() {
 
             fetchCompositions()
             var retries = 0
-            while (album.compositions == null && retries++ < 10) { delay(1000) }
-            val compositions = album.compositions
+            while (item.compositions == null && retries++ < 10) { delay(1000) }
+            val compositions = item.compositions
             if (compositions == null || compositions.isEmpty()) {
-                "Error loading album tracks".toast(getContext())
-                switchTo("new")
+                "Error loading item tracks".toast(getContext())
+                switchTo(fromTab)
             } else {
-                (currentTab as Tab<Composition>).activate(compositions)
+                (this@SearchFragment.currentTab as Tab<Composition>).activate(compositions)
             }
 
             launch(UI) {
@@ -164,12 +165,16 @@ class SearchFragment : VkmFragment() {
 
     private fun switchTo(name: String) {
         searchTabsSwiper.setCurrentString(name)
-        State.currentSearchTab = getTabIndex(name)
+        switchTo(getTabIndex(name))
+    }
+
+    private fun switchTo(index: Int) {
+        State.currentSearchTab = index
         searchPanel.visibility = if (tabs[State.currentSearchTab].hideSearch) GONE else VISIBLE
     }
 
     private fun getTabIndex(name: String): Int {
-        return tabs.map { it.name }.indexOf(name)
+        return tabs.asSequence().map { it.name }.indexOf(name)
     }
 
     override fun onDestroyView() {

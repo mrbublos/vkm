@@ -1,7 +1,6 @@
 package vkm.vkm
 
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -18,6 +17,7 @@ interface MusicService {
     fun getCompositions(filter: String = "", offset: Int = 0, callback: (tracks: MutableList<Composition>) -> Unit): Boolean
     fun getNewAlbums(callback: (tracks: MutableList<Album>) -> Unit): Boolean
     fun getChart(callback: (tracks: MutableList<Composition>) -> Unit): Boolean
+    fun getArtists(filter: String = "", offset: Int = 0, callback: (artists: MutableList<Artist>) -> Unit): Boolean
     suspend fun preprocess(composition: Composition) {}
 }
 
@@ -28,7 +28,7 @@ open class YMusicService : MusicService {
         launch(CommonPool) {
             val compositions = YMusicParsers.parseChart(YMusicApi.getChart())
             loadingFinished()
-            launch(UI) { callback(compositions) }
+            callback(compositions)
         }
         return true
     }
@@ -46,7 +46,7 @@ open class YMusicService : MusicService {
                 }
             }
             loadingFinished()
-            launch(UI) { callback(albums) }
+            callback(albums)
         }
         return true
     }
@@ -67,14 +67,38 @@ open class YMusicService : MusicService {
         launch(CommonPool) {
             if (filter.isEmpty()) {
                 loadingFinished()
-                launch(UI) { callback(mutableListOf()) }
+                callback(mutableListOf())
                 return@launch
             }
 
-            val result = YMusicApi.search(filter, offset)
+            val result = YMusicApi.search(filter, offset, "track")
             val tracks = YMusicParsers.parseCompositionList(result)
             loadingFinished()
-            launch(UI) { callback(tracks) }
+            callback(tracks)
+        }
+        return true
+    }
+
+    override fun getArtists(filter: String, offset: Int, callback: (artists: MutableList<Artist>) -> Unit): Boolean {
+        if (isLoading()) { return false }
+        launch(CommonPool) {
+            if (filter.isEmpty()) {
+                loadingFinished()
+                callback(mutableListOf())
+                return@launch
+            }
+
+            val result = YMusicApi.search(filter, offset, "artist")
+            val artists = YMusicParsers.parseArtists(result)
+            artists.forEach { artist ->
+                artist.compositionFetcher = {
+                    launch(CommonPool) {
+                        artist.compositions = YMusicParsers.parseArtistTracks(YMusicApi.getArtistTracks(artist.id))
+                    }
+                }
+            }
+            loadingFinished()
+            callback(artists)
         }
         return true
     }
