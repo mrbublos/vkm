@@ -6,11 +6,17 @@ import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
 import org.jsoup.Jsoup
 import vkm.vkm.State
+import vkm.vkm.utils.db.ProxyDao
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.experimental.suspendCoroutine
+
+typealias JProxy = java.net.Proxy
 
 class HttpUtils {
 
@@ -27,29 +33,44 @@ class HttpUtils {
                 currentProxy?.type = "current"
             }
             FuelManager.instance = FuelManager()
-            FuelManager.instance.proxy = proxy?.let {
-                java.net.Proxy(java.net.Proxy.Type.HTTP, InetSocketAddress(it.host, it.port))
-            }
+            FuelManager.instance.proxy = proxy?.let { JProxy(java.net.Proxy.Type.HTTP, InetSocketAddress(it.host, it.port)) }
             FuelManager.instance.timeoutInMillisecond = 5000
             FuelManager.instance.timeoutReadInMillisecond = 5000
         }
 
-        fun setBlackList(list: List<Proxy>) {
+        private fun setProxies(list: List<Proxy>) {
             proxyBlacklist.clear()
+            untrustedProxyList.clear()
             list.forEach {
-                if (it.type == "current") {
-                    "Setting proxy $it".log()
-                    currentProxy = it
-                    return@forEach
+                when (it.type) {
+                    "current" -> currentProxy = it
+                    "untrusted" -> untrustedProxyList.add(it)
+                    else -> proxyBlacklist[it] = it.added
                 }
-                proxyBlacklist[it] = it.added
             }
         }
 
-        fun getBlackList(): List<Proxy> {
+        private fun getBlackList(): List<Proxy> {
             return proxyBlacklist.map {
                 it.key.added = it.value
                 it.key
+            }
+        }
+
+        fun storeProxies(dao: ProxyDao): Job {
+            // slow but simple
+            return launch(CommonPool) {
+                val blackList = HttpUtils.getBlackList().filter { it.added > System.currentTimeMillis() - 1000 * 60 * 60 * 24 }
+                dao.deleteAll()
+                dao.insertAll(blackList)
+                dao.insertAll(untrustedProxyList)
+                currentProxy?.let { dao.insert(it) }
+            }
+        }
+
+        fun loadProxies(dao: ProxyDao): Job {
+            return launch(CommonPool) {
+                HttpUtils.setProxies(dao.getAll())
             }
         }
 
@@ -132,9 +153,7 @@ class HttpUtils {
                     Jsoup.connect("https://www.proxy" + "nova.com/proxy-server-list/country-ru/").get().run {
                         "Proxy list fetched".log()
                         val result = getElementById("tbl_p" + "roxy_list").select("tbody tr").map { row ->
-                            if (!row.hasAttr("data-proxy-id")) {
-                                return@map Proxy("", 0)
-                            }
+                            if (!row.hasAttr("data-proxy-id")) { return@map Proxy("", 0) }
 
                             val columns = row.select("td")
                             val ip = columns[0].select("abbr").attr("title")
@@ -142,10 +161,8 @@ class HttpUtils {
                             val speed = columns[3].select("small").text().split(" ")[0]
                             val type = columns[6].select("span").text()
 
-                            if (port.isBlank() || speed.isBlank()) {
-                                return@map Proxy("", 0)
-                            }
-                            Proxy(host = ip, port = port.toInt(), type = type, speed = speed.toInt())
+                            if (port.isBlank() || speed.isBlank()) { return@map Proxy("", 0) }
+                            Proxy(host = ip, port = port.toInt(), type = "untrusted", speed = speed.toInt())
                         }.filter { it.port != 0 }
                         continuation.resume(result)
                     }

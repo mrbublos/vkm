@@ -36,11 +36,8 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         savedInstanceState?.let {
             State.currentSearchTab = it.getInt("currentSearchTab")
             State.currentHistoryTab = it.getString("currentHistoryTab")
-            launch(CommonPool) {
-                val proxyDao = Db.instance(applicationContext).proxyDao()
-                HttpUtils.setBlackList(proxyDao.getAll())
-                DownloadManager.initialize(Db.instance(applicationContext).tracksDao())
-            }
+            HttpUtils.loadProxies(Db.instance(applicationContext).proxyDao())
+            DownloadManager.initialize(Db.instance(applicationContext).tracksDao())
         }
 
         setContentView(R.layout.pager_activity)
@@ -55,14 +52,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         outState?.putInt("currentSearchTab", State.currentSearchTab)
         outState?.putString("currentHistoryTab", State.currentHistoryTab)
 
-        // slow but simple
-        val blackList = HttpUtils.getBlackList().filter { it.added > System.currentTimeMillis() - 1000 * 60 * 60 * 24 }
-        launch(CommonPool) {
-            val proxyDao = Db.instance(applicationContext).proxyDao()
-            proxyDao.deleteAll()
-            proxyDao.insertAll(blackList)
-            HttpUtils.currentProxy?.let { proxyDao.insert(it) }
-        }
+        HttpUtils.storeProxies(Db.instance(applicationContext).proxyDao())
     }
 
     override fun onDestroy() {

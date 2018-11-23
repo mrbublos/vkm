@@ -5,6 +5,7 @@ import org.json.JSONObject
 import vkm.vkm.utils.HttpMethod.GET
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import kotlin.math.roundToInt
 
 object YMusicParsers {
 
@@ -64,8 +65,17 @@ object YMusicApi {
 
     // type: (artist|album|track|all)
     suspend fun search(text: String, offset: Int, type: String): JSONObject {
+        val pageSize = when (type) {
+            "artist" -> 48
+            "track" -> 100
+            "album" -> 48
+            else -> 48
+        }
+
+        val page = offset / pageSize
+        if (offset > 0 && page == 0) { return JSONObject() } // only one page available
         val urlEncText = URLEncoder.encode(text.replace(" ", "%20"), StandardCharsets.UTF_8.name())
-        val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=$type&page=${offset / 100}"
+        val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=$type&page=$page"
         return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
