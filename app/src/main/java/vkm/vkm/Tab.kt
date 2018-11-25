@@ -14,6 +14,7 @@ abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
     var callback: SearchTabCallback by TabStateDelegate<SearchTabCallback, T>()
     var dataList: MutableList<T> by TabStateDelegate<MutableList<T>, T>()
     var lastPopulated: Long by TabStateDelegate<Long, T>()
+    var active: Boolean by TabStateDelegate<Boolean, T>()
 
     open val hideSearch = false
 
@@ -24,12 +25,17 @@ abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
         filter = tabState?.get("filter") as String? ?: ""
         dataList = tabState?.get("dataList") as MutableList<T>? ?: mutableListOf()
         lastPopulated = tabState?.get("lastPopulated") as Long? ?: System.currentTimeMillis()
+        active = tabState?.get("active") as Boolean? ?: false
         this.callback = callback
     }
 
-    open fun activate(data: List<T>?) {}
+    open fun activate(data: List<T>?) {
+        active = true
+    }
 
-    open fun deactivate() {}
+    open fun deactivate() {
+        active = false
+    }
 
     open fun destroy() { callback = { _, _ -> } }
 

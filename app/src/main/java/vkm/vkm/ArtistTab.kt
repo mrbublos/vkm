@@ -19,12 +19,14 @@ class ArtistTab(callback: SearchTabCallback) : Tab<Artist>(callback, "artists") 
     }
 
     override fun search(query: String) {
+        if (filter == query) { return }
         filter = query
         currentOffset = 0
         MusicService.trackMusicService.getArtists(filter, 0, ::onDataFetched)
     }
 
     private fun onDataFetched(artists: MutableList<Artist>) {
+        if (!active) { return }
         if (currentOffset == 0) { dataList.clear() }
         currentOffset = if (currentOffset < 0 || artists.isEmpty()) -1 else currentOffset + artists.size
         dataList.addAll(artists)

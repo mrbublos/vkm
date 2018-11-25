@@ -29,7 +29,7 @@
     <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
-            app:srcCompat="@drawable/ic_next_player"
+            app:srcCompat="@drawable/ic_list"
             android:contentDescription="@string/listen_to_album"
             android:id="@+id/action"
             android:adjustViewBounds="false"

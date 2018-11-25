@@ -19,12 +19,14 @@ class TracksTab(callback: SearchTabCallback) : Tab<Composition>(callback, "track
     }
 
     override fun search(query: String) {
+        if (filter == query) { return }
         filter = query
         currentOffset = 0
         MusicService.trackMusicService.getCompositions(filter, 0, ::onTracksFetched)
     }
 
     private fun onTracksFetched(tracks: MutableList<Composition>) {
+        if (!active) { return }
         if (currentOffset == 0) { dataList.clear() }
         currentOffset = if (currentOffset < 0 || tracks.isEmpty()) -1 else currentOffset + tracks.size
         dataList.addAll(tracks)

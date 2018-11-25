@@ -22,6 +22,7 @@ class NewAlbumsTab(callback: SearchTabCallback) : Tab<Album>(callback, "new") {
     }
 
     private fun onAlbumsFetched(albums: MutableList<Album>) {
+        if (!active) { return }
         dataList = albums
         callback(dataList, AlbumListAdapter::class)
     }

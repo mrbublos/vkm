@@ -22,6 +22,7 @@ class ChartTab(callback: SearchTabCallback) : Tab<Composition>(callback, "chart"
     }
 
     private fun onChartFetched(compositions: MutableList<Composition>) {
+        if (!active) { return }
         dataList = compositions
         callback(dataList, CompositionListAdapter::class)
     }
