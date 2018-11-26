@@ -1,13 +1,11 @@
 package vkm.vkm
 
-import android.widget.ListAdapter
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-typealias SearchTabCallback = (data: MutableList<out Any>, adaptorClass: KClass<out ListAdapter>) -> Unit
+typealias SearchTabCallback = () -> Unit
 
-abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
+abstract class Tab<T>(callback: SearchTabCallback, var name: String, val listType: ListType) {
 
     var currentOffset: Int by TabStateDelegate<Int, T>()
     var filter: String by TabStateDelegate<String, T>()
@@ -15,6 +13,7 @@ abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
     var dataList: MutableList<T> by TabStateDelegate<MutableList<T>, T>()
     var lastPopulated: Long by TabStateDelegate<Long, T>()
     var active: Boolean by TabStateDelegate<Boolean, T>()
+    var loading: Boolean by TabStateDelegate<Boolean, T>()
 
     open val hideSearch = false
 
@@ -27,6 +26,7 @@ abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
         lastPopulated = tabState?.get("lastPopulated") as Long? ?: System.currentTimeMillis()
         active = tabState?.get("active") as Boolean? ?: false
         this.callback = callback
+        loading = false
     }
 
     open fun activate(data: List<T>?) {
@@ -37,7 +37,7 @@ abstract class Tab<T> (callback: SearchTabCallback, var name: String) {
         active = false
     }
 
-    open fun destroy() { callback = { _, _ -> } }
+    open fun destroy() { callback = { } }
 
     open fun onBottomReached() {}
 
@@ -56,4 +56,10 @@ class TabStateDelegate<T, R> {
         if (properties == null) { State.tabState[thisRef.name] = ConcurrentHashMap() }
         State.tabState[thisRef.name]!![property.name] = value as Any
     }
+}
+
+enum class ListType {
+    Composition,
+    Album,
+    Artist
 }

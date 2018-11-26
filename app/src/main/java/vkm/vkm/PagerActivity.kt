@@ -33,11 +33,12 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        HttpUtils.loadProxies(Db.instance(applicationContext).proxyDao())
+        DownloadManager.initialize(Db.instance(applicationContext).tracksDao())
+
         savedInstanceState?.let {
             State.currentSearchTab = it.getInt("currentSearchTab")
             State.currentHistoryTab = it.getString("currentHistoryTab")
-            HttpUtils.loadProxies(Db.instance(applicationContext).proxyDao())
-            DownloadManager.initialize(Db.instance(applicationContext).tracksDao())
         }
 
         setContentView(R.layout.pager_activity)
@@ -57,6 +58,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onDestroy() {
         super.onDestroy()
+        HttpUtils.storeProxies(Db.instance(applicationContext).proxyDao())
         unbindService(this)
     }
 

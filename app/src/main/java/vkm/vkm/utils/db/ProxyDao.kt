@@ -1,26 +1,23 @@
 package vkm.vkm.utils.db
 
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Delete
-import android.arch.persistence.room.Insert
-import android.arch.persistence.room.Query
+import android.arch.persistence.room.*
 import vkm.vkm.utils.Proxy
 
 @Dao
 interface ProxyDao {
 
-    @Query("SELECT * FROM blacklisted_proxy")
+    @Query("SELECT * FROM proxy")
     fun getAll(): List<Proxy>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(list: List<Proxy>)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(proxy: Proxy)
 
     @Delete
     fun delete(proxy: Proxy)
 
-    @Query("DELETE FROM blacklisted_proxy")
+    @Query("DELETE FROM proxy")
     fun deleteAll()
 }

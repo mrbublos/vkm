@@ -1,13 +1,13 @@
 package vkm.vkm
 
-import vkm.vkm.adapters.CompositionListAdapter
 import vkm.vkm.utils.Composition
 
-class ChartTab(callback: SearchTabCallback) : Tab<Composition>(callback, "chart") {
+class ChartTab(callback: SearchTabCallback) : Tab<Composition>(callback, "chart", ListType.Composition) {
 
     override val hideSearch = true
 
     override fun activate(data: List<Composition>?) {
+        super.activate(null)
         data?.let { dataList = data.toMutableList() }
         if (dataList.isNotEmpty() && System.currentTimeMillis() - lastPopulated < 1000 * 60 * 60) {
             onChartFetched(dataList)
@@ -17,13 +17,15 @@ class ChartTab(callback: SearchTabCallback) : Tab<Composition>(callback, "chart"
     }
 
     override fun search(query: String) {
+        if (loading || !active) { return }
+        loading = true
         lastPopulated = System.currentTimeMillis()
         MusicService.trackMusicService.getChart(::onChartFetched)
     }
 
     private fun onChartFetched(compositions: MutableList<Composition>) {
-        if (!active) { return }
+        loading = false
         dataList = compositions
-        callback(dataList, CompositionListAdapter::class)
+        callback()
     }
 }
