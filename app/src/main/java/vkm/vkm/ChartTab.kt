@@ -7,34 +7,20 @@ class ChartTab(callback: SearchTabCallback) : Tab<Composition>(callback, "chart"
     override val hideSearch = true
 
     override fun activate(data: List<Composition>?) {
-        super.activate(null)
-        data?.let { dataList = data.toMutableList() }
-        if (dataList.isNotEmpty() && System.currentTimeMillis() - lastPopulated < 1000 * 60 * 60) {
-            onDataFetched(dataList)
-            return
+        super.activate(data)
+        if (dataList.isEmpty() || System.currentTimeMillis() - lastPopulated < 1000 * 60 * 60) {
+            search("")
         }
-        search("")
     }
 
-    override fun search(query: String) {
-        if (loading || !active) { return }
+    override fun search(query: String): Boolean {
+        if (loading || !active) { return false }
         loading = true
         lastPopulated = System.currentTimeMillis()
         page = 0
-        MusicService.trackMusicService.getChart(page, this::onDataFetched)
-    }
 
-    override fun onBottomReached() {
-        if (loading) { return }
-        if (page == NO_MORE_PAGES) { return }
-
-        loading = true
-        MusicService.trackMusicService.getChart(++page, this::onDataFetched)
-    }
-
-    override fun onDataFetched(data: MutableList<Composition>) {
-        loading = false
-        dataList = data
-        callback()
+        nextPageLoader = { page -> MusicService.trackMusicService.getChart(page) }
+        loadNewPage()
+        return true
     }
 }

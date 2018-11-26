@@ -1,7 +1,5 @@
 package vkm.vkm
 
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
 import vkm.vkm.utils.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -11,96 +9,70 @@ interface MusicService {
         val trackMusicService: YMusicService = YMusicService()
     }
 
-    fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String = "", page: Int = 0): Boolean
-    fun getGroups(fragment: SearchFragment, filter: String = "", page: Int = 0): Boolean
-    fun getUsers(fragment: SearchFragment, filter: String = "", page: Int = 0): Boolean
-    fun getCompositions(filter: String = "", page: Int = 0, callback: (tracks: MutableList<Composition>) -> Unit): Boolean
-    fun getNewAlbums(page: Int, callback: (tracks: MutableList<Album>) -> Unit): Boolean
-    fun getChart(page: Int, callback: (tracks: MutableList<Composition>) -> Unit): Boolean
-    fun getArtists(filter: String = "", page: Int = 0, callback: (artists: MutableList<Artist>) -> Unit): Boolean
+    suspend fun getCompositions(filter: String = "", page: Int = 0): List<Composition>
+    suspend fun getNewAlbums(page: Int): List<Album>
+    suspend fun getChart(page: Int): List<Composition>
+    suspend fun getArtists(filter: String = "", page: Int = 0): List<Artist>
     suspend fun preprocess(composition: Composition) {}
 }
 
 open class YMusicService : MusicService {
 
-    override fun getChart(page: Int, callback: (tracks: MutableList<Composition>) -> Unit): Boolean {
-        if (isLoading()) { return false }
-        launch(CommonPool) {
-            val compositions = YMusicParsers.parseChart(YMusicApi.getChart(page))
-            loadingFinished()
-            callback(compositions)
-        }
-        return true
+    override suspend fun getChart(page: Int): List<Composition> {
+        if (isLoading()) { return listOf() }
+        val compositions = YMusicParsers.parseChart(YMusicApi.getChart(page))
+        loadingFinished()
+        return compositions
     }
 
-    override fun getNewAlbums(page: Int, callback: (data: MutableList<Album>) -> Unit): Boolean {
-        if (isLoading()) { return false }
-        launch(CommonPool) {
-            val albumIds = YMusicParsers.parseNewReleases(YMusicApi.getNewReleases(page))
-            val albums = YMusicParsers.parseAlbums(YMusicApi.getAlbums(albumIds))
-            albums.forEach {
-                it.compositionFetcher = {
-                    launch(CommonPool) {
-                        it.compositions = YMusicParsers.parseAlbum(YMusicApi.getAlbum(it.id))
-                    }
-                }
+    override suspend fun getNewAlbums(page: Int): List<Album> {
+        if (isLoading()) { return listOf() }
+        val albumIds = YMusicParsers.parseNewReleases(YMusicApi.getNewReleases(page))
+        val albums = YMusicParsers.parseAlbums(YMusicApi.getAlbums(albumIds))
+        albums.forEach { album ->
+            album.compositionFetcher = { page ->
+                if (page > 0)
+                    listOf()
+                else
+                YMusicParsers.parseAlbum(YMusicApi.getAlbum(album.id))
             }
-            loadingFinished()
-            callback(albums)
         }
-        return true
+        loadingFinished()
+        return albums
     }
-
-    // TODO implement
-    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, page: Int): Boolean { return false }
-
-    // TODO implement
-    override fun getGroups(fragment: SearchFragment, filter: String, page: Int): Boolean { return false }
-
-    // TODO implement
-    override fun getUsers(fragment: SearchFragment, filter: String, page: Int): Boolean { return false }
 
     override suspend fun preprocess(composition: Composition) = YMusicApi.preprocessUrl(composition)
 
-    override fun getCompositions(filter: String, page: Int, callback: (tracks: MutableList<Composition>) -> Unit): Boolean {
-        if (isLoading()) { return false }
-        launch(CommonPool) {
-            if (filter.isEmpty()) {
-                loadingFinished()
-                callback(mutableListOf())
-                return@launch
-            }
-
-            val result = YMusicApi.search(filter, page, "track")
-            val tracks = YMusicParsers.parseCompositionList(result)
+    override suspend fun getCompositions(filter: String, page: Int): List<Composition> {
+        if (isLoading() || filter.isEmpty()) {
             loadingFinished()
-            callback(tracks)
+            return mutableListOf()
         }
-        return true
+
+        val result = YMusicApi.search(filter, page, "track")
+        val tracks = YMusicParsers.parseCompositionList(result)
+        loadingFinished()
+        return tracks
     }
 
-    override fun getArtists(filter: String, page: Int, callback: (artists: MutableList<Artist>) -> Unit): Boolean {
-        if (isLoading()) { return false }
-        launch(CommonPool) {
-            if (filter.isEmpty()) {
-                loadingFinished()
-                callback(mutableListOf())
-                return@launch
-            }
-
-            val result = YMusicApi.search(filter, page, "artist")
-            val artists = YMusicParsers.parseArtists(result)
-            artists.forEach { artist ->
-                artist.compositionFetcher = {
-                    launch(CommonPool) {
-                        artist.compositions = YMusicParsers.parseArtistTracks(YMusicApi.getArtistTracks(artist.id))
-                    }
-                }
-            }
+    override suspend fun getArtists(filter: String, page: Int): List<Artist> {
+        if (isLoading() || filter.isEmpty()) {
             loadingFinished()
-            callback(artists)
+            return listOf()
         }
-        return true
+
+        val result = YMusicApi.search(filter, page, "artist")
+        val artists = YMusicParsers.parseArtists(result)
+        artists.forEach { artist ->
+            artist.compositionFetcher = { page ->
+                if (page > 0)
+                    listOf()
+                else
+                YMusicParsers.parseArtistTracks(YMusicApi.getArtistTracks(page, artist.id))
+            }
+        }
+        loadingFinished()
+        return artists
     }
 
     private fun loadingFinished() {

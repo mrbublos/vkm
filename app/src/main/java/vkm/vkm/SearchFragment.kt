@@ -77,8 +77,7 @@ class SearchFragment : VkmFragment() {
         blockSearch(false)
         searchButton.setOnClickListener {
             filterText = search.text.toString()
-            currentTab.search(filterText)
-            lockScreen(true)
+            if (currentTab.search(filterText)) { lockScreen(true) }
             currentElement = 0
             return@setOnClickListener
         }
@@ -132,32 +131,8 @@ class SearchFragment : VkmFragment() {
 
     private fun compositionContainerAction(item: CompositionContainer, view: View) {
         lockScreen(true)
-
-        val fromTab = State.currentSearchTab
-
         switchTo("tracks")
-        launch(CommonPool) {
-            val fetchCompositions = item.compositionFetcher
-            if (fetchCompositions == null) {
-                "Error loading item tracks".toast(getContext())
-                switchTo(fromTab)
-                lockScreen(false)
-                return@launch
-            }
-
-            fetchCompositions()
-            var retries = 0
-            while (item.compositions == null && retries++ < 10) { delay(1000) }
-            val compositions = item.compositions
-            if (compositions == null || compositions.isEmpty()) {
-                "Error loading item tracks".toast(getContext())
-                switchTo(fromTab)
-            } else {
-                (this@SearchFragment.currentTab as Tab<Composition>).activate(compositions)
-            }
-
-            lockScreen(false)
-        }
+        (this@SearchFragment.currentTab as Tab<Composition>).activate(item.compositionFetcher)
     }
 
     private fun switchTo(name: String) {

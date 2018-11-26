@@ -24,6 +24,7 @@ data class Proxy(val host: String,
                  val country: String = "", var type: String = "", val speed: Int = 0,
                  var added: Long = System.currentTimeMillis())
 
-abstract class CompositionContainer(var compositions: List<Composition>? = null, @Transient var compositionFetcher: (() -> Unit)? = null)
+abstract class CompositionContainer(var compositions: List<Composition>? = null,
+                                    @Transient var compositionFetcher: suspend ((page: Int) -> List<Composition>) = { listOf() })
 data class Album(val id: String, val name: String, val url: String, val artist: String) : CompositionContainer()
 data class Artist(val id: String, val name: String, val url: String) : CompositionContainer()
