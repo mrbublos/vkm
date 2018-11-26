@@ -12,6 +12,6 @@ class ArtistTab(callback: SearchTabCallback) : Tab<Artist>(callback, "artists", 
         page = 0
         nextPageLoader = { page -> MusicService.trackMusicService.getArtists(filter, page) }
         loadNewPage()
-        return false
+        return true
     }
 }
