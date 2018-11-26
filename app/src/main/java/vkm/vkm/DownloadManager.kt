@@ -4,6 +4,7 @@ import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.sync.Mutex
 import kotlinx.coroutines.experimental.sync.withLock
@@ -149,7 +150,7 @@ object DownloadManager {
         }
     }
 
-    private fun downloadTrack(vararg params: Composition): String? {
+    private suspend fun downloadTrack(vararg params: Composition): String? {
         val dir = getDownloadDir()
         val composition = params[0]
         val dest = dir.resolve(composition.fileName())
@@ -168,6 +169,7 @@ object DownloadManager {
                     out.write(buffer, 0, bytes)
                     bytesCopied += bytes
                     DownloadManager.downloadedPercent = (bytesCopied * 100 / totalBytes).toInt()
+                    delay(100)
                     bytes = it.read(buffer)
                 }
             }

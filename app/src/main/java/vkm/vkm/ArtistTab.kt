@@ -8,16 +8,16 @@ class ArtistTab(callback: SearchTabCallback) : Tab<Artist>(callback, "artists", 
         super.activate(null)
         data?.let {
             dataList = it.toMutableList()
-            currentOffset = -1
+            page = NO_MORE_PAGES
         }
         onDataFetched(dataList)
     }
 
     override fun onBottomReached() {
         if (loading || !active) { return }
+        if (page == NO_MORE_PAGES) { return }
         loading = true
-        if (currentOffset < 0) { return }
-        MusicService.trackMusicService.getArtists(filter, currentOffset, ::onDataFetched)
+        MusicService.trackMusicService.getArtists(filter, ++page, ::onDataFetched)
     }
 
     override fun search(query: String) {
@@ -25,15 +25,7 @@ class ArtistTab(callback: SearchTabCallback) : Tab<Artist>(callback, "artists", 
         if (filter == query) { return }
         loading = true
         filter = query
-        currentOffset = 0
+        page = 0
         MusicService.trackMusicService.getArtists(filter, 0, ::onDataFetched)
-    }
-
-    private fun onDataFetched(artists: MutableList<Artist>) {
-        loading = false
-        if (currentOffset == 0) { dataList.clear() }
-        currentOffset = if (currentOffset < 0 || artists.isEmpty()) -1 else currentOffset + artists.size
-        dataList.addAll(artists)
-        callback()
     }
 }

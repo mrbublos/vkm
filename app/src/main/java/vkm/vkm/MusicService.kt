@@ -11,32 +11,32 @@ interface MusicService {
         val trackMusicService: YMusicService = YMusicService()
     }
 
-    fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String = "", offset: Int = 0): Boolean
-    fun getGroups(fragment: SearchFragment, filter: String = "", offset: Int = 0): Boolean
-    fun getUsers(fragment: SearchFragment, filter: String = "", offset: Int = 0): Boolean
-    fun getCompositions(filter: String = "", offset: Int = 0, callback: (tracks: MutableList<Composition>) -> Unit): Boolean
-    fun getNewAlbums(callback: (tracks: MutableList<Album>) -> Unit): Boolean
-    fun getChart(callback: (tracks: MutableList<Composition>) -> Unit): Boolean
-    fun getArtists(filter: String = "", offset: Int = 0, callback: (artists: MutableList<Artist>) -> Unit): Boolean
+    fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String = "", page: Int = 0): Boolean
+    fun getGroups(fragment: SearchFragment, filter: String = "", page: Int = 0): Boolean
+    fun getUsers(fragment: SearchFragment, filter: String = "", page: Int = 0): Boolean
+    fun getCompositions(filter: String = "", page: Int = 0, callback: (tracks: MutableList<Composition>) -> Unit): Boolean
+    fun getNewAlbums(page: Int, callback: (tracks: MutableList<Album>) -> Unit): Boolean
+    fun getChart(page: Int, callback: (tracks: MutableList<Composition>) -> Unit): Boolean
+    fun getArtists(filter: String = "", page: Int = 0, callback: (artists: MutableList<Artist>) -> Unit): Boolean
     suspend fun preprocess(composition: Composition) {}
 }
 
 open class YMusicService : MusicService {
 
-    override fun getChart(callback: (tracks: MutableList<Composition>) -> Unit): Boolean {
+    override fun getChart(page: Int, callback: (tracks: MutableList<Composition>) -> Unit): Boolean {
         if (isLoading()) { return false }
         launch(CommonPool) {
-            val compositions = YMusicParsers.parseChart(YMusicApi.getChart())
+            val compositions = YMusicParsers.parseChart(YMusicApi.getChart(page))
             loadingFinished()
             callback(compositions)
         }
         return true
     }
 
-    override fun getNewAlbums(callback: (tracks: MutableList<Album>) -> Unit): Boolean {
+    override fun getNewAlbums(page: Int, callback: (data: MutableList<Album>) -> Unit): Boolean {
         if (isLoading()) { return false }
         launch(CommonPool) {
-            val albumIds = YMusicParsers.parseNewReleases(YMusicApi.getNewReleases())
+            val albumIds = YMusicParsers.parseNewReleases(YMusicApi.getNewReleases(page))
             val albums = YMusicParsers.parseAlbums(YMusicApi.getAlbums(albumIds))
             albums.forEach {
                 it.compositionFetcher = {
@@ -52,17 +52,17 @@ open class YMusicService : MusicService {
     }
 
     // TODO implement
-    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, offset: Int): Boolean { return false }
+    override fun getPlaylist(fragment: SearchFragment, userOrGroup: User?, filter: String, page: Int): Boolean { return false }
 
     // TODO implement
-    override fun getGroups(fragment: SearchFragment, filter: String, offset: Int): Boolean { return false }
+    override fun getGroups(fragment: SearchFragment, filter: String, page: Int): Boolean { return false }
 
     // TODO implement
-    override fun getUsers(fragment: SearchFragment, filter: String, offset: Int): Boolean { return false }
+    override fun getUsers(fragment: SearchFragment, filter: String, page: Int): Boolean { return false }
 
     override suspend fun preprocess(composition: Composition) = YMusicApi.preprocessUrl(composition)
 
-    override fun getCompositions(filter: String, offset: Int, callback: (tracks: MutableList<Composition>) -> Unit): Boolean {
+    override fun getCompositions(filter: String, page: Int, callback: (tracks: MutableList<Composition>) -> Unit): Boolean {
         if (isLoading()) { return false }
         launch(CommonPool) {
             if (filter.isEmpty()) {
@@ -71,7 +71,7 @@ open class YMusicService : MusicService {
                 return@launch
             }
 
-            val result = YMusicApi.search(filter, offset, "track")
+            val result = YMusicApi.search(filter, page, "track")
             val tracks = YMusicParsers.parseCompositionList(result)
             loadingFinished()
             callback(tracks)
@@ -79,7 +79,7 @@ open class YMusicService : MusicService {
         return true
     }
 
-    override fun getArtists(filter: String, offset: Int, callback: (artists: MutableList<Artist>) -> Unit): Boolean {
+    override fun getArtists(filter: String, page: Int, callback: (artists: MutableList<Artist>) -> Unit): Boolean {
         if (isLoading()) { return false }
         launch(CommonPool) {
             if (filter.isEmpty()) {
@@ -88,7 +88,7 @@ open class YMusicService : MusicService {
                 return@launch
             }
 
-            val result = YMusicApi.search(filter, offset, "artist")
+            val result = YMusicApi.search(filter, page, "artist")
             val artists = YMusicParsers.parseArtists(result)
             artists.forEach { artist ->
                 artist.compositionFetcher = {

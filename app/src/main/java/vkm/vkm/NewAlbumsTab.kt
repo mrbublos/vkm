@@ -10,7 +10,7 @@ class NewAlbumsTab(callback: SearchTabCallback) : Tab<Album>(callback, "new", Li
         super.activate(null)
         data?.let {  dataList = data.toMutableList() }
         if (dataList.isNotEmpty() && System.currentTimeMillis() - lastPopulated < 1000 * 60 * 60) {
-            onAlbumsFetched(dataList)
+            onDataFetched(dataList)
             return
         }
         search("")
@@ -20,12 +20,21 @@ class NewAlbumsTab(callback: SearchTabCallback) : Tab<Album>(callback, "new", Li
         if (loading || !active) { return }
         loading = true
         lastPopulated = System.currentTimeMillis()
-        MusicService.trackMusicService.getNewAlbums(::onAlbumsFetched)
+        page = 0
+        MusicService.trackMusicService.getNewAlbums(page, this::onDataFetched)
     }
 
-    private fun onAlbumsFetched(albums: MutableList<Album>) {
+    override fun onBottomReached() {
+        if (loading) { return }
+        if (page == NO_MORE_PAGES) { return }
+
+        loading = true
+        MusicService.trackMusicService.getNewAlbums(++page, this::onDataFetched)
+    }
+
+    override fun onDataFetched(data: MutableList<Album>) {
         loading = false
-        dataList = albums
+        dataList = data
         callback()
     }
 }

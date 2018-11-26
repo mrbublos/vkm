@@ -10,7 +10,7 @@ class ChartTab(callback: SearchTabCallback) : Tab<Composition>(callback, "chart"
         super.activate(null)
         data?.let { dataList = data.toMutableList() }
         if (dataList.isNotEmpty() && System.currentTimeMillis() - lastPopulated < 1000 * 60 * 60) {
-            onChartFetched(dataList)
+            onDataFetched(dataList)
             return
         }
         search("")
@@ -20,12 +20,21 @@ class ChartTab(callback: SearchTabCallback) : Tab<Composition>(callback, "chart"
         if (loading || !active) { return }
         loading = true
         lastPopulated = System.currentTimeMillis()
-        MusicService.trackMusicService.getChart(::onChartFetched)
+        page = 0
+        MusicService.trackMusicService.getChart(page, this::onDataFetched)
     }
 
-    private fun onChartFetched(compositions: MutableList<Composition>) {
+    override fun onBottomReached() {
+        if (loading) { return }
+        if (page == NO_MORE_PAGES) { return }
+
+        loading = true
+        MusicService.trackMusicService.getChart(++page, this::onDataFetched)
+    }
+
+    override fun onDataFetched(data: MutableList<Composition>) {
         loading = false
-        dataList = compositions
+        dataList = data
         callback()
     }
 }

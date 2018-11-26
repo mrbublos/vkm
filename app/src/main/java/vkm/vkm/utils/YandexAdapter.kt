@@ -64,23 +64,14 @@ object YMusicParsers {
 object YMusicApi {
 
     // type: (artist|album|track|all)
-    suspend fun search(text: String, offset: Int, type: String): JSONObject {
-        val pageSize = when (type) {
-            "artist" -> 48
-            "track" -> 100
-            "album" -> 48
-            else -> 48
-        }
-
-        val page = offset / pageSize
-        if (offset > 0 && page == 0) { return JSONObject() } // only one page available
+    suspend fun search(text: String, page: Int = 0, type: String): JSONObject {
         val urlEncText = URLEncoder.encode(text.replace(" ", "%20"), StandardCharsets.UTF_8.name())
         val url = "https://music.yandex.ru/handlers/music-search.jsx?text=$urlEncText&type=$type&page=$page"
         return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
-    suspend fun getNewReleases(): JSONObject {
-        val url = "https://music.yandex.ru/handlers/main.jsx?what=new-releases"
+    suspend fun getNewReleases(page: Int = 0): JSONObject {
+        val url = "https://music.yandex.ru/handlers/main.jsx?what=new-releases&page=$page"
         return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
@@ -94,8 +85,8 @@ object YMusicApi {
         return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
-    suspend fun getChart(): JSONObject {
-        val url = "https://music.yandex.ru/handlers/main.jsx?what=chart"
+    suspend fun getChart(page: Int): JSONObject {
+        val url = "https://music.yandex.ru/handlers/main.jsx?what=chart&page=$page"
         return HttpUtils.call4Json(GET, url, true).safeObj()
     }
 
