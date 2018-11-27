@@ -169,7 +169,6 @@ object DownloadManager {
                     out.write(buffer, 0, bytes)
                     bytesCopied += bytes
                     DownloadManager.downloadedPercent = (bytesCopied * 100 / totalBytes).toInt()
-                    delay(100)
                     bytes = it.read(buffer)
                 }
             }
