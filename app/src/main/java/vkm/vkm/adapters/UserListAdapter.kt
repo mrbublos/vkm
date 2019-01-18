@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import kotlinx.android.synthetic.main.user_list_element.view.*
+import vkm.vkm.R
 import vkm.vkm.utils.PictureDownloader
 import vkm.vkm.utils.User
 
