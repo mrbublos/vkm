@@ -9,10 +9,9 @@ import android.widget.AbsListView
 import android.widget.AbsListView.OnScrollListener.SCROLL_STATE_IDLE
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import vkm.vkm.R.layout.*
 import vkm.vkm.adapters.AlbumListAdapter
 import vkm.vkm.adapters.ArtistListAdapter
@@ -85,7 +84,7 @@ class SearchFragment : VkmFragment() {
 
     private fun drawData() {
         val me = this
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             lockScreen(false)
 
             val data = currentTab.dataList
@@ -98,7 +97,7 @@ class SearchFragment : VkmFragment() {
             resultList.setSelection(currentElement)
 
             // TODO see how slow it is
-            getContext()?.let { HttpUtils.storeProxies(Db.instance(it).proxyDao()) }
+            context?.let { HttpUtils.storeProxies(Db.instance(it).proxyDao()) }
         }
     }
 
@@ -114,7 +113,7 @@ class SearchFragment : VkmFragment() {
     }
 
     private fun lockScreen(locked: Boolean) {
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             blockSearch(currentTab.loading || locked)
             showSpinner(currentTab.loading || locked)
         }

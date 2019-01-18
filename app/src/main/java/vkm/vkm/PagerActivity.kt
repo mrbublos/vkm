@@ -6,19 +6,19 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.BaseAdapter
 import android.widget.ListView
 import android.widget.SeekBar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 import kotlinx.android.synthetic.main.pager_activity.*
 import kotlinx.android.synthetic.main.pager_activity.view.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import vkm.vkm.utils.Composition
 import vkm.vkm.utils.HttpUtils
 import vkm.vkm.utils.db.Db
@@ -38,7 +38,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
 
         savedInstanceState?.let {
             State.currentSearchTab = it.getInt("currentSearchTab")
-            State.currentHistoryTab = it.getString("currentHistoryTab")
+            State.currentHistoryTab = it.getString("currentHistoryTab") ?: ""
         }
 
         setContentView(R.layout.pager_activity)
@@ -96,13 +96,13 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun refreshList() {
-        launch (UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             ((findViewById<ListView>(R.id.resultList))?.adapter as BaseAdapter?)?.notifyDataSetChanged()
         }
     }
 
     private val onPlayerPlay: () -> Unit = {
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             currentTrackPlaying.visibility = View.VISIBLE
             pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_pause_player))
             refreshList()
@@ -110,7 +110,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private val onPlayerStop: () -> Unit = {
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             currentTrackPlaying.visibility = View.VISIBLE
             pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
             refreshList()
@@ -118,7 +118,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private val onPlayerPause: () -> Unit = {
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             currentTrackPlaying.visibility = View.VISIBLE
             pause.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_play_player))
             refreshList()
@@ -139,7 +139,7 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         val composition = musicPlayer?.currentComposition
         if (composition?.equalsTo(displayedComposition) != true) {
             displayedComposition = composition
-            launch(UI) {
+            GlobalScope.launch(Dispatchers.Main) {
                 currentTrackPlaying?.name?.text = composition?.name ?: ""
                 currentTrackPlaying?.name?.isSelected = true
                 currentTrackPlaying?.artist?.text = composition?.artist ?: ""

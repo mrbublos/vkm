@@ -1,6 +1,6 @@
 package vkm.vkm.utils.db
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import vkm.vkm.utils.Composition
 
 @Dao

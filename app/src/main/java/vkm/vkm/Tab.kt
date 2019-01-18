@@ -1,7 +1,8 @@
 package vkm.vkm
 
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 typealias SearchTabCallback = () -> Unit
 
@@ -59,7 +60,7 @@ abstract class Tab<T>(var refreshTab: SearchTabCallback, var name: String, val l
     }
 
     open fun loadNewPage() {
-        launch(CommonPool) { setData(nextPageLoader(page)) }
+        GlobalScope.launch(Dispatchers.IO) { setData(nextPageLoader(page)) }
     }
 
     companion object {

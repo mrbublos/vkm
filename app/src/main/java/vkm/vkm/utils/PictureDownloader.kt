@@ -4,9 +4,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.View
 import android.widget.ImageView
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newFixedThreadPoolContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,9 +20,9 @@ object PictureDownloader {
     private val photoCache: ConcurrentHashMap<String, Bitmap> = ConcurrentHashMap()
     private const val limit = 100
 
-    fun downloadAndSet(view: ImageView?, url: String) = launch(context) {
+    fun downloadAndSet(view: ImageView?, url: String) = GlobalScope.launch(context) {
         val image = downloadPhoto(url)
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             image?.let { view?.setImageBitmap(image) }
             if (image == null) { view?.visibility = View.INVISIBLE }
         }

@@ -5,8 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.composition_list_element.view.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import vkm.vkm.*
 import vkm.vkm.utils.Composition
 import vkm.vkm.utils.VkmFragment
@@ -15,7 +16,7 @@ import vkm.vkm.utils.equalsTo
 class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(fragment.context, resource, data) {
 
     private val activity = fragment.activity as PagerActivity
-    var lastItemPlayedView: View? = null
+    private var lastItemPlayedView: View? = null
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.composition_list_element, null)
@@ -29,13 +30,13 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
             var withAction = false
             val trackAvailable = item.hash.isNotEmpty() || item.url.trim().isNotEmpty()
 
-            val actionButton = view?.imageView
-            val audioControl = view?.audioControl
-            audioControl?.visibility = View.VISIBLE
+            val actionButton = view.imageView
+            val audioControl = view.audioControl
+            audioControl.visibility = View.VISIBLE
 
             if (trackAvailable) {
                 if (activity.musicPlayer?.isCurrentTrack(item) == true) {
-                    audioControl?.apply {
+                    audioControl.apply {
                         if (activity.musicPlayer?.loading() == true) {
                             setImageDrawable(context.getDrawable(R.drawable.ic_loading))
                         } else {
@@ -104,7 +105,7 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
         if (item.hash.isEmpty()) {
             view?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
             activity.musicPlayer?.onLoaded = {
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     view?.audioControl?.setImageDrawable(c.getDrawable(R.drawable.ic_stop))
                     view?.audioControl?.setOnClickListener { onStopPressed(view, item) }
                 }

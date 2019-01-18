@@ -2,12 +2,12 @@ package vkm.vkm
 
 import android.os.Environment
 import android.util.Log
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.sync.Mutex
-import kotlinx.coroutines.experimental.sync.withLock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import vkm.vkm.utils.*
 import vkm.vkm.utils.db.TracksDao
 import java.io.ByteArrayOutputStream
@@ -30,7 +30,7 @@ object DownloadManager {
     fun initialize(dao: TracksDao) {
         "Loading all lists".log()
         this.dao = dao
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.IO) {
             downloadedList.clear()
             queue.clear()
             "Fetching data from db".log()
@@ -42,13 +42,13 @@ object DownloadManager {
 
     fun clearDownloaded() {
         downloadedList.clear()
-        launch(CommonPool) { dao?.deleteAllDownloaded() }
+        GlobalScope.launch(Dispatchers.IO) { dao?.deleteAllDownloaded() }
         "Cleared downloaded list".log()
     }
 
     fun clearQueue() {
         queue.clear()
-        launch(CommonPool) { dao?.deleteAllQueued() }
+        GlobalScope.launch(Dispatchers.IO) { dao?.deleteAllQueued() }
         "Cleared queue list".log()
     }
 
@@ -57,7 +57,7 @@ object DownloadManager {
         composition?.takeIf { it.url.isNotEmpty() }?.let {
             queue.offer(composition)
             composition.status = "queued"
-            launch(CommonPool) { dao?.insert(composition) }
+            GlobalScope.launch(Dispatchers.IO) { dao?.insert(composition) }
         }
         downloadNext()
     }
@@ -77,14 +77,14 @@ object DownloadManager {
     fun removeFromQueue(composition: Composition) {
         queue.find { it.id == composition.id }?.let {
             queue.remove(it)
-            launch(CommonPool) { dao?.delete(it) }
+            GlobalScope.launch(Dispatchers.IO) { dao?.delete(it) }
         }
     }
 
     fun removeDownloaded(composition: Composition) {
         downloadedList.find { it.vkmId == composition.vkmId }?.let {
             downloadedList.remove(it)
-            launch(CommonPool) { dao?.delete(it) }
+            GlobalScope.launch(Dispatchers.IO) { dao?.delete(it) }
         }
     }
 
@@ -109,7 +109,7 @@ object DownloadManager {
                     downloadNext()
                 } else {
                     inProgress.offer(itemToDownload)
-                    launch(CommonPool) {
+                    GlobalScope.launch(Dispatchers.IO) {
                         MusicService.trackMusicService.preprocess(itemToDownload)
                         val error = downloadTrack(itemToDownload)
                         if (error != null) {
@@ -150,7 +150,7 @@ object DownloadManager {
         }
     }
 
-    private suspend fun downloadTrack(vararg params: Composition): String? {
+    private fun downloadTrack(vararg params: Composition): String? {
         val dir = getDownloadDir()
         val composition = params[0]
         val dest = dir.resolve(composition.fileName())
@@ -199,14 +199,14 @@ object DownloadManager {
     }
 
     fun removeAllMusic() {
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.IO) {
             getDownloadDir().deleteRecursively()
             dao?.deleteAllDownloaded()
         }
     }
 
     fun rehash() {
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.IO) {
             lock.withLock {
                 downloadedList.filter { it.hash.isEmpty() }.forEach {
                     it.hash = it.localFile()?.readBytes().md5()
@@ -222,7 +222,7 @@ object DownloadManager {
             val jobs = mutableListOf<Job>()
             getDownloadDir().listFiles().forEach { file ->
                  file.takeIf { it.isFile && it.extension == "mp3" }?.let {
-                     val job = launch(CommonPool) {
+                     val job = GlobalScope.launch(Dispatchers.IO) {
                          val fileName = file.name.substringBeforeLast(".") // cutting .mp3
                          val data = fileName.replace('_', ' ').split('-')
                          val existingComposition = Composition(artist = data[0], name = data[1], hash = file.readBytes().md5())

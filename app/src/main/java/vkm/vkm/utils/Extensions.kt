@@ -5,8 +5,9 @@ import android.media.MediaPlayer
 import android.util.Log
 import android.widget.Toast
 import com.github.kittinunf.fuel.android.core.Json
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import vkm.vkm.DownloadManager
@@ -14,7 +15,8 @@ import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import kotlin.coroutines.experimental.suspendCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaType
@@ -84,7 +86,7 @@ fun String?.toast(context: Context?, length: Int = Toast.LENGTH_SHORT): String? 
     if (this == null) { return this }
     val me = this
     context?.let {
-        launch(UI) { Toast.makeText(context, me, length).show() }
+        GlobalScope.launch(Dispatchers.Main) { Toast.makeText(context, me, length).show() }
     }
     return this
 }

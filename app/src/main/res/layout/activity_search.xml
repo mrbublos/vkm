@@ -10,7 +10,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/searchPanel"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -38,7 +38,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:id="@id/searchButton"/>
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <vkm.vkm.utils.StringSwiper
                 android:id="@+id/searchTabsSwiper"

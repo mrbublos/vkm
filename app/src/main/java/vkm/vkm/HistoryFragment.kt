@@ -4,11 +4,7 @@ import android.text.InputType
 import android.view.View
 import kotlinx.android.synthetic.main.activity_history.*
 import kotlinx.android.synthetic.main.composition_list_element.view.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import vkm.vkm.adapters.CompositionListAdapter
 import vkm.vkm.utils.*
 
@@ -48,10 +44,10 @@ class HistoryFragment : VkmFragment() {
     }
 
     private fun startProgressUpdate() {
-        progressUpdateJob = launch(CommonPool) {
+        progressUpdateJob = GlobalScope.launch(Dispatchers.IO) {
             while (true) {
                 val compositionBeingDownloaded = DownloadManager.getInProgress().firstOrNull()
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     compositionInProgress.imageView.visibility = View.GONE
                     compositionInProgress.name.text = compositionBeingDownloaded?.name
                     compositionInProgress.artist.text = compositionBeingDownloaded?.artist

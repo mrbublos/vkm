@@ -4,8 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import kotlinx.android.synthetic.main.album_list_element.view.*
-import vkm.vkm.R
 import vkm.vkm.utils.Artist
 import vkm.vkm.utils.PictureDownloader
 import vkm.vkm.utils.VkmFragment
@@ -22,7 +20,7 @@ class ArtistListAdapter(fragment: VkmFragment, resource: Int, data: List<Artist>
             view.action.setOnClickListener { v ->
                 elementClickListener.invoke(item, v)
             }
-            PictureDownloader.downloadAndSet(view?.cover, it.url)
+            PictureDownloader.downloadAndSet(view.cover, it.url)
         }
 
         return view

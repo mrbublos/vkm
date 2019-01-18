@@ -2,9 +2,9 @@ package vkm.vkm
 
 import android.view.View
 import kotlinx.android.synthetic.main.activity_settings.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import vkm.vkm.utils.VkmFragment
 import vkm.vkm.utils.logE
 import vkm.vkm.utils.toast
@@ -39,7 +39,7 @@ class SettingsFragment : VkmFragment() {
         restoreDownloaded.setOnClickListener {
             val me = this
             restoreDownloaded.visibility = View.GONE
-            launch(CommonPool) {
+            GlobalScope.launch(Dispatchers.IO) {
                 try {
                     DownloadManager.restoreDownloaded()
                     "List of downloaded files restored".toast(me.context)
@@ -47,7 +47,7 @@ class SettingsFragment : VkmFragment() {
                     "".logE(e)
                     "Error restoring downloaded files ${e.message}".toast(me.context)
                 }
-                launch(UI) { restoreDownloaded.visibility = View.VISIBLE }
+                GlobalScope.launch(Dispatchers.Main) { restoreDownloaded.visibility = View.VISIBLE }
             }
         }
     }

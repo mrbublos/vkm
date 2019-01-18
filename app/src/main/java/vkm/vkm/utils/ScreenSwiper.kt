@@ -3,13 +3,13 @@ package vkm.vkm.utils
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.support.constraint.ConstraintLayout
-import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.GestureDetectorCompat
 import kotlinx.android.synthetic.main.text_swiper_view.view.*
 import vkm.vkm.R
 import java.lang.ref.WeakReference

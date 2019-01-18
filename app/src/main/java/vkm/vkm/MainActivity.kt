@@ -6,19 +6,20 @@ import android.content.pm.PackageManager
 import android.graphics.Point
 import android.os.Bundle
 import android.os.Environment
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import vkm.vkm.utils.HttpUtils
 import vkm.vkm.utils.Proxy
 import vkm.vkm.utils.Swiper
 import vkm.vkm.utils.db.Db
 import vkm.vkm.utils.log
 import java.io.File
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
-
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 
         // asking for writing permissions
         val permissionCheck = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        launch (UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             "starting permissions".log()
             if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
                 suspendCoroutine<IntArray> {

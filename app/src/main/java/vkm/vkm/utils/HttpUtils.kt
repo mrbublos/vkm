@@ -6,15 +6,18 @@ import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import vkm.vkm.State
 import vkm.vkm.utils.db.ProxyDao
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.experimental.suspendCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 typealias JProxy = java.net.Proxy
 
@@ -57,7 +60,7 @@ object HttpUtils {
 
     fun storeProxies(dao: ProxyDao): Job {
         // slow but simple
-        return launch(CommonPool) {
+        return GlobalScope.launch(Dispatchers.IO) {
             val blackList = HttpUtils.getBlackList().filter { it.added > System.currentTimeMillis() - 1000 * 60 * 60 * 24 }
             dao.deleteAll()
             dao.insertAll(blackList)
@@ -70,7 +73,7 @@ object HttpUtils {
     }
 
     fun loadProxies(dao: ProxyDao): Job {
-        return launch(CommonPool) {
+        return GlobalScope.launch(Dispatchers.IO) {
             HttpUtils.setProxies(dao.getAll())
         }
     }

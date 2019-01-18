@@ -1,8 +1,6 @@
 package vkm.vkm
 
-import android.app.Notification
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -11,22 +9,16 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.session.PlaybackState
+import android.media.session.PlaybackState.*
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationCompat.*
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v4.media.session.PlaybackStateCompat.*
-import android.widget.RemoteViews
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import vkm.vkm.utils.*
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
@@ -131,41 +123,41 @@ class MusicPlayService : Service() {
         mediaSession.setPlaybackState(playbackState)
     }
 
-    private fun createNotification(): Notification {
-        val nextPendingIntent = PendingIntent.getService(this, 1, Intent(this, MusicPlayService::class.java).setAction("next"), PendingIntent.FLAG_UPDATE_CURRENT)
-        val pausePendingIntent = PendingIntent.getService(this, 3, Intent(this, MusicPlayService::class.java).setAction("pause"), PendingIntent.FLAG_UPDATE_CURRENT)
-
-
-        val playerView = RemoteViews(packageName, R.layout.notification_player)
-        playerView.setTextViewText(R.id.name, currentComposition?.name ?: "test")
-        playerView.setTextViewText(R.id.artist, currentComposition?.artist ?: "test")
-        playerView.setImageViewResource(R.id.pause, if (isPlaying()) R.drawable.ic_pause_player_black else R.drawable.ic_play_player_black)
-        playerView.setOnClickPendingIntent(R.id.pause, pausePendingIntent)
-        playerView.setOnClickPendingIntent(R.id.nextTrack, nextPendingIntent)
-
-        val publicNotification = NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_vkm_main)
-                .setVisibility(VISIBILITY_PUBLIC)
-                .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
-                .build()
-
-        return NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_vkm_main)
-                .setAutoCancel(false)
-                .setPriority(PRIORITY_MAX)
-                .setCategory(CATEGORY_SERVICE)
-                .setVisibility(VISIBILITY_PUBLIC)
-                .setOngoing(true)
-                .setCustomContentView(playerView)
-                .setPublicVersion(publicNotification)
-                .build()
-    }
+//    private fun createNotification(): Notification {
+//        val nextPendingIntent = PendingIntent.getService(this, 1, Intent(this, MusicPlayService::class.java).setAction("next"), PendingIntent.FLAG_UPDATE_CURRENT)
+//        val pausePendingIntent = PendingIntent.getService(this, 3, Intent(this, MusicPlayService::class.java).setAction("pause"), PendingIntent.FLAG_UPDATE_CURRENT)
+//
+//
+//        val playerView = RemoteViews(packageName, R.layout.notification_player)
+//        playerView.setTextViewText(R.id.name, currentComposition?.name ?: "test")
+//        playerView.setTextViewText(R.id.artist, currentComposition?.artist ?: "test")
+//        playerView.setImageViewResource(R.id.pause, if (isPlaying()) R.drawable.ic_pause_player_black else R.drawable.ic_play_player_black)
+//        playerView.setOnClickPendingIntent(R.id.pause, pausePendingIntent)
+//        playerView.setOnClickPendingIntent(R.id.nextTrack, nextPendingIntent)
+//
+//        val publicNotification = NotificationCompat.Builder(this)
+//                .setSmallIcon(R.drawable.ic_vkm_main)
+//                .setVisibility(VISIBILITY_PUBLIC)
+//                .setStyle(NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
+//                .build()
+//
+//        return NotificationCompat.Builder(this)
+//                .setSmallIcon(R.drawable.ic_vkm_main)
+//                .setAutoCancel(false)
+//                .setPriority(PRIORITY_MAX)
+//                .setCategory(CATEGORY_SERVICE)
+//                .setVisibility(VISIBILITY_PUBLIC)
+//                .setOngoing(true)
+//                .setCustomContentView(playerView)
+//                .setPublicVersion(publicNotification)
+//                .build()
+//    }
 
     private fun startTrackProgressTrack(onUpdate: () -> Unit = {}) {
         progressUpdateJob?.cancel()
         onProgressUpdate = onUpdate
 
-        progressUpdateJob = launch(CommonPool) {
+        progressUpdateJob = GlobalScope.launch(Dispatchers.IO) {
             while (true) {
                 if (trackLength > 0) {
                     trackProgress = mp.currentPosition * 100 / trackLength
@@ -187,7 +179,7 @@ class MusicPlayService : Service() {
     }
 
     fun play(composition: Composition? = null, onProgressUpdate: () -> Unit = this.onProgressUpdate) {
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.IO) {
             val compositionToPlay = composition ?: (currentComposition ?: playList.firstOrNull())
             isPaused.compareAndSet(true, compositionToPlay.equalsTo(currentComposition))
 
@@ -219,7 +211,7 @@ class MusicPlayService : Service() {
         if (isPaused.compareAndSet(false, true)) {
             mp.takeIf { it.isPlaying }?.pause()
             _onPause()
-            createNotification()
+//            createNotification()
         }
     }
 
@@ -250,7 +242,7 @@ class MusicPlayService : Service() {
             return
         }
 
-        launch(CommonPool) {
+        GlobalScope.launch(Dispatchers.IO) {
             var index = playList.indexOf(currentComposition)
             var steps = 0
             do {
@@ -316,13 +308,13 @@ class MusicPlayService : Service() {
         if (loading()) updateMediaSession(PlaybackState.STATE_BUFFERING) else updateMediaSession(PlaybackState.STATE_PLAYING)
         mediaSession.isActive = true
         becomeNoisyListener.register()
-        startForeground(2, createNotification())
+//        startForeground(2, createNotification())
         onPlay()
     }
 
     private fun _onStop() {
         updateMediaSession(PlaybackState.STATE_STOPPED)
-        createNotification()
+//        createNotification()
         becomeNoisyListener.unregister()
         audioManager.abandonAudioFocus(audioFocusListener)
         stopForeground(false)
@@ -330,13 +322,13 @@ class MusicPlayService : Service() {
     }
 
     private fun _onLoaded() {
-        createNotification()
+//        createNotification()
         onLoaded()
     }
 
     private fun _onPause() {
         updateMediaSession(PlaybackState.STATE_PAUSED)
-        createNotification()
+//        createNotification()
         becomeNoisyListener.unregister()
         audioManager.abandonAudioFocus(audioFocusListener)
         stopForeground(false)
