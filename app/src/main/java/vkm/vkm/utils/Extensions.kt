@@ -121,9 +121,7 @@ fun Composition?.equalsTo(other: Composition?): Boolean {
 
 suspend fun MediaPlayer.loadAsync() {
     suspendCoroutine<Unit> { continuation ->
-        this.setOnPreparedListener {
-            continuation.resume(Unit)
-        }
+        this.setOnPreparedListener { continuation.resume(Unit) }
         this.prepareAsync()
     }
 }

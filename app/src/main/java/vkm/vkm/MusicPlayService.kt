@@ -18,10 +18,10 @@ import android.os.PowerManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.*
 import vkm.vkm.utils.*
 import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
 
 class MusicPlayService : Service() {
 
@@ -29,19 +29,15 @@ class MusicPlayService : Service() {
         private lateinit var instance: MusicPlayService
     }
 
-    var currentComposition: Composition? = null
+    val displayedComposition: MutableLiveData<Composition> = MutableLiveData()
+    val loadingComposition: MutableLiveData<Composition> = MutableLiveData()
+    val state: MutableLiveData<String> = MutableLiveData()
+    val progress: MutableLiveData<Long> = MutableLiveData()
+
+    private var currentComposition: Composition? = null
     var playList: List<Composition> = mutableListOf()
-    var trackLength = 0
-    var trackProgress = 0
 
-    var onPlay: () -> Unit = {}
-    var onStop: () -> Unit = {}
-    var onPause: () -> Unit = {}
-    var onLoaded: () -> Unit = {}
-    private var onProgressUpdate: () -> Unit = {}
-
-    private var isLoading = AtomicBoolean(false)
-    private var isPaused = AtomicBoolean(false)
+    var trackLength = 0L
 
     private val mp = MediaPlayer()
     private val binder = MusicPlayerController()
@@ -66,17 +62,11 @@ class MusicPlayService : Service() {
         override fun onSkipToPrevious() { previous() }
     }
 
-    override fun onBind(intent: Intent?): IBinder {
-        "Service bound".log()
-        return binder
-    }
+    override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) {
-            return START_NOT_STICKY
-        }
+        if (intent == null) { return START_NOT_STICKY }
 
-        // TODO audio_becoming_noisy handle
         // wifi lock
         when (intent.action) {
             "next" -> next()
@@ -89,7 +79,6 @@ class MusicPlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        "Service created".log()
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         powerManager = applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -100,6 +89,17 @@ class MusicPlayService : Service() {
         mediaSession = MediaSessionCompat(baseContext, "vkm")
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
         mediaSession.setCallback(playerControlsCallback)
+
+        state.observeForever {
+            val state = when (it) {
+                "stopped" -> PlaybackState.STATE_STOPPED
+                "playing" -> PlaybackState.STATE_PLAYING
+                "loading" -> PlaybackState.STATE_BUFFERING
+                "paused" -> PlaybackState.STATE_PAUSED
+                else -> PlaybackState.STATE_STOPPED
+            }
+            updateMediaSession(state)
+        }
     }
 
     override fun onDestroy() {
@@ -113,7 +113,7 @@ class MusicPlayService : Service() {
         val mediaMetadata = mediaMetadataBuilder
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, currentComposition?.artist ?: "No Artist")
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentComposition?.name ?: "No Title")
-                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, trackLength.toLong())
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, trackLength)
                 .build()
         val playbackState = playbackStateBuilder
                 .setState(state, 0, 1f)
@@ -153,17 +153,14 @@ class MusicPlayService : Service() {
 //                .build()
 //    }
 
-    private fun startTrackProgressTrack(onUpdate: () -> Unit = {}) {
+    private fun startProgressTracking() {
         progressUpdateJob?.cancel()
-        onProgressUpdate = onUpdate
-
-        progressUpdateJob = GlobalScope.launch(Dispatchers.IO) {
+        progressUpdateJob = GlobalScope.launch(Dispatchers.Default) {
             while (true) {
-                if (trackLength > 0) {
-                    trackProgress = mp.currentPosition * 100 / trackLength
+                if (trackLength > 0 && mp.isPlaying) {
+                    GlobalScope.launch(Dispatchers.Main) { progress.value = mp.currentPosition * 100 / trackLength }
                 }
                 delay(1000)
-                onProgressUpdate()
             }
         }
     }
@@ -171,30 +168,27 @@ class MusicPlayService : Service() {
     private fun stopProgressUpdate() {
         progressUpdateJob?.cancel()
         progressUpdateJob = null
-        onProgressUpdate = {}
     }
 
     class MusicPlayerController : Binder() {
         fun getService(): MusicPlayService = instance
     }
 
-    fun play(composition: Composition? = null, onProgressUpdate: () -> Unit = this.onProgressUpdate) {
-        GlobalScope.launch(Dispatchers.IO) {
+    fun play(composition: Composition? = null) {
+        stop()
+        GlobalScope.launch {
             val compositionToPlay = composition ?: (currentComposition ?: playList.firstOrNull())
-            isPaused.compareAndSet(true, compositionToPlay.equalsTo(currentComposition))
 
             "Starting to play ${compositionToPlay?.fileName()}".log()
-            playList.takeIf { !isPaused.get() && compositionToPlay != null }?.let {
-                isLoading.compareAndSet(false, true)
+            playList.takeIf { compositionToPlay != null }?.let {
                 currentComposition = try {
                     fetchComposition(compositionToPlay)
                 } catch (e: Exception) {
                     "Failed to load track ${compositionToPlay?.fileName()}".logE(e)
                     null
                 }
-                isLoading.compareAndSet(true, false)
+                GlobalScope.launch(Dispatchers.Main) { displayedComposition.value = currentComposition }
                 "Composition fetched ${currentComposition?.fileName()}".log()
-                _onLoaded()
             }
 
             currentComposition?.let {
@@ -202,45 +196,44 @@ class MusicPlayService : Service() {
                 _onPlay()
                 mp.start()
                 mp.setOnCompletionListener { next() }
-                startTrackProgressTrack(onProgressUpdate)
+                startProgressTracking()
             }
         }
     }
 
     fun pause() {
-        if (isPaused.compareAndSet(false, true)) {
-            mp.takeIf { it.isPlaying }?.pause()
-            _onPause()
-//            createNotification()
-        }
+        mp.takeIf { it.isPlaying }?.pause()
+        GlobalScope.launch(Dispatchers.Main) { state.value = "paused" }
+        becomeNoisyListener.unregister()
+        audioManager.abandonAudioFocus(audioFocusListener)
+        stopForeground(false)
     }
 
     fun skipTo(time: Int) = mp.seekTo(time)
 
     fun stop() {
-        mp.stop()
+        GlobalScope.launch(Dispatchers.Main) { state.value = "stopped" }
+        if(mp.isPlaying) { mp.stop() }
         resetTrack()
         currentComposition = null
         stopProgressUpdate()
-        _onStop()
+        becomeNoisyListener.unregister()
+        audioManager.abandonAudioFocus(audioFocusListener)
+        stopForeground(false)
     }
 
-    fun loading() = isLoading.get()
     fun isPlaying() = mp.isPlaying
 
     fun next() = getSibling(true)
     fun previous() = getSibling(false)
 
-    fun isCurrentTrack(item: Composition) = (item.url.isNotEmpty() && item.url == currentComposition?.url) || item.fileName() == currentComposition?.fileName()
+    fun isCurrentTrack(item: Composition) = currentComposition?.equalsTo(item) == true
+    fun isCurrentTrackLoading(item: Composition) = loadingComposition.value?.equalsTo(item) == true
 
     private fun getSibling(next: Boolean) {
-        mp.stop()
         resetTrack()
 
-        if (playList.isEmpty()) {
-            stop()
-            return
-        }
+        if (playList.isEmpty()) { return }
 
         GlobalScope.launch(Dispatchers.IO) {
             var index = playList.indexOf(currentComposition)
@@ -249,13 +242,11 @@ class MusicPlayService : Service() {
                 index = (playList.size + index + if (next) 1 else -1) % playList.size
                 steps++
                 currentComposition = try {
-                    updateMediaSession(PlaybackStateCompat.STATE_BUFFERING)
                     fetchComposition(playList.getOrNull(index))
                 } catch (e: Exception) {
                     "Error fetching next composition".logE(e)
                     null
                 }
-                "Next sibling is ${currentComposition?.fileName()}".log()
             } while (currentComposition == null && steps < 20)
 
             currentComposition?.let { play(currentComposition) }
@@ -265,14 +256,17 @@ class MusicPlayService : Service() {
     private suspend fun fetchComposition(composition: Composition?): Composition? {
         "Fetching composition ${composition?.fileName()}".log()
         if (composition == null) { return null }
-        MusicService.trackMusicService.preprocess(composition)
 
+        GlobalScope.launch(Dispatchers.Main) {
+            loadingComposition.value = composition
+            state.value = "loading"
+        }
+
+        MusicService.trackMusicService.preprocess(composition)
         val resource = if (composition.hash.isEmpty()) composition.url else DownloadManager.getDownloadDir().resolve(composition.fileName())
 
         mp.reset()
-        var internetLockRequired = false
         if (composition.url.startsWith("http")) {
-            internetLockRequired = true
             mp.setDataSource(resource as String)
         } else {
             mp.setDataSource(applicationContext, Uri.fromFile(resource as File))
@@ -284,56 +278,32 @@ class MusicPlayService : Service() {
             return@setOnErrorListener true
         }
 
-        if (internetLockRequired) {
-            wifiLock.acquire()
-            "Wifi lock acquired ${wifiLock.isHeld}".log()
-        }
         mp.loadAsync()
-        if (internetLockRequired) { wifiLock.release() }
-        trackLength = mp.duration
-        trackProgress = 0
+        GlobalScope.launch(Dispatchers.Main) {
+            loadingComposition.value = null
+            progress.value = 0
+        }
+        trackLength = mp.duration.toLong()
+
         return composition
     }
 
 
     private fun resetTrack() {
         trackLength = 0
-        trackProgress = 0
+        progress.value = 0
     }
 
     private fun _onPlay() {
+        GlobalScope.launch(Dispatchers.Main) { state.value = "playing" }
         val result = audioManager.requestAudioFocus(audioFocusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) { return; }
 
-        if (loading()) updateMediaSession(PlaybackState.STATE_BUFFERING) else updateMediaSession(PlaybackState.STATE_PLAYING)
         mediaSession.isActive = true
         becomeNoisyListener.register()
 //        startForeground(2, createNotification())
-        onPlay()
     }
 
-    private fun _onStop() {
-        updateMediaSession(PlaybackState.STATE_STOPPED)
-//        createNotification()
-        becomeNoisyListener.unregister()
-        audioManager.abandonAudioFocus(audioFocusListener)
-        stopForeground(false)
-        onStop()
-    }
-
-    private fun _onLoaded() {
-//        createNotification()
-        onLoaded()
-    }
-
-    private fun _onPause() {
-        updateMediaSession(PlaybackState.STATE_PAUSED)
-//        createNotification()
-        becomeNoisyListener.unregister()
-        audioManager.abandonAudioFocus(audioFocusListener)
-        stopForeground(false)
-        onPause()
-    }
 }
 
 class AudioFocusChangeListener(private val service: MusicPlayService) : AudioManager.OnAudioFocusChangeListener {

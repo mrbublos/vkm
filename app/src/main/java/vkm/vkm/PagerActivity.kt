@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.pager_activity.*
 import kotlinx.android.synthetic.main.pager_activity.view.*
 import kotlinx.coroutines.Dispatchers
@@ -22,13 +23,10 @@ import kotlinx.coroutines.launch
 import vkm.vkm.utils.Composition
 import vkm.vkm.utils.HttpUtils
 import vkm.vkm.utils.db.Db
-import vkm.vkm.utils.equalsTo
 
 class PagerActivity : AppCompatActivity(), ServiceConnection {
 
     var musicPlayer: MusicPlayService? = null
-
-    private var displayedComposition: Composition? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,25 +71,44 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
             if (musicPlayer?.isPlaying() == true) {
                 musicPlayer?.pause()
             } else {
-                musicPlayer?.play(musicPlayer?.currentComposition, this::onPlayingProgressUpdated)
+                musicPlayer?.play(musicPlayer?.displayedComposition?.value)
             }
         }
-
-        musicPlayer?.onPlay = onPlayerPlay
-        musicPlayer?.onStop = onPlayerStop
-        musicPlayer?.onPause = onPlayerPause
-
 
         trackPlayingProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (!fromUser) { return }
 
                 val duration = musicPlayer?.trackLength ?: 0
-                musicPlayer?.skipTo(progress * duration / 100)
+                musicPlayer?.skipTo((progress * duration / 100).toInt())
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        musicPlayer?.state?.observe(this, Observer { state ->
+            when (state) {
+                "playing" -> onPlayerPlay()
+                "stopped" -> onPlayerStop()
+                "paused" -> onPlayerPause()
+                else -> refreshList()
+            }
+        })
+
+        musicPlayer?.progress?.observe(this, Observer {
+            GlobalScope.launch(Dispatchers.Main) {
+                currentTrackPlaying.trackPlayingProgress.progress = it.toInt()
+            }
+        })
+
+        musicPlayer?.displayedComposition?.observe(this, Observer {
+            GlobalScope.launch(Dispatchers.Main) {
+                currentTrackPlaying?.name?.text = it.name
+                currentTrackPlaying?.name?.isSelected = true
+                currentTrackPlaying?.artist?.text = it.artist
+                currentTrackPlaying?.artist?.isSelected = true
+            }
         })
     }
 
@@ -130,23 +147,8 @@ class PagerActivity : AppCompatActivity(), ServiceConnection {
         val newPlayList = mutableListOf<Composition>()
         newPlayList.addAll(list)
         musicPlayer?.playList = newPlayList
-        musicPlayer?.play(track, this::onPlayingProgressUpdated)
+        musicPlayer?.play(track)
         refreshList()
-    }
-
-    private fun onPlayingProgressUpdated() {
-        currentTrackPlaying.trackPlayingProgress.progress = musicPlayer?.trackProgress ?: 0
-        val composition = musicPlayer?.currentComposition
-        if (composition?.equalsTo(displayedComposition) != true) {
-            displayedComposition = composition
-            GlobalScope.launch(Dispatchers.Main) {
-                currentTrackPlaying?.name?.text = composition?.name ?: ""
-                currentTrackPlaying?.name?.isSelected = true
-                currentTrackPlaying?.artist?.text = composition?.artist ?: ""
-                currentTrackPlaying?.artist?.isSelected = true
-                refreshList()
-            }
-        }
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {

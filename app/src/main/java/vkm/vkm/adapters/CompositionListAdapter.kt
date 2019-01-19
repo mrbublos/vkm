@@ -5,18 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.composition_list_element.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import vkm.vkm.*
 import vkm.vkm.utils.Composition
 import vkm.vkm.utils.VkmFragment
 import vkm.vkm.utils.equalsTo
 
-class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(fragment.context, resource, data) {
+class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, val data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(fragment.context, resource, data) {
 
     private val activity = fragment.activity as PagerActivity
-    private var lastItemPlayedView: View? = null
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.composition_list_element, null)
@@ -35,18 +31,17 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
             audioControl.visibility = View.VISIBLE
 
             if (trackAvailable) {
-                if (activity.musicPlayer?.isCurrentTrack(item) == true) {
-                    audioControl.apply {
-                        if (activity.musicPlayer?.loading() == true) {
-                            setImageDrawable(context.getDrawable(R.drawable.ic_loading))
-                        } else {
-                            setImageDrawable(context.getDrawable(R.drawable.ic_stop))
-                        }
-                        setOnClickListener { onStopPressed(view, item) }
+                when {
+                    activity.musicPlayer?.isCurrentTrack(item) == true -> audioControl.apply {
+                        setImageDrawable(context.getDrawable(R.drawable.ic_stop))
+                        setOnClickListener { activity.musicPlayer?.stop() }
                     }
-                } else {
-                    audioControl?.apply {
-                        setOnClickListener { onPlayPressed(view, item) }
+                    activity.musicPlayer?.isCurrentTrackLoading(item) == true -> audioControl.apply {
+                        setImageDrawable(context.getDrawable(R.drawable.ic_loading))
+                        setOnClickListener { activity.musicPlayer?.stop() }
+                    }
+                    else -> audioControl?.apply {
+                        setOnClickListener { activity.playNewTrack(data, item) }
                         setImageDrawable(context.getDrawable(R.drawable.ic_play))
                     }
                 }
@@ -88,33 +83,5 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, d
         }
 
         return view
-    }
-
-    private fun onStopPressed(view: View?, item: Composition) {
-        activity.musicPlayer?.stop()
-        view?.audioControl?.apply {
-            setImageDrawable(context.getDrawable(R.drawable.ic_play))
-            setOnClickListener { onPlayPressed(view, item) }
-        }
-    }
-
-    private fun onPlayPressed(view: View?, item: Composition) {
-        activity.musicPlayer?.stop()
-        lastItemPlayedView?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_play))
-        val c = context
-        if (item.hash.isEmpty()) {
-            view?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_loading))
-            activity.musicPlayer?.onLoaded = {
-                GlobalScope.launch(Dispatchers.Main) {
-                    view?.audioControl?.setImageDrawable(c.getDrawable(R.drawable.ic_stop))
-                    view?.audioControl?.setOnClickListener { onStopPressed(view, item) }
-                }
-            }
-        } else {
-            view?.audioControl?.setImageDrawable(context.getDrawable(R.drawable.ic_stop))
-            view?.audioControl?.setOnClickListener { onStopPressed(view, item) }
-        }
-        lastItemPlayedView = view
-        activity.playNewTrack(listOf(0 until count).flatten().map { getItem(it) }, item)
     }
 }
