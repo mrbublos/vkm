@@ -1,6 +1,8 @@
 package vkm.vkm
 
+import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -18,6 +20,9 @@ import android.os.PowerManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.widget.RemoteViews
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.*
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.*
 import vkm.vkm.utils.*
@@ -123,35 +128,35 @@ class MusicPlayService : Service() {
         mediaSession.setPlaybackState(playbackState)
     }
 
-//    private fun createNotification(): Notification {
-//        val nextPendingIntent = PendingIntent.getService(this, 1, Intent(this, MusicPlayService::class.java).setAction("next"), PendingIntent.FLAG_UPDATE_CURRENT)
-//        val pausePendingIntent = PendingIntent.getService(this, 3, Intent(this, MusicPlayService::class.java).setAction("pause"), PendingIntent.FLAG_UPDATE_CURRENT)
-//
-//
-//        val playerView = RemoteViews(packageName, R.layout.notification_player)
-//        playerView.setTextViewText(R.id.name, currentComposition?.name ?: "test")
-//        playerView.setTextViewText(R.id.artist, currentComposition?.artist ?: "test")
-//        playerView.setImageViewResource(R.id.pause, if (isPlaying()) R.drawable.ic_pause_player_black else R.drawable.ic_play_player_black)
-//        playerView.setOnClickPendingIntent(R.id.pause, pausePendingIntent)
-//        playerView.setOnClickPendingIntent(R.id.nextTrack, nextPendingIntent)
-//
-//        val publicNotification = NotificationCompat.Builder(this)
-//                .setSmallIcon(R.drawable.ic_vkm_main)
-//                .setVisibility(VISIBILITY_PUBLIC)
-//                .setStyle(NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
-//                .build()
-//
-//        return NotificationCompat.Builder(this)
-//                .setSmallIcon(R.drawable.ic_vkm_main)
-//                .setAutoCancel(false)
-//                .setPriority(PRIORITY_MAX)
-//                .setCategory(CATEGORY_SERVICE)
-//                .setVisibility(VISIBILITY_PUBLIC)
-//                .setOngoing(true)
-//                .setCustomContentView(playerView)
-//                .setPublicVersion(publicNotification)
-//                .build()
-//    }
+    private fun createNotification(): Notification {
+        val nextPendingIntent = PendingIntent.getService(this, 1, Intent(this, MusicPlayService::class.java).setAction("next"), PendingIntent.FLAG_UPDATE_CURRENT)
+        val pausePendingIntent = PendingIntent.getService(this, 3, Intent(this, MusicPlayService::class.java).setAction("pause"), PendingIntent.FLAG_UPDATE_CURRENT)
+
+
+        val playerView = RemoteViews(packageName, R.layout.notification_player)
+        playerView.setTextViewText(R.id.name, currentComposition?.name ?: "test")
+        playerView.setTextViewText(R.id.artist, currentComposition?.artist ?: "test")
+        playerView.setImageViewResource(R.id.pause, if (isPlaying()) R.drawable.ic_pause_player_black else R.drawable.ic_play_player_black)
+        playerView.setOnClickPendingIntent(R.id.pause, pausePendingIntent)
+        playerView.setOnClickPendingIntent(R.id.nextTrack, nextPendingIntent)
+
+        val publicNotification = NotificationCompat.Builder(this, "media control")
+                .setSmallIcon(R.drawable.ic_vkm_main)
+                .setVisibility(VISIBILITY_PUBLIC)
+                .setStyle(androidx.media.app.NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
+                .build()
+
+        return NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_vkm_main)
+                .setAutoCancel(false)
+                .setPriority(PRIORITY_MAX)
+                .setCategory(CATEGORY_SERVICE)
+                .setVisibility(VISIBILITY_PUBLIC)
+                .setOngoing(true)
+                .setCustomContentView(playerView)
+                .setPublicVersion(publicNotification)
+                .build()
+    }
 
     private fun startProgressTracking() {
         progressUpdateJob?.cancel()
@@ -227,9 +232,6 @@ class MusicPlayService : Service() {
     fun next() = getSibling(true)
     fun previous() = getSibling(false)
 
-    fun isCurrentTrack(item: Composition) = currentComposition?.equalsTo(item) == true
-    fun isCurrentTrackLoading(item: Composition) = loadingComposition.value?.equalsTo(item) == true
-
     private fun getSibling(next: Boolean) {
         resetTrack()
 
@@ -301,7 +303,7 @@ class MusicPlayService : Service() {
 
         mediaSession.isActive = true
         becomeNoisyListener.register()
-//        startForeground(2, createNotification())
+        startForeground(2, createNotification())
     }
 
 }

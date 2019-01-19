@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.composition_list_element.view.*
 import vkm.vkm.*
 import vkm.vkm.utils.Composition
@@ -13,18 +14,25 @@ import vkm.vkm.utils.equalsTo
 class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, val data: List<Composition>, private var elementClickListener: (composition: Composition, view: View) -> Unit? = { _, _ -> }) : ArrayAdapter<Composition>(fragment.context, resource, data) {
 
     private val activity = fragment.activity as PagerActivity
+    private var playing: Composition? = null
+    private var loading: Composition? = null
+
+    init {
+        activity.musicPlayer?.loadingComposition?.observe(fragment, Observer { loading = it })
+        activity.musicPlayer?.displayedComposition?.observe(fragment, Observer { playing = it })
+    }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.composition_list_element, null)
-        val item = getItem(position)
+        val composition = getItem(position)
 
-        item?.let {
-            view.name.text = item.name
-            view.artist.text = item.artist
+        composition?.let {
+            view.name.text = composition.name
+            view.artist.text = composition.artist
 
             // determining icon to display
             var withAction = false
-            val trackAvailable = item.hash.isNotEmpty() || item.url.trim().isNotEmpty()
+            val trackAvailable = composition.hash.isNotEmpty() || composition.url.trim().isNotEmpty()
 
             val actionButton = view.imageView
             val audioControl = view.audioControl
@@ -32,16 +40,16 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, v
 
             if (trackAvailable) {
                 when {
-                    activity.musicPlayer?.isCurrentTrack(item) == true -> audioControl.apply {
+                    playing?.equalsTo(composition) == true -> audioControl.apply {
                         setImageDrawable(context.getDrawable(R.drawable.ic_stop))
                         setOnClickListener { activity.musicPlayer?.stop() }
                     }
-                    activity.musicPlayer?.isCurrentTrackLoading(item) == true -> audioControl.apply {
+                    loading?.equalsTo(composition) == true -> audioControl.apply {
                         setImageDrawable(context.getDrawable(R.drawable.ic_loading))
                         setOnClickListener { activity.musicPlayer?.stop() }
                     }
                     else -> audioControl?.apply {
-                        setOnClickListener { activity.playNewTrack(data, item) }
+                        setOnClickListener { activity.playNewTrack(data, composition) }
                         setImageDrawable(context.getDrawable(R.drawable.ic_play))
                     }
                 }
@@ -54,14 +62,14 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, v
                     withAction = true
                     actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_add))
 
-                    DownloadManager.getDownloaded().find { it.equalsTo(item) }?.let {
+                    DownloadManager.getDownloaded().find { it.equalsTo(composition) }?.let {
                         actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloaded))
                     }
-                    DownloadManager.getQueue().find { it.equalsTo(item) }?.let {
+                    DownloadManager.getQueue().find { it.equalsTo(composition) }?.let {
                         actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
                         withAction = false
                     }
-                    DownloadManager.getInProgress().find { it.equalsTo(item) }?.let {
+                    DownloadManager.getInProgress().find { it.equalsTo(composition) }?.let {
                         actionButton?.setImageDrawable(context.getDrawable(R.drawable.ic_downloading))
                         withAction = false
                         audioControl?.visibility = View.INVISIBLE
@@ -77,7 +85,7 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, v
 
             // adding icon click listener
             actionButton?.takeIf { withAction }?.setOnClickListener { v ->
-                elementClickListener.invoke(item, v)
+                elementClickListener.invoke(composition, v)
                 this.notifyDataSetInvalidated()
             }
         }
