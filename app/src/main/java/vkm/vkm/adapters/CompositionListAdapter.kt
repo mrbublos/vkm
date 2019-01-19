@@ -18,8 +18,14 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, v
     private var loading: Composition? = null
 
     init {
-        activity.musicPlayer?.loadingComposition?.observe(fragment, Observer { loading = it })
-        activity.musicPlayer?.displayedComposition?.observe(fragment, Observer { playing = it })
+        activity.musicPlayer?.loadingComposition?.observe(fragment, Observer {
+            loading = it
+            notifyDataSetChanged()
+        })
+        activity.musicPlayer?.displayedComposition?.observe(fragment, Observer {
+            playing = it
+            notifyDataSetChanged()
+        })
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
@@ -40,7 +46,7 @@ class CompositionListAdapter(private val fragment: VkmFragment, resource: Int, v
 
             if (trackAvailable) {
                 when {
-                    playing?.equalsTo(composition) == true -> audioControl.apply {
+                    activity.musicPlayer?.isPlaying() == true && playing?.equalsTo(composition) == true -> audioControl.apply {
                         setImageDrawable(context.getDrawable(R.drawable.ic_stop))
                         setOnClickListener { activity.musicPlayer?.stop() }
                     }

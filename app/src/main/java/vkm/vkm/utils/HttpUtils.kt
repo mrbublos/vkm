@@ -28,8 +28,8 @@ object HttpUtils {
     var currentProxy: Proxy? = null
 
     private fun setProxy(proxy: Proxy?) {
-        "Using proxy: $proxy".log()
-        if (proxy != null) {
+        proxy?.let {
+            "Using proxy: $proxy".log()
             currentProxy = proxy
             currentProxy?.type = "current"
         }

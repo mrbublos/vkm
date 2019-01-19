@@ -192,14 +192,14 @@ class MusicPlayService : Service() {
                     "Failed to load track ${compositionToPlay?.fileName()}".logE(e)
                     null
                 }
-                GlobalScope.launch(Dispatchers.Main) { displayedComposition.value = currentComposition }
                 "Composition fetched ${currentComposition?.fileName()}".log()
             }
 
             currentComposition?.let {
                 "Starting media player for ${currentComposition?.fileName()}".log()
-                _onPlay()
                 mp.start()
+                _onPlay()
+                GlobalScope.launch(Dispatchers.Main) { displayedComposition.value = currentComposition }
                 mp.setOnCompletionListener { next() }
                 startProgressTracking()
             }
