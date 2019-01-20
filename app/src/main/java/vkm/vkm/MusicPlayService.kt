@@ -104,6 +104,7 @@ class MusicPlayService : Service() {
                 else -> PlaybackState.STATE_STOPPED
             }
             updateMediaSession(state)
+            createNotification()
         }
     }
 
@@ -122,7 +123,7 @@ class MusicPlayService : Service() {
                 .build()
         val playbackState = playbackStateBuilder
                 .setState(state, 0, 1f)
-                .setActions(ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS)
+                .setActions(ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT)
                 .build()
         mediaSession.setMetadata(mediaMetadata)
         mediaSession.setPlaybackState(playbackState)
@@ -134,8 +135,8 @@ class MusicPlayService : Service() {
 
 
         val playerView = RemoteViews(packageName, R.layout.notification_player)
-        playerView.setTextViewText(R.id.name, currentComposition?.name ?: "test")
-        playerView.setTextViewText(R.id.artist, currentComposition?.artist ?: "test")
+        playerView.setTextViewText(R.id.name, currentComposition?.name ?: "")
+        playerView.setTextViewText(R.id.artist, currentComposition?.artist ?: "")
         playerView.setImageViewResource(R.id.pause, if (isPlaying()) R.drawable.ic_pause_player_black else R.drawable.ic_play_player_black)
         playerView.setOnClickPendingIntent(R.id.pause, pausePendingIntent)
         playerView.setOnClickPendingIntent(R.id.nextTrack, nextPendingIntent)
@@ -146,7 +147,7 @@ class MusicPlayService : Service() {
                 .setStyle(androidx.media.app.NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
                 .build()
 
-        return NotificationCompat.Builder(this)
+        return NotificationCompat.Builder(this, "control notification")
                 .setSmallIcon(R.drawable.ic_vkm_main)
                 .setAutoCancel(false)
                 .setPriority(PRIORITY_MAX)
@@ -211,7 +212,7 @@ class MusicPlayService : Service() {
         GlobalScope.launch(Dispatchers.Main) { state.value = "paused" }
         becomeNoisyListener.unregister()
         audioManager.abandonAudioFocus(audioFocusListener)
-        stopForeground(false)
+        startForeground(2, createNotification())
     }
 
     fun skipTo(time: Int) = mp.seekTo(time)
@@ -224,6 +225,7 @@ class MusicPlayService : Service() {
         stopProgressUpdate()
         becomeNoisyListener.unregister()
         audioManager.abandonAudioFocus(audioFocusListener)
+        startForeground(2, createNotification())
         stopForeground(false)
     }
 
