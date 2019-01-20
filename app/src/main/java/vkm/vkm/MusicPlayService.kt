@@ -57,8 +57,6 @@ class MusicPlayService : Service() {
     private lateinit var notificationManager: NotificationManager
     private lateinit var audioManager: AudioManager
     private lateinit var powerManager: PowerManager
-    private lateinit var wifiManager: WifiManager
-    private lateinit var wifiLock: WifiManager.WifiLock
 
     private val playerControlsCallback = object : MediaSessionCompat.Callback() {
         override fun onPlay() { play() }
@@ -87,9 +85,6 @@ class MusicPlayService : Service() {
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         powerManager = applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
-        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL,"VkmPlayerWifiLock")
-        wifiLock.setReferenceCounted(false)
 
         mediaSession = MediaSessionCompat(baseContext, "vkm")
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
@@ -110,6 +105,8 @@ class MusicPlayService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopProgressUpdate()
+        becomeNoisyListener.unregister()
         notificationManager.cancelAll()
         mediaSession.release()
         mp.release()
@@ -163,8 +160,9 @@ class MusicPlayService : Service() {
         progressUpdateJob?.cancel()
         progressUpdateJob = GlobalScope.launch(Dispatchers.Default) {
             while (true) {
-                if (trackLength > 0 && mp.isPlaying) {
-                    GlobalScope.launch(Dispatchers.Main) { progress.value = mp.currentPosition * 100 / trackLength }
+                val length = trackLength
+                if (length > 0 && mp.isPlaying) {
+                    GlobalScope.launch(Dispatchers.Main) { progress.value = mp.currentPosition * 100 / length }
                 }
                 delay(1000)
             }
@@ -295,7 +293,7 @@ class MusicPlayService : Service() {
 
     private fun resetTrack() {
         trackLength = 0
-        progress.value = 0
+        GlobalScope.launch(Dispatchers.Main) { progress.value = 0 }
     }
 
     private fun _onPlay() {
