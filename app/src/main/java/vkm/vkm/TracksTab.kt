@@ -8,7 +8,6 @@ class TracksTab(callback: SearchTabCallback) : Tab<Composition>(callback, "track
         if (loading || !active) { return false }
         if (filter == query) { return false }
 
-        loading = true
         filter = query
         page = 0
 

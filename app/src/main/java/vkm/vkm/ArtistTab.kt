@@ -7,7 +7,7 @@ class ArtistTab(callback: SearchTabCallback) : Tab<Artist>(callback, "artists", 
     override fun search(query: String): Boolean {
         if (loading || !active) { return false }
         if (filter == query) { return false }
-        loading = true
+
         filter = query
         page = 0
         nextPageLoader = { page -> MusicService.trackMusicService.getArtists(filter, page) }

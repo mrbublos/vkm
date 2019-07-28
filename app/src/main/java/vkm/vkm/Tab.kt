@@ -60,7 +60,10 @@ abstract class Tab<T>(var refreshTab: SearchTabCallback, var name: String, val l
     }
 
     open fun loadNewPage() {
-        GlobalScope.launch(Dispatchers.IO) { setData(nextPageLoader(page)) }
+        GlobalScope.launch(Dispatchers.IO) {
+            loading = true
+            setData(nextPageLoader(page))
+        }
     }
 
     companion object {

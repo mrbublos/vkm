@@ -15,7 +15,7 @@ class NewAlbumsTab(callback: SearchTabCallback) : Tab<Album>(callback, "new", Li
 
     override fun search(query: String): Boolean {
         if (loading || !active) { return false }
-        loading = true
+
         lastPopulated = System.currentTimeMillis()
         page = 0
 

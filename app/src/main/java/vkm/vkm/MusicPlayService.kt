@@ -1,13 +1,11 @@
 package vkm.vkm
 
-import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.session.PlaybackState
@@ -15,6 +13,7 @@ import android.media.session.PlaybackState.*
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.support.v4.media.MediaMetadataCompat
@@ -138,13 +137,14 @@ class MusicPlayService : Service() {
         playerView.setOnClickPendingIntent(R.id.pause, pausePendingIntent)
         playerView.setOnClickPendingIntent(R.id.nextTrack, nextPendingIntent)
 
-        val publicNotification = NotificationCompat.Builder(this, "media control")
+        val publicNotification = NotificationCompat.Builder(this, createNotificationChannel())
                 .setSmallIcon(R.drawable.ic_vkm_main)
                 .setVisibility(VISIBILITY_PUBLIC)
+                .setCategory(Notification.CATEGORY_SERVICE)
                 .setStyle(androidx.media.app.NotificationCompat.MediaStyle().setMediaSession(mediaSession.sessionToken))
                 .build()
 
-        return NotificationCompat.Builder(this, "control notification")
+        return NotificationCompat.Builder(this, createNotificationChannel())
                 .setSmallIcon(R.drawable.ic_vkm_main)
                 .setAutoCancel(false)
                 .setPriority(PRIORITY_MAX)
@@ -306,6 +306,17 @@ class MusicPlayService : Service() {
         startForeground(2, createNotification())
     }
 
+    private fun createNotificationChannel(): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val chan = NotificationChannel("vkm_music_service","Vkm Music service", NotificationManager.IMPORTANCE_NONE)
+            chan.lightColor = Color.BLUE
+            chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+            val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            service.createNotificationChannel(chan)
+        }
+
+        return "vkm_music_service"
+    }
 }
 
 class AudioFocusChangeListener(private val service: MusicPlayService) : AudioManager.OnAudioFocusChangeListener {

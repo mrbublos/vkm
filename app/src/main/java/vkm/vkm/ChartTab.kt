@@ -15,7 +15,7 @@ class ChartTab(callback: SearchTabCallback) : Tab<Composition>(callback, "chart"
 
     override fun search(query: String): Boolean {
         if (loading || !active) { return false }
-        loading = true
+
         lastPopulated = System.currentTimeMillis()
         page = 0
 

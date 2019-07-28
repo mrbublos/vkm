@@ -31,7 +31,9 @@ class SearchFragment : VkmFragment() {
     init { layout = activity_search }
 
     override fun init() {
-        tabs = listOf(TracksTab(::drawData), NewAlbumsTab(::drawData), ChartTab(::drawData), ArtistTab(::drawData))
+        tabs = listOf(TracksTab(::drawData),
+//                NewAlbumsTab(::drawData),
+                ChartTab(::drawData), ArtistTab(::drawData))
         initializeElements()
         initializeTabs()
         initializeButton()
