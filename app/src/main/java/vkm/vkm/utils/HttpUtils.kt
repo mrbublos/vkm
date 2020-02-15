@@ -168,7 +168,7 @@ object HttpUtils {
                         }
 
                         val columns = row.select("td")
-                        val ip = columns[0].select("abbr").attr("title")
+                        val ip = columns[0].select("abbr").html().replace(Regex(".*?(\\d+\\.\\d+\\.\\d+\\.\\d+).*"), "$1")
                         val port = columns[1].select("a").text()
                         val speed = columns[3].select("small").text().split(" ")[0]
                         val type = columns[6].select("span").text()
@@ -177,7 +177,7 @@ object HttpUtils {
                             return@map Proxy("", 0)
                         }
                         Proxy(host = ip, port = port.toInt(), type = "untrusted", speed = speed.toInt())
-                    }.filter { it.port != 0 }
+                    }.filter { it.port != 0 && it.host.isNotEmpty() }
                     continuation.resume(result)
                 }
             } catch (e: Exception) {
